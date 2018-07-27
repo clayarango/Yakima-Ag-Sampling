@@ -16,26 +16,25 @@ ggplot(GH_lab_noC, aes(x=nutrient, y= gpp.nrr))+geom_boxplot(aes(color=factor(in
 #limitation analysis
 str(GH_lab)
 GH<-subset(GH_lab, incubation=="GH")
-GH_glass<-subset(GH, top="glass")
-GH_sponge<-subset(GH, top="sponge")
+GH_glass<-subset(GH, top=="glass")
+GH_sponge<-subset(GH, top=="cellulose")
 
 lab<-subset(GH_lab, incubation=="lab")
-lab_glass<-subset(GH_lab, top="glass")
-lab_sponge<-subset(GH_lab, top="sponge")
+lab_glass<-subset(lab, top=="glass")
+lab_sponge<-subset(lab, top=="cellulose")
 
 str(lab)
 
 #analyze Greenhouse limitation
 gpp_GH = aov(gpp.area~N*P, data=GH_glass)
 summary(gpp_GH)
-     #no limitation of gpp (N limitation at a=0.10)
+     #no limitation of gpp
      #still needs residual analysis
 
 cr_GH = aov(cr.area~N*P, data=GH_sponge)
 summary(cr_GH)
      #no limitation of cr (N limitation at a=0.10)
      #still needs residual analysis
-     #why are the summary tables identical?
 
 #analyze lab limitation
 gpp_lab = aov(gpp.area~N*P, data=lab_glass)
