@@ -39,7 +39,7 @@ summary(cr_GH)
 #analyze lab limitation
 gpp_lab = aov(gpp.area~N*P, data=lab_glass)
 summary(gpp_lab)
-     #P limitation of gpp
+     #no limitation of gpp 
      #still needs residual analysis
 
 cr_lab = aov(cr.area~N*P, data=lab_sponge)
