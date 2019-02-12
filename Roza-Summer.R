@@ -20,7 +20,9 @@ library(ggplot2)
 roza_sum <- read.table(file="roza_summer.csv", header=T, sep=",")
 
 #set variable
-d = roza_sum
+d = roza_sum 
+
+#new thing
 
 #evaluate data to make sure factors are correct
 names(d)
