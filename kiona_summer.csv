@@ -1,0 +1,81 @@
+site.date,nds.id,nutrient,N,P,Si,top,cr.area,gpp.area,chla,Notes
+Kiona_summer_2018,AA1,NSi,1,0,1,cellulose,-6.534229024,0,0,
+Kiona_summer_2018,AA2,Si,0,0,1,cellulose,-4.825614763,0,0,
+Kiona_summer_2018,AA3,NP,1,1,0,glass,-4.425436824,0,0,
+Kiona_summer_2018,AA4,P,0,1,0,cellulose,-3.852566041,0,0,
+Kiona_summer_2018,AA5,P,0,1,0,glass,-3.388937138,0,0,
+Kiona_summer_2018,AA6,P,0,1,0,cellulose,-5.112780428,0,0,
+Kiona_summer_2018,AA7,N,1,0,0,glass,-3.838253661,0,0,
+Kiona_summer_2018,AA8,NPSi,1,1,1,cellulose,-3.60865454,0,0,
+Kiona_summer_2018,AB1,control,0,0,0,glass,-2.334411317,0,0,out of water
+Kiona_summer_2018,AB2,PSi,0,1,1,cellulose,-4.351220871,0,0,out of water
+Kiona_summer_2018,AB3,control,0,0,0,glass,,,0,out of water
+Kiona_summer_2018,AB4,Si,0,0,1,cellulose,-4.888046813,0,0,out of water
+Kiona_summer_2018,AB5,Si,0,0,1,glass,,,0,out of water
+Kiona_summer_2018,AB6,Si,0,0,1,cellulose,,,0,out of water
+Kiona_summer_2018,AB7,NPSi,1,1,1,glass,-4.710057919,0,0,out of water
+Kiona_summer_2018,AB8,Si,0,0,1,glass,-3.633918721,0,0,out of water
+Kiona_summer_2018,AC1,P,0,1,0,glass,-5.189422523,0,0,
+Kiona_summer_2018,AC2,P,0,1,0,glass,-4.31745011,0,0,
+Kiona_summer_2018,AC3,Si,0,0,1,glass,-4.083959479,0,0,
+Kiona_summer_2018,AC4,NP,1,1,0,glass,-3.531799662,0,0,
+Kiona_summer_2018,AC5,N,1,0,0,cellulose,-2.338366504,0,0,
+Kiona_summer_2018,AC6,N,1,0,0,cellulose,-1.975807364,0,0,
+Kiona_summer_2018,AC7,N,1,0,0,cellulose,-6.984191785,0,0,
+Kiona_summer_2018,AC8,PSi,0,1,1,glass,-5.805886142,0,0,
+Kiona_summer_2018,AD1,NP,1,1,0,cellulose,-9.965275642,2.593151965,0,out of water
+Kiona_summer_2018,AD2,P,0,1,0,glass,-8.568625874,0,0,out of water
+Kiona_summer_2018,AD3,control,0,0,0,cellulose,-7.279870866,0,0,out of water
+Kiona_summer_2018,AD4,PSi,0,1,1,glass,-6.673189644,0,0,out of water
+Kiona_summer_2018,AD5,NSi,1,0,1,glass,-7.689845348,0,0,out of water
+Kiona_summer_2018,AD6,N,1,0,0,glass,-6.678680072,0,0,out of water
+Kiona_summer_2018,AD7,P,0,1,0,cellulose,-4.245500412,0,0,out of water
+Kiona_summer_2018,AD8,Si,0,0,1,cellulose,-8.980386014,0,0,out of water
+Kiona_summer_2018,U1,NSi,1,0,1,glass,-17.79193859,1.924974649,0,
+Kiona_summer_2018,U2,NSi,1,0,1,glass,-18.03669304,2.380585771,0,
+Kiona_summer_2018,U3,N,1,0,0,glass,-13.39571581,2.509844338,0,
+Kiona_summer_2018,U4,control,0,0,0,cellulose,-8.855563633,0,0,
+Kiona_summer_2018,U5,PSi,0,1,1,glass,-16.83836068,0,0,
+Kiona_summer_2018,U6,NPSi,1,1,1,glass,-17.66398476,3.714752473,0,
+Kiona_summer_2018,U7,control,0,0,0,glass,-16.33970806,0,0,
+Kiona_summer_2018,U8,PSi,0,1,1,glass,-16.15552825,7.215789835,0,
+Kiona_summer_2018,V1,NP,1,1,0,glass,-15.49638305,0,0,
+Kiona_summer_2018,V2,NP,1,1,0,cellulose,-14.75051515,0,0,
+Kiona_summer_2018,V3,NSi,1,0,1,cellulose,-14.58144838,0,0,
+Kiona_summer_2018,V4,NPSi,1,1,1,glass,-14.82750151,0,0,
+Kiona_summer_2018,V5,PSi,0,1,1,cellulose,-14.21735009,0,,
+Kiona_summer_2018,V6,PSi,0,1,1,glass,-14.12511225,3.971564617,,
+Kiona_summer_2018,V7,NSi,1,0,1,cellulose,-12.77630948,0,,
+Kiona_summer_2018,V8,Si,0,0,1,glass,-12.53613605,0.816349691,,
+Kiona_summer_2018,W1,control,0,0,0,cellulose,,,,
+Kiona_summer_2018,W2,N,1,0,0,cellulose,-12.42835923,5.34875166,,
+Kiona_summer_2018,W3,NP,1,1,0,glass,-12.08099435,0,,
+Kiona_summer_2018,W4,NP,1,1,0,cellulose,,,,
+Kiona_summer_2018,W5,PSi,0,1,1,cellulose,,,,
+Kiona_summer_2018,W6,NP,1,1,0,glass,,,,
+Kiona_summer_2018,W7,NSi,1,0,1,cellulose,,,,
+Kiona_summer_2018,W8,P,0,1,0,cellulose,-11.87999642,0,,
+Kiona_summer_2018,X1,control,0,0,0,cellulose,,,0,out of water
+Kiona_summer_2018,X2,Si,0,0,1,glass,-11.18409337,0,0,out of water
+Kiona_summer_2018,X3,N,1,0,0,cellulose,,,0,out of water
+Kiona_summer_2018,X4,NP,1,1,0,cellulose,-10.17617056,10.17617056,0,out of water; not touching substrate
+Kiona_summer_2018,X5,NPSi,1,1,1,cellulose,,,0,out of water
+Kiona_summer_2018,X6,N,1,0,0,glass,-9.561731653,9.238707734,0,out of water
+Kiona_summer_2018,X7,P,0,1,0,glass,-9.581434272,0,0,out of water
+Kiona_summer_2018,X8,N,1,0,0,glass,-9.290911528,0,0,out of water
+Kiona_summer_2018,Y1,Si,0,0,1,cellulose,-7.311997974,0,0,
+Kiona_summer_2018,Y2,NSi,1,0,1,cellulose,-7.304025247,0,0,
+Kiona_summer_2018,Y3,NPSi,1,1,1,cellulose,-6.62508507,0,0,
+Kiona_summer_2018,Y4,PSi,0,1,1,cellulose,-5.893250246,0,0,
+Kiona_summer_2018,Y5,NP,1,1,0,cellulose,-5.12431037,0,,
+Kiona_summer_2018,Y6,NPSi,1,1,1,glass,-3.128043896,0,,
+Kiona_summer_2018,Y7,control,0,0,0,cellulose,,,,
+Kiona_summer_2018,Y8,NPSi,1,1,1,cellulose,-3.137514766,0,,
+Kiona_summer_2018,Z1,NSi,1,0,1,glass,-4.368088729,0,,
+Kiona_summer_2018,Z2,PSi,0,1,1,cellulose,-2.553474885,0,,
+Kiona_summer_2018,Z3,control,0,0,0,glass,,,,
+Kiona_summer_2018,Z4,P,0,1,0,cellulose,,,,
+Kiona_summer_2018,Z5,NPSi,1,1,1,cellulose,-1.448833142,0,,
+Kiona_summer_2018,Z6,NSi,1,0,1,glass,-7.18513056,0,,
+Kiona_summer_2018,Z7,NPSi,1,1,1,glass,-6.695909453,0,,upside down on bottom of river
+Kiona_summer_2018,Z8,control,0,0,0,glass,-7.803254776,0,,
