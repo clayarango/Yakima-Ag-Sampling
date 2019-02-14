@@ -48,12 +48,12 @@ d.gpp = subset(d, top=="glass", data=d)
 #calculate nrr for cr
 x = aggregate(d.cr[,8], list(d.cr$nutrient), mean, na.rm=T)
 x
-d.cr$cr.nrr = d.cr$cr.area/-9.818856 #is there a prettier way to do this?
+d.cr$cr.nrr = d.cr$cr.area/-16.93973 #is there a prettier way to do this?
 
 #calculate nrr for gpp
 x = aggregate(d.gpp[,9], list(d.gpp$nutrient), mean, na.rm=T)
 x
-d.gpp$gpp.nrr = d.gpp$gpp.area/4.059326 #is there a prettier way to do this?
+d.gpp$gpp.nrr = d.gpp$gpp.area/6.264241 #is there a prettier way to do this?
 
 ############################################################
 #analyze RESPIRATION data
@@ -64,8 +64,8 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are normally distributed, p=0.5626
-hist(E1)  
+   #residuals are normally distributed, p=0.5832
+hist(E1) #almost perfectly normal - weird  
 plot(M1)
 
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
@@ -74,7 +74,7 @@ bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test OK
 
 anova(M1)
-  #co-limited by N, P, and Si
+  #inhibited by N... in figure, all N groups are <control
 
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(cr.mean = abs(mean(cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
@@ -131,7 +131,7 @@ bartlett.test(gpp.area~nutrient, data=d.gpp)
    #OK
 
 anova(M1)
-  #P+Si co-limitation
+  #no limitation. figure shows lots of variation, with N and P generally < control
 
 x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(gpp.mean = abs(mean(gpp.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
