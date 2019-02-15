@@ -17,12 +17,10 @@ library(MASS)
 library(ggplot2)
 
 #Load data
-roza_summer <- read.table(file="roza_summer.csv", header=T, sep=",")
+roza_fall <- read.table(file="roza_fall.csv", header=T, sep=",")
 
 #set variable
-d = roza_summer
-
-#new thing
+d = roza_fall
 
 #evaluate data to make sure factors are correct
 names(d)
@@ -48,12 +46,12 @@ d.gpp = subset(d, top=="glass", data=d)
 #calculate nrr for cr
 x = aggregate(d.cr[,8], list(d.cr$nutrient), mean, na.rm=T)
 x
-d.cr$cr.nrr = d.cr$cr.area/-9.818856 #is there a prettier way to do this?
+d.cr$cr.nrr = d.cr$cr.area/-10.244565 #is there a prettier way to do this?
 
 #calculate nrr for gpp
 x = aggregate(d.gpp[,9], list(d.gpp$nutrient), mean, na.rm=T)
 x
-d.gpp$gpp.nrr = d.gpp$gpp.area/4.059326 #is there a prettier way to do this?
+d.gpp$gpp.nrr = d.gpp$gpp.area/3.991310 #is there a prettier way to do this?
 
 ############################################################
 #analyze RESPIRATION data
@@ -64,17 +62,17 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are normally distributed, p=0.5626
+   #residuals are normally distributed, p=0.1036
 hist(E1)  
 plot(M1)
 
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance test OK
+   #variance test is below 0.05, but just barely
 
 anova(M1)
-  #co-limited by N, P, and Si
+  #co-limited by P and Si
 
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(cr.mean = abs(mean(cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
