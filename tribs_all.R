@@ -2,6 +2,10 @@
 #Code to analyze tribs for 2018 NDS
 #Sarah Roley, Clay Arango, Alex Alexiades
 
+library(plyr)
+library(ggplot2)
+library(dplyr)
+
 #First: combine all tribs into one dataset.
 
 aht_summer<-read.csv("aht_summer.csv")
@@ -79,8 +83,31 @@ satus_summer$nrr.cr<-ifelse(satus_summer$top=="cellulose", satus_summer$cr.area/
 
 wen_summer<-read.csv("wen_summer.csv")
 str(wen_summer)
+wen_summer$site.date<-"Wenas_summer_2018"
+wen_summer<-wen_summer[-c(1,11:12)]
+
+ws_control<-subset(wen_summer, nutrient=="C")
+ws_c_means<-ddply(ws_control, "top", summarise, ave_gpp = mean(gpp.area), 
+                  ave_cr = mean(cr.area))
+
+ws_c_means
+wen_summer$nrr.gpp<-ifelse(wen_summer$top =="glass", wen_summer$gpp.area/0.6824,NA)
+wen_summer$nrr.cr<-ifelse(wen_summer$top=="sponge", wen_summer$cr.area/-5.76578, NA)
+
 
 wen_fall<-read.csv("wen_fall.csv")
+str(wen_fall)
+
+wen_fall$site.date<-"Wenas_fall_2018"
+wen_fall<-wen_fall[-c(1,11:12)]
+
+wf_control<-subset(wen_fall, nutrient=="C")
+wf_c_means<-ddply(wf_control, "top", summarise, ave_gpp = mean(gpp.area), 
+                  ave_cr = mean(cr.area))
+
+wf_c_means
+wen_fall$nrr.gpp<-ifelse(wen_fall$top =="glass", wen_fall$gpp.area/1.8996,NA)
+wen_fall$nrr.cr<-ifelse(wen_fall$top=="sponge", wen_fall$cr.area/-3.9976, NA)
 
 topp_summer<-read.csv("toppenish_summer.csv")
 str(topp_summer)
@@ -94,15 +121,31 @@ topp_summer$nrr.gpp<-ifelse(topp_summer$top =="glass", topp_summer$gpp.area/2.32
 topp_summer$nrr.cr<-ifelse(topp_summer$top=="cellulose", topp_summer$cr.area/-19.11745, NA)
 
 
-tribs_summer<-rbind(topp_summer, satus_summer, aht_summer, reec_summer)
+tribs_summer<-rbind(topp_summer, satus_summer, aht_summer, reec_summer, wen_summer)
 tribs_summer$top<-recode(tribs_summer$top, "cellulose" ="sponge")
 tribs_summer$nutrient<-recode(tribs_summer$nutrient, "C"="control", "N+P"="NP",
                               "N+P+Si"="NPSi", "N+Si"="NSi", "P+Si"="PSi")
 
-tribs_summer[-(321:402),] facet_wrap(~Site+Time)
+write.table(tribs_summer, "tribs_summer.csv", sep=",", quote=F, row.names=F)
+tribs_summer<-read.csv("tribs_summer.csv")
 
 ggplot(data=subset(tribs_summer, top ="glass"), aes(x=nutrient, y=nrr.gpp))+
   geom_boxplot()+facet_wrap(~site.date)+theme_classic()+ylim(0,5)
 
 ggplot(data=subset(tribs_summer, top ="glass"), aes(x=nutrient, y=nrr.cr))+
   geom_boxplot()+facet_wrap(~site.date)+theme_classic()
+
+tribs_fall<-rbind(satus_fall, aht_fall, reec_fall, wen_fall)
+tribs_fall$top<-recode(tribs_fall$top, "cellulose" ="sponge")
+tribs_fall$nutrient<-recode(tribs_fall$nutrient, "C"="control", "N+P"="NP",
+                              "N+P+Si"="NPSi", "N+Si"="NSi", "P+Si"="PSi")
+
+write.table(tribs_fall, "tribs_fall.csv", sep=",", quote=F, row.names=F)
+tribs_fall<-read.csv("tribs_fall.csv")
+
+ggplot(data=subset(tribs_fall, top ="glass"), aes(x=nutrient, y=nrr.gpp))+
+  geom_boxplot()+facet_wrap(~site.date)+theme_classic()+geom_hline(yintercept=1)
+
+ggplot(data=subset(tribs_fall, top ="glass"), aes(x=nutrient, y=nrr.cr))+
+  geom_boxplot()+facet_wrap(~site.date)+theme_classic()+geom_hline(yintercept=1)
+  
