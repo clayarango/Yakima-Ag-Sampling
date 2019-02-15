@@ -62,7 +62,7 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are normally distributed, p=0.241
+   #residuals are normally distributed
 hist(E1)  
 plot(M1)
    #this doesn't look good
@@ -73,8 +73,7 @@ bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test not OK, we'll probably need to mess with this one
 
 anova(M1)
-  #co-limited by N, P, and Si
-
+  
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(cr.mean = abs(mean(cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
             cr.sd=abs(sd(cr.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values
@@ -130,8 +129,7 @@ bartlett.test(gpp.area~nutrient, data=d.gpp)
    #not good, check outlier
 
 anova(M1)
-  #N
-
+  
 x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(gpp.mean = abs(mean(gpp.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
             gpp.sd=abs(sd(gpp.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values

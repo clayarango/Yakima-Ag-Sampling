@@ -22,8 +22,6 @@ ring_summer <- read.table(file="ring_summer.csv", header=T, sep=",")
 #set variable
 d = ring_summer
 
-#new thing
-
 #evaluate data to make sure factors are correct
 names(d)
 unique(d$nutrient) #control, N, NP, NPSi, NSi, P, PSi, Si
@@ -64,7 +62,7 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are normally distributed, p=0.241
+   #residuals are normally distributed
 hist(E1)  
 plot(M1)
 
@@ -74,8 +72,7 @@ bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test OK
 
 anova(M1)
-  #co-limited by N, P, and Si, but this doesn't square with the graphics
-
+  
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(cr.mean = abs(mean(cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
             cr.sd=abs(sd(cr.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values
@@ -131,8 +128,7 @@ bartlett.test(gpp.area~nutrient, data=d.gpp)
    #OK
 
 anova(M1)
-  #N, P+Si co-limitation
-
+  
 x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(gpp.mean = abs(mean(gpp.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
             gpp.sd=abs(sd(gpp.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values

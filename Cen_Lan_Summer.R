@@ -17,10 +17,10 @@ library(MASS)
 library(ggplot2)
 
 #Load data
-roza_summer <- read.table(file="roza_summer.csv", header=T, sep=",")
+cen_lan_summer <- read.table(file="cen_lan_summer.csv", header=T, sep=",")
 
 #set variable
-d = roza_summer
+d = cen_lan_summer
 
 #evaluate data to make sure factors are correct
 names(d)
@@ -46,12 +46,12 @@ d.gpp = subset(d, top=="glass", data=d)
 #calculate nrr for cr
 x = aggregate(d.cr[,8], list(d.cr$nutrient), mean, na.rm=T)
 x
-d.cr$cr.nrr = d.cr$cr.area/-9.818856 #is there a prettier way to do this?
+d.cr$cr.nrr = d.cr$cr.area/-21.614009 #is there a prettier way to do this?
 
 #calculate nrr for gpp
 x = aggregate(d.gpp[,9], list(d.gpp$nutrient), mean, na.rm=T)
 x
-d.gpp$gpp.nrr = d.gpp$gpp.area/4.059326 #is there a prettier way to do this?
+d.gpp$gpp.nrr = d.gpp$gpp.area/3.398031 #is there a prettier way to do this?
 
 ############################################################
 #analyze RESPIRATION data
@@ -65,11 +65,12 @@ ad.test(E1)
    #residuals are normally distributed
 hist(E1)  
 plot(M1)
+   #this doesn't look good
 
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance test OK
+   #variance test not OK, we'll probably need to mess with this one
 
 anova(M1)
   
@@ -101,7 +102,7 @@ ggplot(data=x, aes(x=nutrient, y=cr.mean)) +
         axis.title.x=element_text(size=8), 
         axis.text.x=element_text(size=8))
 
-#ggsave('output/figures/Roza_summer.tiff',
+#ggsave('output/figures/Ring_summer.tiff',
 #       units="in",
 #       width=3.25,
 #       height=3.25,
@@ -117,16 +118,14 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are normal
-
+   
 hist(E1, xlab="residuals", main="")
 plot(M1)
 
 plot(filter(d.gpp, !is.na(gpp.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(gpp.area~nutrient, data=d.gpp)
-   #OK
-
+   
 anova(M1)
   
 x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
