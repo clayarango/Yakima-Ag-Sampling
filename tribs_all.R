@@ -130,10 +130,10 @@ write.table(tribs_summer, "tribs_summer.csv", sep=",", quote=F, row.names=F)
 tribs_summer<-read.csv("tribs_summer.csv")
 
 ggplot(data=subset(tribs_summer, top ="glass"), aes(x=nutrient, y=nrr.gpp))+
-  geom_boxplot()+facet_wrap(~site.date)+theme_classic()+ylim(0,5)
+  geom_boxplot()+facet_wrap(~site.date)+theme_classic()+ylim(0,5)+geom_hline(yintercept=1)
 
 ggplot(data=subset(tribs_summer, top ="glass"), aes(x=nutrient, y=nrr.cr))+
-  geom_boxplot()+facet_wrap(~site.date)+theme_classic()
+  geom_boxplot()+facet_wrap(~site.date)+theme_classic()+geom_hline(yintercept = 1)
 
 tribs_fall<-rbind(satus_fall, aht_fall, reec_fall, wen_fall)
 tribs_fall$top<-recode(tribs_fall$top, "cellulose" ="sponge")
