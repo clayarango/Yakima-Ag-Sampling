@@ -3,12 +3,6 @@
 #Script to analyze NDS data from Summer 2018 WSB work with S. Roley and A. Alexiades
 
 #packages
-install.packages("nlme")
-install.packages("nortest")
-install.packages("dplyr")
-install.packages("multcomp")
-install.packages("MASS")
-install.packages("ggplot2")
 library(nlme)
 library(nortest)
 library(plyr)
@@ -18,10 +12,10 @@ library(MASS)
 library(ggplot2)
 
 #Load data
-aht_summer <- read.table(file="aht_summer.csv", header=T, sep=",")
+aht_fall <- read.table(file="aht_fall.csv", header=T, sep=",")
 
 #set variable
-d = aht_summer
+d = aht_fall
 
 #evaluate data to make sure factors are correct
 names(d)
@@ -48,12 +42,29 @@ d.gpp = subset(d, top=="glass", data=d)
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed to ddply b/c allows
 #to specify by column name - I had a csv file with the relevant column in a different position.
 x
-d.cr$cr.nrr = d.cr$cr.area/-20.436057 #divide by control ave_cr
+d.cr$cr.nrr = d.cr$cr.area/-16.93973 #divide by control ave_cr
 
-#calculate nrr for gpp
-x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T)) 
+#calculate nrr for gpp and chla
+x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla_ug_cm2, na.rm=T)) 
 x
-d.gpp$gpp.nrr = d.gpp$gpp.area/6.354663 #divide by control ave_gpp
+d.gpp$gpp.nrr = d.gpp$gpp.area/6.264241 #divide by control ave_gpp
+d.gpp$chla.nrr = d.gpp$chla_ug_cm2/1.3750262 #divide by control ave_chla
+
+###############
+#plots of NRR
+##############
+ggplot(data=subset(d.cr, !(nutrient=="control")), aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
+  ylab("CR NRR")+geom_abline(slope = 0, intercept = 1)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+
+ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=gpp.nrr))+geom_boxplot()+theme_bw()+
+  ylab("GPP NRR")+geom_abline(slope = 0, intercept = 1)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+
+ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
+  ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+ 
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+
 
 ############################################################
 #analyze RESPIRATION data
