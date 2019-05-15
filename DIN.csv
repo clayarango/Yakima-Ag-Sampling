@@ -1,0 +1,45 @@
+Sample_ID,Site,Site_Full_Name,Sample_Date,Location,Matrix,NH4_mgNL,NO3_mgNL,Notes.NO3,Notes.NH4
+AC_2018-11-18_FBP_d_SW,AC,Ahtanum,11/18/2018,FBP,SW,0.2516,0.532,,
+AC_2018-11-03_FBP_e_SW,AC,Ahtanum,11/3/2018,FBP,SW,0.2564,0.3355,,
+AC_2018-07-18_FBP_g_SW,AC,Ahtanum,7/18/2018,FBP,SW,0.50285,0.471,,large discrepancy in duplicates
+AC_2018-07-30_FBP_g_SW,AC,Ahtanum,7/30/2018,FBP,SW,0.6788,0.53,,large discrepancy in duplicates
+Cle Elum_2018-11-18,Cle Elum,,11/18/2018,,SW,0.0531,0.023,,ran a spike and non-spiked. Non-spike reported here because above DL of 0.0198 ppm
+Cle Elum_2018-11-30,Cle Elum,,11/30/2018,,SW,0,0.006,spiked,spiked result negative so reported as zero
+Cle Elum_2018-06-15,Cle Elum,,6/15/2018,,SW,0,0.03,spiked,spiked result negative so reported as zero
+Ellensburg_2018-06-15,Ellensburg,,6/15/2018,,SW,0,0.037,,spiked result negative so reported as zero
+Main Stem 1_2018-07-26,Main Stem 1,,7/26/2018,,SW,0.002,0.15,,spiked
+Main Stem 2_2018-07-28,Main Stem 2,,7/28/2018,,SW,0,0.077,,spiked result negative so reported as zero
+Main Stem 3_2018-07-25,Main Stem 3,,7/25/2018,,SW,0,0.0045,spiked,spiked result negative so reported as zero
+Reecer_2018-10-28,Reecer,,10/28/2018,,SW,0.0051,0.427,,spiked
+Reecer_2018-11-10,Reecer,,11/10/2018,,SW,0,0.347,,spiked result negative so reported as zero
+Reecer_2018-07-19,Reecer,,7/19/2018,,SW,0.0213,0.201,,ran a spike and non-spiked. Non-spike reported here because above DL of 0.0198 ppm
+Reecer_2019-07-31,Reecer,,7/31/2018,,SW,0.004,0.15,,spiked
+Ringer_2018-11-18,Ringer,,11/18/2018,,SW,0,0.161,,spiked result negative so reported as zero
+Ringer_2018-11-30,Ringer,,11/30/2018,,SW,0,0.225,,spiked result negative so reported as zero
+Roza_2018-11-18,Roza,,11/18/2018,,SW,0.0237,0.322,,ran a spike and non-spiked. Non-spike reported here because above DL of 0.0198 ppm
+Roza_2018-11-30,Roza,,11/30/2018,,SW,0.0046,0.275,,spiked
+SC_2018-11-18_SLR_e_SW,SC,Satus,11/18/2018,SLR,SW,0.3208,0.338,,
+SC_2018-11-03_SLR_e_SW,SC,Satus,11/3/2018,SLR,SW,0.2781,0.264,,
+SC_2018-07-19_SLR_f_SW,SC,Satus,7/19/2018,SLR,SW,0.57235,1.174,,
+SC_2018-08-02_SLR_g_SW,SC,Satus,8/2/2018,SLR,SW,0.4978,0.894,,
+Selah_2018-06-14,Selah,Selah,6/14/2018,,SW,0,0.069,,spiked result negative so reported as zero
+TC_2018-07-19_ICR_g_SW,TC,Toppenish,7/19/2018,ICR,SW,0.4838,1.868,,
+TC_2018-08-01_ICR_f_SW,TC,Toppenish,8/1/2018,ICR,SW,0.4115,2.066,,
+Wenas_2018-10-28,Wenas,Wenas,10/28/2018,,SW,0,0.096,,spiked result negative so reported as zero
+Wenas_2018-11-10,Wenas,Wenas,11/10/2018,,SW,0.0004,0.158,,spiked
+Wenas_2018-07-19,Wenas,Wenas,7/19/2018,,SW,0.0274,0.027,,ran a spike and non-spiked. Non-spike reported here because above DL of 0.0198 ppm
+Wenas_2018-07-31,Wenas,Wenas,7/31/2018,,SW,0.02,0.046,,ran a spike and non-spiked. Non-spike reported here because above DL of 0.0198 ppm
+YAK_2018-11-18_CL_g_SW,YAK,Century Landing,11/18/2018,CL,SW,0.23705,0.549,,
+YAK_2018-11-21_K_g_SW,YAK,Kiona,11/21/2018,K,SW,0.34415,1.547,,
+YAK_2018-11-21_M_f_SW,YAK,Mabton,11/21/2018,M,SW,0.403,1.557,,
+YAK_2018-11-29_CL_b_SW,YAK,Century Landing,11/29/2018,CL,SW,0.3726,0.386,,
+YAK_2018-11-29_K_c_SW,YAK,Kiona,11/29/2018,K,SW,0.22575,1.733,,
+YAK_2018-11-29_M_b_SW,YAK,Mabton,11/29/2018,M,SW,0.33615,1.362,,
+YAK_2018-06-12_K_f_SW,YAK,Kiona,6/12/2018,K,SW,BD,0.355,,BD limit of 0.09 ppm
+YAK_2018-06-13_M_g_SW,YAK,Mabton,6/13/2018,M,SW,0.38745,0.471,,large discrepancy in duplicates
+YAK_2018-06-14_CL_f_SW,YAK,Century Landing,6/14/2018,CL,SW,BD,0.094,,BD limit of 0.09 ppm
+YAK_2018-06-14_K_g_SW,YAK,Kiona,6/14/2018,K,SW,BD,1.814,diluted 2x with result corrected for dilution,BD limit of 0.09 ppm
+YAK_2018-06-26_M_g_SW,YAK,Mabton,6/26/2018,M,SW,0.61045,1.4,,large discrepancy in duplicates
+YAK_2018-06-28_CL_f_SW,YAK,Century Landing,6/28/2018,CL,SW,BD,0.096,,BD limit of 0.09 ppm
+YAK_2018-07-10_CL_f_SW,YAK,Century Landing,7/10/2018,CL,SW,1.0695,0.23,,analytical rep 1 diluted 2x.  Large discrepancy in duplicates
+YAK_2018-07-11_M_f_SW,YAK,Mabton,7/11/2018,M,SW,0.6124,1.421,,large discrepancy in duplicates
