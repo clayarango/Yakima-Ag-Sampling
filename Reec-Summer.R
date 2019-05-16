@@ -3,14 +3,9 @@
 #Script to analyze NDS data from Summer 2018 WSB work with S. Roley and A. Alexiades
 
 #packages
-install.packages("nlme")
-install.packages("nortest")
-install.packages("dplyr")
-install.packages("multcomp")
-install.packages("MASS")
-install.packages("ggplot2")
 library(nlme)
 library(nortest)
+library(plyr)
 library(dplyr)
 library(multcomp)
 library(MASS)
@@ -44,14 +39,31 @@ d.cr = subset(d, top=="sponge", data=d)
 d.gpp = subset(d, top=="glass", data=d)
 
 #calculate nrr for cr
-x = aggregate(d.cr[,8], list(d.cr$nutrient), mean, na.rm=T)
+x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed to ddply b/c allows
+#to specify by column name - I had a csv file with the relevant column in a different position.
 x
-d.cr$cr.nrr = d.cr$cr.area/-15.02240 #is there a prettier way to do this?
+d.cr$cr.nrr = d.cr$cr.area/-15.02240 #divide by control ave_cr
 
-#calculate nrr for gpp
-x = aggregate(d.gpp[,9], list(d.gpp$nutrient), mean, na.rm=T)
+#calculate nrr for gpp and chla
+x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T)) 
 x
-d.gpp$gpp.nrr = d.gpp$gpp.area/5.770496 #is there a prettier way to do this?
+d.gpp$gpp.nrr = d.gpp$gpp.area/5.770496 #divide by control ave_gpp
+d.gpp$chla.nrr = d.gpp$chla/0.0000525500 #divide by control ave_chla
+
+###############
+#plots of NRR
+##############
+ggplot(data=subset(d.cr, !(nutrient=="control")), aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
+  ylab("CR NRR")+geom_abline(slope = 0, intercept = 1)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+
+ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=gpp.nrr))+geom_boxplot()+theme_bw()+
+  ylab("GPP NRR")+geom_abline(slope = 0, intercept = 1)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+
+ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
+  ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
 ############################################################
 #analyze RESPIRATION data
