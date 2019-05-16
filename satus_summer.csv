@@ -62,7 +62,7 @@ Satus_summer_2018,X4,NPSi,1,1,1,cellulose,-23.56801112,0,,NA,sponge falling apar
 Satus_summer_2018,X5,P,0,1,0,cellulose,-19.74049993,8.024094297,,NA,
 Satus_summer_2018,X6,NP,1,1,0,cellulose,-26.66422968,2.77861818,,NA,
 Satus_summer_2018,X7,Si,0,0,1,glass,-13.26009178,10.04160407,1.121640431,2.891213978,
-Satus_summer_2018,X8,control,0,0,0,cellulose,#DIV/0!,#DIV/0!,,NA,
+Satus_summer_2018,X8,control,0,0,0,cellulose,,,,NA,
 Satus_summer_2018,Y1,PSi,0,1,1,glass,-10.70820282,3.208269363,0.485994218,1.252730589,
 Satus_summer_2018,Y2,control,0,0,0,glass,-9.988439262,5.033815192,0.364844404,0.940446879,
 Satus_summer_2018,Y3,NP,1,1,0,glass,-13.45639093,1.078819401,0.708866302,1.827220297,
