@@ -1,5 +1,5 @@
 #Author:  Clay Arango
-#Creation date: 10-Feb-19
+#Creation date: 14-Feb-19
 #Script to analyze NDS data from Summer 2018 WSB work with S. Roley and A. Alexiades
 
 #packages
@@ -11,16 +11,17 @@ install.packages("MASS")
 install.packages("ggplot2")
 library(nlme)
 library(nortest)
+library(plyr)
 library(dplyr)
 library(multcomp)
 library(MASS)
 library(ggplot2)
 
 #Load data
-wen_summer <- read.table(file="wen_summer.csv", header=T, sep=",")
+sat_fall<- read.csv("satus_fall.csv")
 
 #set variable
-d = wen_summer
+d = sat_fall
 
 #evaluate data to make sure factors are correct
 names(d)
@@ -44,15 +45,15 @@ d.cr = subset(d, top=="sponge", data=d)
 d.gpp = subset(d, top=="glass", data=d)
 
 #calculate nrr for cr
-x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) 
+x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T))
 x
-d.cr$cr.nrr = d.cr$cr.area/-5.765783 #divide by control ave_cr
+d.cr$cr.nrr = d.cr$cr.area/-17.11723 #divide by control ave_cr
 
 #calculate nrr for gpp and chla
-x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T)) 
+x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla_ug_cm2, na.rm=T)) 
 x
-d.gpp$gpp.nrr = d.gpp$gpp.area/0.6824351 #divide by control ave_gpp
-d.gpp$chla.nrr = d.gpp$chla/0.18437257 #divide by control ave_chla
+d.gpp$gpp.nrr = d.gpp$gpp.area/4.345200 #divide by control ave_gpp
+d.gpp$chla.nrr = d.gpp$chla_ug_cm2/0.06266962 #divide by control ave_chla
 
 ###############
 #plots of NRR
@@ -66,9 +67,8 @@ ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=gpp.nrr))+g
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
-  ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+scale_y_continuous(limits=c(0,12))+
+  ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
-
 
 ############################################################
 #analyze RESPIRATION data
@@ -79,9 +79,9 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are ok
-hist(E1)  
-plot(M1)
+   #residuals are more-or-less normally distributed, p=0.06625. A lot of wiggle around QQ line
+hist(E1) #ok
+plot(M1)# a little bit heteroscedastic but not dramatically so. less variation as values increase
 
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
@@ -89,8 +89,11 @@ bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test OK
 
 anova(M1)
-  
-x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
+  #P and NPSi interaction signficant. in figure, Si appears higher, NP lower, all others equal to Control
+
+ggplot(data=d.cr, aes(x=nutrient, y = cr.area))+geom_boxplot()
+
+x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by treatment
   summarize(cr.mean = abs(mean(cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
             cr.sd=abs(sd(cr.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values
             n = sum(!is.na(cr.area)), # of observations, excluding NAs. 
@@ -118,7 +121,8 @@ ggplot(data=x, aes(x=nutrient, y=cr.mean)) +
         axis.title.x=element_text(size=8), 
         axis.text.x=element_text(size=8))
 
-#ggsave('output/figures/Wen_summer.tiff',
+
+#ggsave('output/figures/Aht_summer_CRNRR.tiff',
 #       units="in",
 #       width=3.25,
 #       height=3.25,
@@ -129,12 +133,13 @@ ggplot(data=x, aes(x=nutrient, y=cr.mean)) +
 #analyze the PRODUCTION data
 ############################################################
 
-M1<-gls(gpp.area~N*P*Si, data=d.gpp, na.action=na.omit) 
+M1<-gls(log10(gpp.area+1)~N*P*Si, data=d.gpp, na.action=na.omit) #had to log-transform
 E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are not normal, these need to be fixed
+  #with log transformation: looks better, p = 0.8947)
+  #w/o transformation: residuals not normal (p = 0.012, clear deviation from QQ line)
 
 hist(E1, xlab="residuals", main="")
 plot(M1)
@@ -142,10 +147,14 @@ plot(M1)
 plot(filter(d.gpp, !is.na(gpp.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(gpp.area~nutrient, data=d.gpp)
-   #not OK, check N outlier
+   #variance increases with value, even with transformation. will use kruskal-wallis
 
-anova(M1)
-  #N, P+Si co-limitation
+ggplot(data=d.gpp, aes(x=nutrient, y = gpp.area))+geom_boxplot()# one funky control value!! check on it!!
+anova(M1)#doing anova anyway
+#nothing significant
+
+kruskal.test(gpp.area~N+P+Si, data=d.gpp, na.action=na.omit)#kruskal-wallis can only have 1 factor
+
 
 x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(gpp.mean = abs(mean(gpp.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
