@@ -1,0 +1,49 @@
+Site_Full_Name,Time,type,N_mgL,DIN_type
+Ahtanum,fall,trib,0.43375,NO3
+Ahtanum,summer,trib,0.5005,NO3
+Century Landing,fall,main,0.4675,NO3
+Century Landing,summer,main,0.14,NO3
+Cle Elum,fall,main,0.0145,NO3
+Cle Elum,summer,main,0.03,NO3
+Ellensburg,summer,main,0.037,NO3
+Kiona,fall,main,1.64,NO3
+Kiona,summer,main,1.0845,NO3
+Mabton,fall,main,1.4595,NO3
+Mabton,summer,main,1.097333333,NO3
+Main Stem 1,summer,main,0.15,NO3
+Main Stem 2,summer,main,0.077,NO3
+Main Stem 3,summer,main,0.0045,NO3
+Reecer,fall,trib,0.387,NO3
+Reecer,summer,trib,0.1755,NO3
+Ringer,fall,main,0.193,NO3
+Roza,fall,main,0.2985,NO3
+Satus,fall,trib,0.301,NO3
+Satus,summer,trib,1.034,NO3
+Selah,summer,main,0.069,NO3
+Toppenish,summer,trib,1.967,NO3
+Wenas,fall,trib,0.127,NO3
+Wenas,summer,trib,0.0365,NO3
+Ahtanum,fall,trib,0.254,NH4
+Ahtanum,summer,trib,0.590825,NH4
+Century Landing,fall,main,0.304825,NH4
+Century Landing,summer,main,0.3565,NH4
+Cle Elum,fall,main,0.02655,NH4
+Cle Elum,summer,main,0,NH4
+Ellensburg,summer,main,0,NH4
+Kiona,fall,main,0.28495,NH4
+Kiona,summer,main,0,NH4
+Mabton,fall,main,0.369575,NH4
+Mabton,summer,main,0.536766667,NH4
+Main Stem 1,summer,main,0.002,NH4
+Main Stem 2,summer,main,0,NH4
+Main Stem 3,summer,main,0,NH4
+Reecer,fall,trib,0.00255,NH4
+Reecer,summer,trib,0.01265,NH4
+Ringer,fall,main,0,NH4
+Roza,fall,main,0.01415,NH4
+Satus,fall,trib,0.29945,NH4
+Satus,summer,trib,0.535075,NH4
+Selah,summer,main,0,NH4
+Toppenish,summer,trib,0.44765,NH4
+Wenas,fall,trib,2.00E-04,NH4
+Wenas,summer,trib,0.0237,NH4
