@@ -84,7 +84,7 @@ tribs$site<-factor(tribs$site, levels=c("Reecer", "Wenas", "Ahtanum", "Toppenish
 tribs$season<-factor(tribs$season, levels=c("summer", "fall"))
 
 ggplot(subset(tribs, nutrient=="C"), aes(x=site, y = cr.area))+geom_boxplot() +theme_classic()+
-  facet_wrap(~season)
+  facet_wrap(~season)+scale_y_continuous(limits=c(-20, 0))
 
 ggplot(subset(tribs, nutrient=="C"), aes(x=site, y = gpp.area))+geom_boxplot() +theme_classic()+
   facet_wrap(~season)+scale_y_continuous(limits=c(0,10))
