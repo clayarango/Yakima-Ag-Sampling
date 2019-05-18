@@ -78,3 +78,16 @@ names(aht.f)
 
 write.table(tribs, "tribs.csv", sep=",", quote=F, row.names=F)
 
+tribs<-read.csv("tribs.csv")
+
+tribs$site<-factor(tribs$site, levels=c("Reecer", "Wenas", "Ahtanum", "Toppenish", "Satus"))
+tribs$season<-factor(tribs$season, levels=c("summer", "fall"))
+
+ggplot(subset(tribs, nutrient=="C"), aes(x=site, y = cr.area))+geom_boxplot() +theme_classic()+
+  facet_wrap(~season)
+
+ggplot(subset(tribs, nutrient=="C"), aes(x=site, y = gpp.area))+geom_boxplot() +theme_classic()+
+  facet_wrap(~season)+scale_y_continuous(limits=c(0,10))
+
+ggplot(subset(tribs, nutrient=="C"), aes(x=site, y = chla_mgL))+geom_boxplot() +theme_classic()+
+  facet_wrap(~season)
