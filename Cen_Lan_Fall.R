@@ -17,7 +17,7 @@ library(MASS)
 library(ggplot2)
 
 #Load data
-cen_lan_fall <- read.table(file="can_lan_fall.csv", header=T, sep=",")
+cen_lan_fall <- read.table(file="cen_lan_fall.csv", header=T, sep=",")
 
 #set variable
 d = cen_lan_fall
@@ -108,6 +108,13 @@ ggplot(data=x, aes(x=nutrient, y=cr.mean)) +
 #       dpi=1200,
 #       compression="lzw")
 
+#summarize nrr
+x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
+  summarize(cr.mean = abs(mean(cr.nrr, na.rm = TRUE)), # na.rm = TRUE to remove missing values
+            cr.sd=abs(sd(cr.nrr, na.rm = TRUE)),  # na.rm = TRUE to remove missing values
+            n = sum(!is.na(cr.nrr)), # of observations, excluding NAs. 
+            cr.se=cr.sd/sqrt(n))
+
 ############################################################
 #analyze the PRODUCTION data
 ############################################################
@@ -163,6 +170,12 @@ ggplot(data=x, aes(x=nutrient, y=gpp.mean)) +
 #       dpi=1200,
 #       compression="lzw")
 
+#summarize nrr
+x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
+  summarize(gpp.mean = abs(mean(gpp.nrr, na.rm = TRUE)), # na.rm = TRUE to remove missing values
+            gpp.sd=abs(sd(gpp.nrr, na.rm = TRUE)),  # na.rm = TRUE to remove missing values
+            n = sum(!is.na(gpp.nrr)), # of observations, excluding NAs. 
+            gpp.se=gpp.sd/sqrt(n))
 
 #BELOW HERE IS NOT EDITED
 
