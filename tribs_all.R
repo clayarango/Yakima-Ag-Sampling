@@ -1,7 +1,7 @@
-<<<<<<< HEAD
 #14-Feb-2019
 #Code to analyze tribs for 2018 NDS
 #Sarah Roley, Clay Arango, Alex Alexiades
+
 
 library(plyr)
 library(ggplot2)
