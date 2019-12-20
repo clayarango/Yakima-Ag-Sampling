@@ -57,13 +57,15 @@ d.gpp$chla.nrr = d.gpp$chla/0.18437257 #divide by control ave_chla
 ###############
 #plots of NRR
 ##############
-ggplot(data=subset(d.cr, !(nutrient=="control")), aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
+ggplot(data=subset(d.cr, !(nutrient=="C")), aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
   ylab("CR NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
-ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=gpp.nrr))+geom_boxplot()+theme_bw()+
+ggplot(data=subset(d.gpp, !(nutrient=="C")), aes(x=nutrient, y=gpp.nrr))+geom_boxplot()+theme_bw()+
   ylab("GPP NRR")+geom_abline(slope = 0, intercept = 1)+
-  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank(),
+        axis.text.x=element_text(size=14), axis.text.y = element_text(size=14),
+        axis.title.y = element_text(size=14))
 
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
   ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+scale_y_continuous(limits=c(0,12))+

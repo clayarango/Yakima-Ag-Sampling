@@ -89,5 +89,5 @@ ggplot(subset(tribs, nutrient=="C"), aes(x=site, y = cr.area))+geom_boxplot() +t
 ggplot(subset(tribs, nutrient=="C"), aes(x=site, y = gpp.area))+geom_boxplot() +theme_classic()+
   facet_wrap(~season)+scale_y_continuous(limits=c(0,10))
 
-ggplot(subset(tribs, nutrient=="C"), aes(x=site, y = chla_mgL))+geom_boxplot() +theme_classic()+
+ggplot(subset(tribs, nutrient=="C"), aes(x=site, y = chla_ug_cm2))+geom_boxplot() +theme_classic()+
   facet_wrap(~season)

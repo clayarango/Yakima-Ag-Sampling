@@ -33,6 +33,8 @@ ggplot(subset(DIN_stackedbar, type=="trib"), aes(fill=DIN_type, x=Site_Full_Name
   theme(axis.title.x =element_blank())+ylab("DIN (mg N/L)")+scale_fill_manual(values = c("springgreen4","cyan4"))+
   facet_grid(~Time)+theme(axis.text.x=element_text(size = 12, angle =20), axis.text.y = element_text(size=12),
                                   axis.title.y = element_text(size=14), legend.position="none")
+col2rgb("cyan4")
+col2rgb("springgreen4")
 
 DOC_ave<- ddply(DOC_TDN, c("stream", "season", "type"), summarise, DOC_ave = mean(doc.mg.l), TDN_ave=mean(tdn.mg.l)) 
 DOC_ave
@@ -45,11 +47,14 @@ write.table(DOC_ave, "DOC_TDN_summary.csv", sep=",", quote=F, row.names=F)
 
 DOC_ave<-read.csv("DOC_TDN_summary.csv")
 
-DOC_ave$stream<-factor(DOC_ave$stream, levels=c("reecer", "wenas", "ahtanum", "toppenish", "satus"))
+DOC_ave$stream<-factor(DOC_ave$stream, levels=c("Reecer", "Wenas", "Ahtanum", "Toppenish", "Satus"))
 
 str(DOC_ave)
-ggplot(subset(DOC_ave, type=="trib"), aes(x=stream, y=DOC_ave))+geom_point(aes(color=factor(season)), size=3)+
-  theme_classic()+scale_color_manual(values=c("chocolate1", "green4"))
+ggplot(subset(DOC_ave, type=="trib"), aes(x=stream, y=DOC_ave))+geom_point(aes(color=factor(season)), size=5)+
+  theme_classic()+scale_color_manual(values=c("chocolate1", "green4"))+
+  ylab("DOC (mg/L)")+theme(legend.position="none", axis.title.x = element_blank(),
+                           axis.text.y = element_text(size=14), axis.title.y=element_text(size=14),
+                           axis.text.x = element_text(size = 14))
 
 ggplot(subset(DOC_ave, type=="trib"), aes(x=stream, y=TDN_ave))+geom_point(aes(color=factor(season)), size=3)+
   theme_classic()+scale_color_manual(values=c("chocolate1", "green4"))
