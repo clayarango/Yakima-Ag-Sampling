@@ -10,6 +10,8 @@ library(gridExtra)
 
 #Load data
 gh_lab <- read.csv("GH_lab_Columbia.csv")
+cwu_lab <- read.csv("Ganges_Lab.csv")
+cwu_gh <- read.csv("Ganges_GH.csv")
 
 #convert N and P values (0 or 1 for absence or presence) to factors
 gh_lab$N<-as.factor(gh_lab$N)
