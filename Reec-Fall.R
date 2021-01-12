@@ -16,6 +16,7 @@ library(dplyr)
 library(multcomp)
 library(MASS)
 library(ggplot2)
+library(tidyr)
 
 #Load data
 reec_fall <- read.table(file="reec_fall.csv", header=T, sep=",")
@@ -49,12 +50,17 @@ x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed 
 #to specify by column name - I had a csv file with the relevant column in a different position.
 x
 d.cr$cr.nrr = d.cr$cr.area/-9.9922869 #divide by control ave_cr
+d.cr$chla.nrr<-NA
 
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T)) 
 x
 d.gpp$gpp.nrr = d.gpp$gpp.area/2.2686372 #divide by control ave_gpp
 d.gpp$chla.nrr = d.gpp$chla/0.5705330 #divide by control ave_chla
+
+#combine files and export
+d.nrr<-rbind(d.cr, d.gpp)
+write.table(d.nrr, "reec_fall_nrr.csv", sep=",", quote=F, row.names =F)
 
 ###############
 #plots of NRR
@@ -87,7 +93,10 @@ GPP_sum<-ddply(d.gpp, "nutrient", summarise, ave_nrr.gpp=mean(gpp.nrr, na.rm=T),
 CR_sum<-ddply(d.cr, "nutrient", summarise, ave_nrr.cr=mean(cr.nrr, na.rm=T), sd_nrr.cr=sd(cr.nrr, na.rm=T), 
               se_nrr.cr =(sd(cr.nrr)/sqrt(sum(!is.na(cr.nrr)))), 
               ci95_nrr.cr = (1.96*(sd(cr.nrr)/sqrt(sum(!is.na(cr.nrr))))))
+
 #now combine into one and export
+d.sum<-merge(GPP_sum, CR_sum, by="nutrient")
+write.table(d.sum, "reec_fall.summ",  sep=",", quote=F, row.names =F)
 
 
 ############################################################
