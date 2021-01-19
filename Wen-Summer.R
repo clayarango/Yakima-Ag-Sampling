@@ -3,24 +3,19 @@
 #Script to analyze NDS data from Summer 2018 WSB work with S. Roley and A. Alexiades
 
 #packages
-install.packages("nlme")
-install.packages("nortest")
-install.packages("dplyr")
-install.packages("multcomp")
-install.packages("MASS")
-install.packages("ggplot2")
 library(nlme)
 library(nortest)
+library(plyr)
 library(dplyr)
 library(multcomp)
 library(MASS)
 library(ggplot2)
 
 #Load data
-wen_summer <- read.table(file="wen_summer.csv", header=T, sep=",")
+wenas_summer <- read.table(file="wen_summer.csv", header=T, sep=",")
 
 #set variable
-d = wen_summer
+d = wenas_summer
 
 #evaluate data to make sure factors are correct
 names(d)
@@ -38,13 +33,15 @@ d$N<-as.factor(d$N)
 d$P<-as.factor(d$P)
 d$Si<-as.factor(d$Si)
 str(d)
+d$chla.nrr<-NA
 
 #subset data into gpp and cr response
 d.cr = subset(d, top=="sponge", data=d)
 d.gpp = subset(d, top=="glass", data=d)
 
 #calculate nrr for cr
-x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) 
+x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed to ddply b/c allows
+#to specify by column name - I had a csv file with the relevant column in a different position.
 x
 d.cr$cr.nrr = d.cr$cr.area/-5.765783 #divide by control ave_cr
 
@@ -54,23 +51,48 @@ x
 d.gpp$gpp.nrr = d.gpp$gpp.area/0.6824351 #divide by control ave_gpp
 d.gpp$chla.nrr = d.gpp$chla/0.18437257 #divide by control ave_chla
 
+#combine files and export
+d.nrr<-rbind(d.cr, d.gpp)
+d.nrr$site_date<-"wenas_summer"
+write.table(d.nrr, "wenas_summer_nrr.csv", sep=",", quote=F, row.names =F)
+
 ###############
 #plots of NRR
 ##############
 ggplot(data=subset(d.cr, !(nutrient=="C")), aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
   ylab("CR NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#inhibition of most N; limitation with Si; others neutral
 
 ggplot(data=subset(d.gpp, !(nutrient=="C")), aes(x=nutrient, y=gpp.nrr))+geom_boxplot()+theme_bw()+
   ylab("GPP NRR")+geom_abline(slope = 0, intercept = 1)+
-  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank(),
-        axis.text.x=element_text(size=14), axis.text.y = element_text(size=14),
-        axis.title.y = element_text(size=14))
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#limitation of most with P; others neutral. One point on N very high (NRR > 15 on C2)
 
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
-  ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+scale_y_continuous(limits=c(0,12))+
+  ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#limitation for most N; inhibition of P. One N value very high (> 20). This is F5 - looks like chla was so high it was diluted.
+#Also check one high Control value (G8).
 
+##########
+#NRR Summary Files
+#########
+
+GPP_sum<-ddply(d.gpp, "nutrient", summarise, ave_nrr.gpp=mean(gpp.nrr, na.rm=T), sd_nrr.gpp=sd(gpp.nrr, na.rm=T), 
+               se_nrr.gpp =(sd(gpp.nrr)/sqrt(sum(!is.na(gpp.nrr)))), 
+               ci95_nrr.gpp = (1.96*(sd(gpp.nrr)/sqrt(sum(!is.na(gpp.nrr))))),
+               ave_nrr.chla=mean(chla.nrr, na.rm=T), sd_nrr.chla=sd(chla.nrr, na.rm=T), 
+               se_nrr.chla =(sd(chla.nrr)/sqrt(sum(!is.na(chla.nrr)))), 
+               ci95_nrr.chla = (1.96*(sd(chla.nrr)/sqrt(sum(!is.na(chla.nrr))))))
+CR_sum<-ddply(d.cr, "nutrient", summarise, ave_nrr.cr=mean(cr.nrr, na.rm=T), sd_nrr.cr=sd(cr.nrr, na.rm=T), 
+              se_nrr.cr =(sd(cr.nrr)/sqrt(sum(!is.na(cr.nrr)))), 
+              ci95_nrr.cr = (1.96*(sd(cr.nrr)/sqrt(sum(!is.na(cr.nrr))))))
+
+#now combine into one and export
+d.sum<-merge(GPP_sum, CR_sum, by="nutrient")
+d.sum$site_date<-"reec_summer"
+write.table(d.sum, "reec_summer_summ.csv",  sep=",", quote=F, row.names =F)
 
 ############################################################
 #analyze RESPIRATION data
@@ -81,14 +103,14 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are ok
+   #residuals are normally distributed, p=0.20289
 hist(E1)  
 plot(M1)
-
+   
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance test OK
+   #variance test not OK, we'll probably need to mess with this one
 
 anova(M1)
   
@@ -120,7 +142,7 @@ ggplot(data=x, aes(x=nutrient, y=cr.mean)) +
         axis.title.x=element_text(size=8), 
         axis.text.x=element_text(size=8))
 
-#ggsave('output/figures/Wen_summer.tiff',
+#ggsave('output/figures/Ring_summer.tiff',
 #       units="in",
 #       width=3.25,
 #       height=3.25,
@@ -136,7 +158,7 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are not normal, these need to be fixed
+   #residuals are OK
 
 hist(E1, xlab="residuals", main="")
 plot(M1)
@@ -144,11 +166,10 @@ plot(M1)
 plot(filter(d.gpp, !is.na(gpp.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(gpp.area~nutrient, data=d.gpp)
-   #not OK, check N outlier
+   #ok
 
 anova(M1)
-  #N, P+Si co-limitation
-
+  
 x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(gpp.mean = abs(mean(gpp.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
             gpp.sd=abs(sd(gpp.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values

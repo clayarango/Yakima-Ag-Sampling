@@ -12,10 +12,10 @@ library(MASS)
 library(ggplot2)
 
 #Load data
-topp <- read.table(file="toppenish_summer.csv", header=T, sep=",")
+sat_summer <- read.table(file="satus_summer.csv", header=T, sep=",")
 
 #set variable
-d = topp
+d = sat_summer
 
 #evaluate data to make sure factors are correct
 names(d)
@@ -43,21 +43,21 @@ d.gpp = subset(d, top=="glass", data=d)
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed to ddply b/c allows
 #to specify by column name - I had a csv file with the relevant column in a different position.
 x
-d.cr$cr.nrr = d.cr$cr.area/-19.11745 #divide by control ave_cr
+d.cr$cr.nrr = d.cr$cr.area/-25.18067 #divide by control ave_cr
 
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla_ug_cm2, na.rm=T)) 
 x
-d.gpp$gpp.nrr = d.gpp$gpp.area/2.323007 #divide by control ave_gpp
-d.gpp$chla.nrr = d.gpp$chla_ug_cm2/2.214887 #divide by control ave_chla
+d.gpp$gpp.nrr = d.gpp$gpp.area/2.7173342 #divide by control ave_gpp
+d.gpp$chla.nrr = d.gpp$chla_ug_cm2/0.8314271 #divide by control ave_chla
 
 #now combine into one and export
 d.cr$chla.nrr<-NA
 d.cr$gpp.nrr<-NA
 d.gpp$cr.nrr<-NA
 d.nrr<-rbind(d.cr, d.gpp)
-d.nrr$site.date<-"toppenish_summer"
-write.table(d.nrr, "toppenish_summer_nrr.csv",  sep=",", quote=F, row.names =F)
+d.nrr$site.date<-"satus_summer"
+write.table(d.nrr, "satus_summer_nrr.csv",  sep=",", quote=F, row.names =F)
 
 ###############
 #plots of NRR
@@ -65,17 +65,17 @@ write.table(d.nrr, "toppenish_summer_nrr.csv",  sep=",", quote=F, row.names =F)
 ggplot(data=subset(d.cr, !(nutrient=="control")), aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
   ylab("CR NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
-#mostly limited; others neutral
+#NPSI limitation, others inhibition or neutral
 
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=gpp.nrr))+geom_boxplot()+theme_bw()+
   ylab("GPP NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
-#mostly neutral. Maybe Si limitation
+#mostly inhibition or neutral. Note: found error in GPP and fixed (AC8)
 
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
   ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+ 
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
-#mostly neutral but N limited and NP inhibited
+#limitation or neutral
 
 ##########
 #NRR Summary Files
