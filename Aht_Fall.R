@@ -1,6 +1,6 @@
 #Author:  Clay Arango
-#Creation date: 14-Feb-19
-#Script to analyze NDS data from Summer 2018 WSB work with S. Roley and A. Alexiades
+#Creation date: 10-Feb-19
+#Script to analyze NDS data from Summer 2018 NDS work with S. Roley and A. Alexiades
 
 #packages
 library(nlme)
@@ -10,6 +10,7 @@ library(dplyr)
 library(multcomp)
 library(MASS)
 library(ggplot2)
+library(tidyr)
 
 #Load data
 aht_fall <- read.table(file="aht_fall.csv", header=T, sep=",")
@@ -28,7 +29,7 @@ unique(d$top) #should be "sponge" and "glass"
 d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
-#convert N and P vand Si alues (0 or 1 for absence or presence) to factors
+#convert N and P and Si values (0 or 1 for absence or presence) to factors
 d$N<-as.factor(d$N)
 d$P<-as.factor(d$P)
 d$Si<-as.factor(d$Si)
@@ -43,12 +44,20 @@ x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed 
 #to specify by column name - I had a csv file with the relevant column in a different position.
 x
 d.cr$cr.nrr = d.cr$cr.area/-16.93973 #divide by control ave_cr
+d.cr$chla.nrr<-NA
+d.cr$gpp.nrr<-NA
 
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla_ug_cm2, na.rm=T)) 
 x
 d.gpp$gpp.nrr = d.gpp$gpp.area/6.264241 #divide by control ave_gpp
 d.gpp$chla.nrr = d.gpp$chla_ug_cm2/1.3750262 #divide by control ave_chla
+d.gpp$cr.nrr<-NA
+
+#combine files and export
+d.nrr<-rbind(d.cr, d.gpp)
+d.nrr$site.date<-"aht_fall"
+write.table(d.nrr, "aht_fall_nrr.csv", sep=",", quote=F, row.names =F)
 
 ###############
 #plots of NRR
@@ -56,14 +65,37 @@ d.gpp$chla.nrr = d.gpp$chla_ug_cm2/1.3750262 #divide by control ave_chla
 ggplot(data=subset(d.cr, !(nutrient=="control")), aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
   ylab("CR NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#inhibition or neutral
 
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=gpp.nrr))+geom_boxplot()+theme_bw()+
   ylab("GPP NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#neutral
 
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
-  ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+ 
+  ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+scale_y_continuous(limits=c(0, 2))+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#inhibition
+
+##########
+#NRR Summary Files
+#########
+#no need to make these now; wait until all NRR files collated and then do a summary! But leaving code here because can use
+#as template for data all together.
+GPP_sum<-ddply(d.gpp, "nutrient", summarise, ave_nrr.gpp=mean(gpp.nrr, na.rm=T), sd_nrr.gpp=sd(gpp.nrr, na.rm=T), 
+               se_nrr.gpp =(sd(gpp.nrr)/sqrt(sum(!is.na(gpp.nrr)))), 
+               ci95_nrr.gpp = (1.96*(sd(gpp.nrr)/sqrt(sum(!is.na(gpp.nrr))))),
+               ave_nrr.chla=mean(chla.nrr, na.rm=T), sd_nrr.chla=sd(chla.nrr, na.rm=T), 
+               se_nrr.chla =(sd(chla.nrr)/sqrt(sum(!is.na(chla.nrr)))), 
+               ci95_nrr.chla = (1.96*(sd(chla.nrr)/sqrt(sum(!is.na(chla.nrr))))))
+CR_sum<-ddply(d.cr, "nutrient", summarise, ave_nrr.cr=mean(cr.nrr, na.rm=T), sd_nrr.cr=sd(cr.nrr, na.rm=T), 
+              se_nrr.cr =(sd(cr.nrr)/sqrt(sum(!is.na(cr.nrr)))), 
+              ci95_nrr.cr = (1.96*(sd(cr.nrr)/sqrt(sum(!is.na(cr.nrr))))))
+
+#now combine into one and export
+d.sum<-merge(GPP_sum, CR_sum, by="nutrient")
+d.sum$site_date<-"aht_fall"
+write.table(d.sum, "aht_fall_summ.csv",  sep=",", quote=F, row.names =F)
 
 
 ############################################################
@@ -75,17 +107,17 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are normally distributed, p=0.5832
-hist(E1) #almost perfectly normal - weird  
+   #residuals are normally distributed
+hist(E1)  
 plot(M1)
 
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance test OK
+   #variance test is ok
 
 anova(M1)
-  #inhibited by N... in figure, all N groups are <control
+  #co-limited by P and Si
 
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(cr.mean = abs(mean(cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
@@ -115,7 +147,7 @@ ggplot(data=x, aes(x=nutrient, y=cr.mean)) +
         axis.title.x=element_text(size=8), 
         axis.text.x=element_text(size=8))
 
-#ggsave('output/figures/Roza_summer.tiff',
+#ggsave('output/figures/Ring_fall.tiff',
 #       units="in",
 #       width=3.25,
 #       height=3.25,
@@ -131,7 +163,7 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are normal
+   #residuals are not normal but close
 
 hist(E1, xlab="residuals", main="")
 plot(M1)
@@ -142,8 +174,7 @@ bartlett.test(gpp.area~nutrient, data=d.gpp)
    #OK
 
 anova(M1)
-  #no limitation. figure shows lots of variation, with N and P generally < control
-
+  
 x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(gpp.mean = abs(mean(gpp.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
             gpp.sd=abs(sd(gpp.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values

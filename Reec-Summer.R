@@ -50,20 +50,48 @@ x
 d.gpp$gpp.nrr = d.gpp$gpp.area/5.770496 #divide by control ave_gpp
 d.gpp$chla.nrr = d.gpp$chla/0.0000525500 #divide by control ave_chla
 
+#combine files and export
+d.cr$chla.nrr<-NA
+d.nrr<-rbind(d.cr, d.gpp)
+d.nrr$site_date<-"reec_summer"
+write.table(d.nrr, "reec_summer_nrr.csv", sep=",", quote=F, row.names =F)
+
 ###############
 #plots of NRR
 ##############
 ggplot(data=subset(d.cr, !(nutrient=="control")), aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
   ylab("CR NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#inhibition of most; limitation with NP
 
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=gpp.nrr))+geom_boxplot()+theme_bw()+
   ylab("GPP NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#inhibition or neutral
 
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
   ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#limitation for nearly all
+
+##########
+#NRR Summary Files
+#########
+
+GPP_sum<-ddply(d.gpp, "nutrient", summarise, ave_nrr.gpp=mean(gpp.nrr, na.rm=T), sd_nrr.gpp=sd(gpp.nrr, na.rm=T), 
+               se_nrr.gpp =(sd(gpp.nrr)/sqrt(sum(!is.na(gpp.nrr)))), 
+               ci95_nrr.gpp = (1.96*(sd(gpp.nrr)/sqrt(sum(!is.na(gpp.nrr))))),
+               ave_nrr.chla=mean(chla.nrr, na.rm=T), sd_nrr.chla=sd(chla.nrr, na.rm=T), 
+               se_nrr.chla =(sd(chla.nrr)/sqrt(sum(!is.na(chla.nrr)))), 
+               ci95_nrr.chla = (1.96*(sd(chla.nrr)/sqrt(sum(!is.na(chla.nrr))))))
+CR_sum<-ddply(d.cr, "nutrient", summarise, ave_nrr.cr=mean(cr.nrr, na.rm=T), sd_nrr.cr=sd(cr.nrr, na.rm=T), 
+              se_nrr.cr =(sd(cr.nrr)/sqrt(sum(!is.na(cr.nrr)))), 
+              ci95_nrr.cr = (1.96*(sd(cr.nrr)/sqrt(sum(!is.na(cr.nrr))))))
+
+#now combine into one and export
+d.sum<-merge(GPP_sum, CR_sum, by="nutrient")
+d.sum$site_date<-"reec_summer"
+write.table(d.sum, "reec_summer_summ.csv",  sep=",", quote=F, row.names =F)
 
 ############################################################
 #analyze RESPIRATION data

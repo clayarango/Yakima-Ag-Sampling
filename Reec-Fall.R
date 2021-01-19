@@ -35,7 +35,7 @@ unique(d$top) #should be "sponge" and "glass"
 d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
-#convert N and P vand Si alues (0 or 1 for absence or presence) to factors
+#convert N and P and Si values (0 or 1 for absence or presence) to factors
 d$N<-as.factor(d$N)
 d$P<-as.factor(d$P)
 d$Si<-as.factor(d$Si)
@@ -60,6 +60,7 @@ d.gpp$chla.nrr = d.gpp$chla/0.5705330 #divide by control ave_chla
 
 #combine files and export
 d.nrr<-rbind(d.cr, d.gpp)
+d.nrr$site_date<-"reec_fall"
 write.table(d.nrr, "reec_fall_nrr.csv", sep=",", quote=F, row.names =F)
 
 ###############
@@ -96,7 +97,8 @@ CR_sum<-ddply(d.cr, "nutrient", summarise, ave_nrr.cr=mean(cr.nrr, na.rm=T), sd_
 
 #now combine into one and export
 d.sum<-merge(GPP_sum, CR_sum, by="nutrient")
-write.table(d.sum, "reec_fall.summ",  sep=",", quote=F, row.names =F)
+d.sum$site_date<-"reec_fall"
+write.table(d.sum, "reec_fall_summ.csv",  sep=",", quote=F, row.names =F)
 
 
 ############################################################
