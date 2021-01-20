@@ -39,19 +39,39 @@ d$chla.nrr<-NA
 d.cr = subset(d, top=="sponge", data=d)
 d.gpp = subset(d, top=="glass", data=d)
 
+#check distribution of controls and remove as needed before calculating NRR.
+ggplot(d.cr, aes(x=nutrient, y=cr.area))+geom_boxplot() +theme_classic()
+#ok
+
 #calculate nrr for cr
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed to ddply b/c allows
 #to specify by column name - I had a csv file with the relevant column in a different position.
 x
 d.cr$cr.nrr = d.cr$cr.area/-5.765783 #divide by control ave_cr
 
+#check distribution of controls and remove as needed before calculating NRR.
+ggplot(d.gpp, aes(x=nutrient, y=gpp.area))+geom_boxplot() +theme_classic()
+#one outlier. C8 has GPP = 2.94, which is > 4x as high as next-highest control. Remove?
+#also, C2 has GPP of 12.68, which is 3x as high as others in N treatment, but just slightly
+#higher than those in NP. Numbers were checked and correct, but concern over effect of control on NRR.
+ggplot(d.gpp, aes(x=nutrient, y=chla))+geom_boxplot() +theme_classic()
+#G8 has chla of 0.94, which is >7x higher than other controls. Remove?
+#also, F5 has chla = 4.3, which is almost twice as high as next highest. Numbers were checked and are correct
+#but are they too high to be reasonable?
+
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T)) 
 x
 d.gpp$gpp.nrr = d.gpp$gpp.area/0.6824351 #divide by control ave_gpp
 d.gpp$chla.nrr = d.gpp$chla/0.18437257 #divide by control ave_chla
+x1<-ddply(subset(d.gpp, !(nds.id=="C8"|nds.id =="G8")), "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T))
+x1
+d.gpp$gpp.nrr_1 = d.gpp$gpp.area/0.2885690 #NRR with weird controls removed.
+d.gpp$chla.nrr_1=d.gpp$chla/0.009295478
 
 #combine files and export
+d.cr$gpp.nrr_1<-NA
+d.cr$chla.nrr_1<-NA
 d.nrr<-rbind(d.cr, d.gpp)
 d.nrr$site_date<-"wenas_summer"
 write.table(d.nrr, "wenas_summer_nrr.csv", sep=",", quote=F, row.names =F)
