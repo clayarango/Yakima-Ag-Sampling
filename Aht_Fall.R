@@ -39,20 +39,33 @@ str(d)
 d.cr = subset(d, top=="sponge", data=d)
 d.gpp = subset(d, top=="glass", data=d)
 
+#check for outliers and check data entry before calculating NRR.
+ggplot(d.cr, aes(x=nutrient, y=cr.area))+geom_boxplot() +theme_classic()
+#one high NSi checks out, one low Si checks out
+
 #calculate nrr for cr
-x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed to ddply b/c allows
-#to specify by column name - I had a csv file with the relevant column in a different position.
+x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) 
 x
 d.cr$cr.nrr = d.cr$cr.area/-16.93973 #divide by control ave_cr
 d.cr$chla.nrr<-NA
 d.cr$gpp.nrr<-NA
 
+#check for outliers and check data entry before calculating NRR.
+ggplot(d.gpp, aes(x=nutrient, y=gpp.area))+geom_boxplot() +theme_classic()
+#ok, but huge range in controls (but appear to have a normal distn - no outliers to remove)
+ggplot(d.gpp, aes(x=nutrient, y=chla_ug_cm2))+geom_boxplot() +theme_classic()
+#one low control value checks out. is an outlier, but not sure if should be removed. will calculate both.
+
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla_ug_cm2, na.rm=T)) 
 x
-d.gpp$gpp.nrr = d.gpp$gpp.area/6.264241 #divide by control ave_gpp
+d.gpp$gpp.nrr = d.gpp$gpp.area/6.501087 #divide by control ave_gpp
 d.gpp$chla.nrr = d.gpp$chla_ug_cm2/1.3750262 #divide by control ave_chla
 d.gpp$cr.nrr<-NA
+x1<- ddply(subset(d.gpp,!(nds.id=="B5")), "nutrient", summarise,  ave_chla = mean(chla_ug_cm2, na.rm=T)) 
+x1
+d.gpp$chla.nrr_1 = d.gpp$chla_ug_cm2/1.7187828
+d.cr$chla.nrr_1<-NA
 
 #combine files and export
 d.nrr<-rbind(d.cr, d.gpp)
@@ -70,7 +83,7 @@ ggplot(data=subset(d.cr, !(nutrient=="control")), aes(x=nutrient, y=cr.nrr))+geo
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=gpp.nrr))+geom_boxplot()+theme_bw()+
   ylab("GPP NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
-#neutral
+#neutral or inhibited
 
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
   ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+scale_y_continuous(limits=c(0, 2))+

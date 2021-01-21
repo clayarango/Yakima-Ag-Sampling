@@ -45,12 +45,23 @@ str(d)
 d.cr = subset(d, top=="sponge", data=d)
 d.gpp = subset(d, top=="glass", data=d)
 
+#check distribution of controls and remove as needed before calculating NRR.
+ggplot(d.cr, aes(x=nutrient, y=cr.area))+geom_boxplot() +theme_classic()
+#check CC4 and DD3
+
 #calculate nrr for cr
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed to ddply b/c allows
 #to specify by column name - I had a csv file with the relevant column in a different position.
 x
-d.cr$cr.nrr = d.cr$cr.area/-9.9922869 #divide by control ave_cr
+d.cr$cr.nrr = d.cr$cr.area/-9.922869 #divide by control ave_cr
 d.cr$chla.nrr<-NA
+
+#check distribution of controls and remove as needed before calculating NRR.
+ggplot(d.gpp, aes(x=nutrient, y=gpp.area))+geom_boxplot() +theme_classic()
+#probaly ok, but check AA3, AA6, X3
+ggplot(d.gpp, aes(x=nutrient, y=chla))+geom_boxplot() +theme_classic()+scale_y_continuous(limits=c(0,2))
+#one super-high outlier - was a copy/paste error.updated with value from NDS spreadsheet.
+#also check CC3
 
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T)) 
@@ -77,7 +88,7 @@ ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=gpp.nrr))+g
 #inhibition
 
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
-  ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+scale_y_continuous(limits=c(0, 2))+
+  ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #inhibition
 

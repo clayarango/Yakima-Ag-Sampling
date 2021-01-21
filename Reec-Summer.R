@@ -38,20 +38,31 @@ str(d)
 d.cr = subset(d, top=="sponge", data=d)
 d.gpp = subset(d, top=="glass", data=d)
 
+#check distribution of controls and remove as needed before calculating NRR.
+ggplot(d.cr, aes(x=nutrient, y=cr.area))+geom_boxplot() +theme_classic()
+#ok
+
 #calculate nrr for cr
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed to ddply b/c allows
 #to specify by column name - I had a csv file with the relevant column in a different position.
 x
 d.cr$cr.nrr = d.cr$cr.area/-15.02240 #divide by control ave_cr
 
+#check distribution of controls and remove as needed before calculating NRR.
+ggplot(d.gpp, aes(x=nutrient, y=gpp.area))+geom_boxplot() +theme_classic()
+#check CC1, but probably ok
+ggplot(d.gpp, aes(x=nutrient, y=chla))+geom_boxplot() +theme_classic()
+#ok - updated b/c original file had values too small (units were mg/cm2)
+
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T)) 
 x
 d.gpp$gpp.nrr = d.gpp$gpp.area/5.770496 #divide by control ave_gpp
-d.gpp$chla.nrr = d.gpp$chla/0.0000525500 #divide by control ave_chla
+d.gpp$chla.nrr = d.gpp$chla/0.05256108 #divide by control ave_chla
 
 #combine files and export
 d.cr$chla.nrr<-NA
+d.gpp$cr.nrr<-NA
 d.nrr<-rbind(d.cr, d.gpp)
 d.nrr$site_date<-"reec_summer"
 write.table(d.nrr, "reec_summer_nrr.csv", sep=",", quote=F, row.names =F)

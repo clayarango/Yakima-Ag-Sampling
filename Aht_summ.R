@@ -3,12 +3,7 @@
 #Script to analyze NDS data from Summer 2018 WSB work with S. Roley and A. Alexiades
 
 #packages
-install.packages("nlme")
-install.packages("nortest")
-install.packages("dplyr")
-install.packages("multcomp")
-install.packages("MASS")
-install.packages("ggplot2")
+
 library(nlme)
 library(nortest)
 library(plyr)
@@ -45,20 +40,34 @@ str(d)
 d.cr = subset(d, top=="sponge", data=d)
 d.gpp = subset(d, top=="glass", data=d)
 
+#check for outliers and check data entry before calculating NRR.
+ggplot(d.cr, aes(x=nutrient, y=cr.area))+geom_boxplot() +theme_classic()
+#one low and one high control but seem well-distributed
+
 #calculate nrr for cr
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed to ddply b/c allows
 #to specify by column name - I had a csv file with the relevant column in a different position.
 x
 d.cr$cr.nrr = d.cr$cr.area/-20.436057 #divide by control ave_cr
 
+#check for outliers and check data entry before calculating NRR.
+ggplot(d.gpp, aes(x=nutrient, y=gpp.area))+geom_boxplot() +theme_classic()
+#one high-ish Si value checks out
+ggplot(d.gpp, aes(x=nutrient, y=chla_ug_cm2))+geom_boxplot() +theme_classic()
+#one high control checks out, but consider dropping. F6
+
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla_ug_cm2, na.rm=T)) 
 x
-d.gpp$gpp.nrr = d.gpp$gpp.area/6.354663 #divide by control ave_gpp
+d.gpp$gpp.nrr = d.gpp$gpp.area/3.099015 #divide by control ave_gpp
 d.gpp$chla.nrr = d.gpp$chla_ug_cm2/2.985545 #divide by control ave_chla
-
+x1<- ddply(subset(d.gpp, !(nds.id=="F6")), "nutrient", summarise, ave_chla = mean(chla_ug_cm2, na.rm=T)) 
+x1
+d.gpp$chla.nrr_1<-d.gpp$chla_ug_cm2/2.700340
+  
 #now combine into one and export
 d.cr$chla.nrr<-NA
+d.cr$chla.nrr_1<-NA
 d.cr$gpp.nrr<-NA
 d.gpp$cr.nrr<-NA
 d.nrr<-rbind(d.cr, d.gpp)

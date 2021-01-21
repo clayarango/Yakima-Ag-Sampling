@@ -39,12 +39,20 @@ str(d)
 d.cr = subset(d, top=="sponge", data=d)
 d.gpp = subset(d, top=="glass", data=d)
 
+#check for outliers and check data entry before calculating NRR.
+ggplot(d.cr, aes(x=nutrient, y=cr.area))+geom_boxplot() +theme_classic()
+#low (high) Si checks out - was completely eaten
+
 #calculate nrr for cr
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed to ddply b/c allows
 #to specify by column name - I had a csv file with the relevant column in a different position.
 x
 d.cr$cr.nrr = d.cr$cr.area/-25.18067 #divide by control ave_cr
 
+#check for outliers and check data entry before calculating NRR.
+ggplot(d.gpp, aes(x=nutrient, y=gpp.area))+geom_boxplot() +theme_classic()
+#one high NPSi checks out
+ggplot(d.gpp, aes(x=nutrient, y=chla_ug_cm2))+geom_boxplot() +theme_classic()
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla_ug_cm2, na.rm=T)) 
 x
