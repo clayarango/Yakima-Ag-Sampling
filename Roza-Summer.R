@@ -5,12 +5,14 @@
 #packages
 install.packages("nlme")
 install.packages("nortest")
+install.packages("plyr")
 install.packages("dplyr")
 install.packages("multcomp")
 install.packages("MASS")
 install.packages("ggplot2")
 library(nlme)
 library(nortest)
+library(plyr)
 library(dplyr)
 library(multcomp)
 library(MASS)
@@ -24,6 +26,7 @@ d = roza_summer
 
 #evaluate data to make sure factors are correct
 names(d)
+
 unique(d$nutrient) #control, N, NP, NPSi, NSi, P, PSi, Si
 unique(d$N) #should be 0 and 1
 unique(d$P) #should be 0 and 1
@@ -33,7 +36,7 @@ unique(d$top) #should be "sponge" and "glass"
 d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
-#convert N and P vand Si alues (0 or 1 for absence or presence) to factors
+#convert N and P and Si values (0 or 1 for absence or presence) to factors
 d$N<-as.factor(d$N)
 d$P<-as.factor(d$P)
 d$Si<-as.factor(d$Si)
@@ -43,15 +46,76 @@ str(d)
 d.cr = subset(d, top=="sponge", data=d)
 d.gpp = subset(d, top=="glass", data=d)
 
-#calculate nrr for cr
-x = aggregate(d.cr[,8], list(d.cr$nutrient), mean, na.rm=T)
-x
-d.cr$cr.nrr = d.cr$cr.area/-9.818856 #is there a prettier way to do this?
+#check for outliers and check data entry before calculating CR-NRR
+ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
+#J1 (control) outlier?
 
-#calculate nrr for gpp
-x = aggregate(d.gpp[,9], list(d.gpp$nutrient), mean, na.rm=T)
+#calculate nrr for cr
+x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) 
 x
-d.gpp$gpp.nrr = d.gpp$gpp.area/4.059326 #is there a prettier way to do this?
+d.cr$cr.nrr = d.cr$cr.area/-9.818865 #divide by control ave_cr
+
+#check for outliers and check data entry before calculating GPP- and chla-NRR
+ggplot(d.gpp, aes(x=nutrient, y=gpp.area)) + geom_boxplot() + theme_classic()
+#J2, P+Si are evenly spread
+ggplot(d.gpp, aes(x=nutrient, y=chla)) + geom_boxplot() + theme_classic()
+#I1, F1?
+
+#calculate nrr for gpp and chla
+x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T)) 
+x
+d.gpp$gpp.nrr = d.gpp$gpp.area/4.059326 #divide by control ave_gpp
+d.gpp$chla.nrr = d.gpp$chla/1.800835 #divide by control ave_chla
+#use to exclude outliers
+#x1<- ddply(subset(d.gpp, !(nds.id=="F6")), "nutrient", summarise, ave_chla = mean(chla_ug_cm2, na.rm=T)) 
+#x1
+#d.gpp$chla.nrr_1<-d.gpp$chla_ug_cm2/2.700340
+
+#combine into one file and export
+d.cr$chla.nrr<-NA
+#d.cr$chla.nrr_1<-NA#for excluded outliers
+d.cr$gpp.nrr<-NA
+d.gpp$cr.nrr<-NA
+d.nrr<-rbind(d.cr, d.gpp)
+d.nrr$site.date<-"roza_summer"
+write.table(d.nrr, "roza_summer_nrr.csv",  sep=",", quote=F, row.names =F)
+
+###############
+#plots of NRR
+##############
+ggplot(data=subset(d.cr, !(nutrient=="control")), aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
+  ylab("CR NRR")+geom_abline(slope = 0, intercept = 1)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#N limitation, possible Si inhibition
+
+ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=gpp.nrr))+geom_boxplot()+theme_bw()+
+  ylab("GPP NRR")+geom_abline(slope = 0, intercept = 1)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#no limitation
+
+ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
+  ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+ 
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#no limitation
+
+##########
+#NRR Summary Files
+#########
+
+GPP_sum<-ddply(d.gpp, "nutrient", summarise, ave_nrr.gpp=mean(gpp.nrr, na.rm=T), sd_nrr.gpp=sd(gpp.nrr, na.rm=T), 
+               se_nrr.gpp =(sd(gpp.nrr)/sqrt(sum(!is.na(gpp.nrr)))), 
+               ci95_nrr.gpp = (1.96*(sd(gpp.nrr)/sqrt(sum(!is.na(gpp.nrr))))),
+               ave_nrr.chla=mean(chla.nrr, na.rm=T), sd_nrr.chla=sd(chla.nrr, na.rm=T), 
+               se_nrr.chla =(sd(chla.nrr)/sqrt(sum(!is.na(chla.nrr)))), 
+               ci95_nrr.chla = (1.96*(sd(chla.nrr)/sqrt(sum(!is.na(chla.nrr))))))
+CR_sum<-ddply(d.cr, "nutrient", summarise, ave_nrr.cr=mean(cr.nrr, na.rm=T), sd_nrr.cr=sd(cr.nrr, na.rm=T), 
+              se_nrr.cr =(sd(cr.nrr)/sqrt(sum(!is.na(cr.nrr)))), 
+              ci95_nrr.cr = (1.96*(sd(cr.nrr)/sqrt(sum(!is.na(cr.nrr))))))
+
+#now combine into one and export
+d.sum<-merge(GPP_sum, CR_sum, by="nutrient")
+d.sum$site_date<-"roza_summer"
+write.table(d.sum, "roza_summer_summ.csv",  sep=",", quote=F, row.names=F)
 
 ############################################################
 #analyze RESPIRATION data
