@@ -67,7 +67,7 @@ x
 d.gpp$gpp.nrr = d.gpp$gpp.area/5.806643 #divide by control ave_gpp
 d.gpp$chla.nrr = d.gpp$chla/0.7594258 #divide by control ave_chla
 #use to exclude outliers
-#x1<- ddply(subset(d.gpp, !(nds.id=="F6")), "nutrient", summarise, ave_chla = mean(chla_ug_cm2, na.rm=T)) 
+#x1<- ddply(subset(d.gpp, !(nds.id=="F6")), "nutrient", summarise, ave_chla = mean(chla, na.rm=T)) 
 #x1
 #d.gpp$chla.nrr_1<-d.gpp$chla_ug_cm2/2.700340
 

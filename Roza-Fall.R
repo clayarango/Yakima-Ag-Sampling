@@ -48,7 +48,8 @@ d.gpp = subset(d, top=="glass", data=d)
 
 #check for outliers and check data entry before calculating CR-NRR
 ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
-#E3,G3 might be outliers, controls look OK
+#J8 and G3 are entered correctly, controls look OK
+#J8 and G3 might need to be removed
 
 #calculate nrr for cr
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) 

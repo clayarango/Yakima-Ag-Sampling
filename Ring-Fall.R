@@ -48,7 +48,8 @@ d.gpp = subset(d, top=="glass", data=d)
 
 #check for outliers and check data entry before calculating CR-NRR
 ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
-#P3, O2, T7, K5, L7 could be outliers, controls look OK
+#P3, O2, T7, K5, L7 are entered correctly, controls look OK
+
 
 #calculate nrr for cr
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) 
@@ -57,7 +58,7 @@ d.cr$cr.nrr = d.cr$cr.area/-11.397616 #divide by control ave_cr
 
 #check for outliers and check data entry before calculating GPP- and chla-NRR
 ggplot(d.gpp, aes(x=nutrient, y=gpp.area)) + geom_boxplot() + theme_classic()
-#K2 might be an outlier
+#K2 is entered correctly
 ggplot(d.gpp, aes(x=nutrient, y=chla)) + geom_boxplot() + theme_classic()
 #P and Si groups are somewhat spread but somewhat centered
 

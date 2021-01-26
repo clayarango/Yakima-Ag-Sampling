@@ -57,9 +57,10 @@ d.cr$cr.nrr = d.cr$cr.area/-7.554539 #divide by control ave_cr
 
 #check for outliers and check data entry before calculating GPP- and chla-NRR
 ggplot(d.gpp, aes(x=nutrient, y=gpp.area)) + geom_boxplot() + theme_classic()
-#K8 is very low
+#K8 data entry checks out, can stay in analysis
 ggplot(d.gpp, aes(x=nutrient, y=chla)) + geom_boxplot() + theme_classic()
-#all values are very low, check units. S1, L7 are low, N2 is high
+#S1, L7, N2 data entry checks out
+#N2 could be excluded from analysis, but it won't affect NRR calculation
 
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T)) 
@@ -67,7 +68,7 @@ x
 d.gpp$gpp.nrr = d.gpp$gpp.area/6.422422 #divide by control ave_gpp
 d.gpp$chla.nrr = d.gpp$chla/0.001824141 #divide by control ave_chla
 #use to exclude outliers
-#x1<- ddply(subset(d.gpp, !(nds.id=="F6")), "nutrient", summarise, ave_chla = mean(chla_ug_cm2, na.rm=T)) 
+#x1<- ddply(subset(d.gpp, !(nds.id=="F6")), "nutrient", summarise, ave_chla = mean(chla, na.rm=T)) 
 #x1
 #d.gpp$chla.nrr_1<-d.gpp$chla_ug_cm2/2.700340
 

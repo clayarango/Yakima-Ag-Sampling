@@ -48,7 +48,8 @@ d.gpp = subset(d, top=="glass", data=d)
 
 #check for outliers and check data entry before calculating CR-NRR
 ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
-#BB5, W1 might be low outliers, controls look OK
+#BB5, W1 data entry check out, controls look OK
+#keep BB5 and W1
 
 #calculate nrr for cr
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) 
@@ -57,7 +58,8 @@ d.cr$cr.nrr = d.cr$cr.area/-4.808690 #divide by control ave_cr
 
 #check for outliers and check data entry before calculating GPP- and chla-NRR
 ggplot(d.gpp, aes(x=nutrient, y=gpp.area)) + geom_boxplot() + theme_classic()
-#Z2, V7 is a high outlier
+#Z2 data entry checks out
+#can remove Z2 from analysis of NRR, but not affected in NRR calculation
 ggplot(d.gpp, aes(x=nutrient, y=chla)) + geom_boxplot() + theme_classic()
 #lots of b.d. are calculating as zeros.  replace with half dl?
 
@@ -67,7 +69,7 @@ x
 d.gpp$gpp.nrr = d.gpp$gpp.area/2.633438 #divide by control ave_gpp
 d.gpp$chla.nrr = d.gpp$chla/0.4318408 #divide by control ave_chla
 #use to exclude outliers
-#x1<- ddply(subset(d.gpp, !(nds.id=="F6")), "nutrient", summarise, ave_chla = mean(chla_ug_cm2, na.rm=T)) 
+#x1<- ddply(subset(d.gpp, !(nds.id=="F6")), "nutrient", summarise, ave_chla = mean(chla, na.rm=T)) 
 #x1
 #d.gpp$chla.nrr_1<-d.gpp$chla_ug_cm2/2.700340
 
