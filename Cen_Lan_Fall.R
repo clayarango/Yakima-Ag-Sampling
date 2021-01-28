@@ -136,6 +136,18 @@ bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test is ok
 
 anova(M1)
+#numDF   F-value p-value
+#(Intercept)     1 1238.9517  <.0001
+#N               1    0.1641  0.6881
+#P               1    1.2067  0.2802
+#Si              1    1.1268  0.2964
+#N:P             1    7.3144  0.0109
+#N:Si            1    0.0672  0.7972
+#P:Si            1    0.3027  0.5860
+#N:P:Si          1    1.3141  0.2602
+
+#Results suggest NxP interaction (co-limitation), but this appears to only occur when Si present.
+#Does the NPSi treatment just increase N and P replication? Or is there something about Si?
   
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(cr.mean = abs(mean(cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values

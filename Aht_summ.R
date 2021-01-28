@@ -119,7 +119,7 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are more-or-less normally distributed, p=0.06625. A lot of wiggle around QQ line
+   #residuals are more-or-less normally distributed, p=0.4456. A lot of wiggle around QQ line
 hist(E1) #ok
 plot(M1)# a little bit heteroscedastic but not dramatically so. less variation as values increase
 
@@ -129,7 +129,21 @@ bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test OK
 
 anova(M1)
-  #P and NPSi interaction signficant. in figure, Si appears higher, NP lower, all others equal to Control
+  #N limitation. P and Si co-limitation (secondary co-limitation??)
+#            numDF  F-value p-value
+#(Intercept)     1 492.4297  <.0001
+#N               1  13.0729  0.0010
+#P               1   5.6370  0.0240
+#Si              1   0.2001  0.6577
+#N:P             1   0.0790  0.7805
+#N:Si            1   1.5230  0.2264
+#P:Si            1   7.3806  0.0107
+#N:P:Si          1   0.0524  0.8205
+
+with(d.cr, 
+     interaction.plot(P,Si,cr.area, 
+                      ylab="CR.Area", lty=c(1,12),lwd=2,ylim=c(-28,5),
+                      xlab="P", trace.label="Si"))
 
 ggplot(data=d.cr, aes(x=nutrient, y = cr.area))+geom_boxplot()
 
