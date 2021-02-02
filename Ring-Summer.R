@@ -49,6 +49,7 @@ d.gpp = subset(d, top=="glass", data=d)
 #check for outliers and check data entry before calculating CR-NRR
 ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
 #looks OK
+#R5 lost in the field
 
 #calculate nrr for cr
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) 
@@ -58,9 +59,20 @@ d.cr$cr.nrr = d.cr$cr.area/-7.554539 #divide by control ave_cr
 #check for outliers and check data entry before calculating GPP- and chla-NRR
 ggplot(d.gpp, aes(x=nutrient, y=gpp.area)) + geom_boxplot() + theme_classic()
 #K8 data entry checks out, can stay in analysis
+#K1 lost in the field
 ggplot(d.gpp, aes(x=nutrient, y=chla)) + geom_boxplot() + theme_classic()
 #S1, L7, N2 data entry checks out
 #N2 could be excluded from analysis, but it won't affect NRR calculation
+#K1 lost in the field
+
+#substitute b.d. chlorophyll with 1/2 detection limit using
+#3*SD(y/x)/slope, where SD(y/x) is standard error of the chlorophyll regression
+#make vectors for the x (chla) and y (RFU) values found in spreadsheet
+#y = c(3.39, 397.33, 693, 1390.66, 3003.32, 5897.49)
+#x = c(0, 0.025, 0.05, 0.1, 0.25, 0.5)
+#summary(lm(y~x))
+#chlabd = (188.47/11627.13)/2
+
 
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T)) 
@@ -127,14 +139,14 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are normally distributed
+   #residuals are normally distributed, p=0.241
 hist(E1)  
 plot(M1)
 
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance test OK
+   #variance test p=0.1614
 
 anova(M1)
   
@@ -189,7 +201,7 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are not normal, but they are close
+   #residuals are not normal, p=0.0403
 
 hist(E1, xlab="residuals", main="")
 plot(M1)
@@ -197,7 +209,7 @@ plot(M1)
 plot(filter(d.gpp, !is.na(gpp.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(gpp.area~nutrient, data=d.gpp)
-   #OK
+   #variances are equal, p=0.3016
 
 anova(M1)
   
@@ -244,133 +256,43 @@ x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functi
             gpp.se=gpp.sd/sqrt(n))
 
 
-#BELOW HERE IS NOT EDITED
-
-
-
-
-
-############################################################
+##########################################################
 #analyze the CHL-A biomass on disks
 
-M1<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit)
+M1<-gls(chla~N*P*Si, data=d.gpp, na.action=na.omit)
 E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-  #residuals look bad (p=0.001)
-hist(E1)
+#residuals are not normal, p=0.005993
+
+hist(E1)  
 plot(M1)
 
-vf1 = varIdent(form = ~ 1|N*P)
-vf2 = varIdent(form = ~ 1|light)
-vf3 = varIdent(form = ~ 1|N*P*light)
-vf4 = varPower(form = ~ fitted(.)) 
-vf5 = varExp(form = ~ fitted(.))
-vf6 = varConstPower(form = ~ fitted(.))
-vf7 = varExp(form = ~ fitted(.)|nutrient)
+plot(filter(d.gpp, !is.na(chla)) %>% dplyr::select(nutrient), 
+     E1, xlab="nutrient", ylab="Residuals")
+bartlett.test(chla~nutrient, data=d.gpp)
+#variance test p=0.0006267
 
-M2<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf1)
-M3<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf2)
-M4<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf3)
-M5<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf4)
-M6<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf5)
-M7<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf6)
-M8<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf7)
+anova(M1)
 
-anova(M1,M2,M3,M4,M5,M6,M7,M8)
+#try normalizing
 
-#M3 is best on AIC
+d.gpp$l.chla = log10(d.gpp$chla+1)
 
-E3<-residuals(M3)
-qqnorm(E3)
-qqline(E3)
-ad.test(E3)
-#residuals are not normal (p=0.001)
-hist(E3, xlab="residuals", main="")
-plot(M3)
-  #hist and plot look good
+M2<-gls(l.chla~N*P*Si, data=d.gpp, na.action=na.omit)
+E2<-residuals(M2)
+qqnorm(E2)
+qqline(E2)
+ad.test(E2)
+#residuals are not normal, p=0.07118
 
-plot(filter(roza_sum.chla, !is.na(chla)) %>% dplyr::select(light), 
-     E3, xlab="light", ylab="Residuals")
-bartlett.test(chla~light, data=roza_sum.chla)
+hist(E2)  
+plot(M2)
 
-plot(filter(roza_sum.chla, !is.na(chla)) %>% dplyr::select(nutrient), 
-     E3, xlab="nutrient", ylab="Residuals")
-bartlett.test(chla~nutrient, data=roza_sum.chla)
+plot(filter(d.gpp, !is.na(chla)) %>% dplyr::select(nutrient), 
+     E1, xlab="nutrient", ylab="Residuals")
+bartlett.test(l.chla~nutrient, data=d.gpp)
+#variance test p=0.007904
 
-anova(M3)
-
-#light is significant and N and P separately interact with light
-
-x<-roza_sum.chla[complete.cases(roza_sum.chla$chla),]
-
-with(x, 
-     interaction.plot(nutrient,light,chla, 
-                      ylim=c(0,1.5),lty=c(1,12),lwd=2,ylab="Chlorophyll a", 
-                      xlab="Nutrient", trace.label="Light"))
-
-x <- group_by(roza_sum.chla, nutrient, light) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(chla.mean = mean(chla, na.rm = TRUE), # na.rm = TRUE to remove missing values
-            chla.sd=sd(chla, na.rm = TRUE),  # na.rm = TRUE to remove missing values
-            n = sum(!is.na(chla)), # of observations, excluding NAs. 
-            chla.se=chla.sd/sqrt(n))
-
-ggplot(data=x, 
-       aes(x=nutrient, y=chla.mean, fill=light)) + 
-  geom_bar(stat="identity", position=position_dodge(), color = "black") + 
-  geom_errorbar(aes(ymin=chla.mean, ymax=chla.mean+chla.se), width=0.2, 
-                position=position_dodge(0.9)) + 
-  scale_fill_manual(values=c("white","black")) +
-  xlab("Nutrient") +
-  ylab(expression(Chlorophyll~a~(ug~cm^{-2}))) +
-  ylim(0,1.7) +
-  labs(fill="Light") +
-  theme_bw() +
-  theme(panel.grid.major=element_blank(), 
-        panel.grid.minor=element_blank(), 
-        legend.title=element_text(size=6), 
-        legend.key=element_blank(), 
-        legend.position=c(0.5,0.95), 
-        legend.text=element_text(size=8), 
-        legend.background=element_blank(), 
-        legend.direction="horizontal", 
-        legend.key.size=unit(0.3, "cm"), 
-        axis.title.y=element_text(size=8), 
-        axis.title.x=element_text(size=8), 
-        axis.text.x=element_text(size=8))
-
-ggsave('output/figures/chlaByNutrientLight.tiff',
-       units="in",
-       width=3.25,
-       height=3.25,
-       dpi=1200,
-       compression="lzw")
-
-
-
-############################################################
-############################################################
-#calculate nrr mean and standard error
-x1 <- group_by(roza_sum, nutrient, light) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(chla.nrr.mean = mean(chla.nrr, na.rm = TRUE), # na.rm = TRUE to remove missing values
-            chla.nrr.sd=sd(chla.nrr, na.rm = TRUE),  # na.rm = TRUE to remove missing values
-            chla.n = sum(!is.na(chla.nrr)), # of observations, excluding NAs. 
-            chla.nrr.se=chla.nrr.sd/sqrt(chla.n))
-
-
-x2 <- group_by(roza_sum, nutrient, light) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(gpp.nrr.mean = mean(gpp.nrr, na.rm = TRUE), # na.rm = TRUE to remove missing values
-            gpp.nrr.sd=sd(gpp.nrr, na.rm = TRUE),  # na.rm = TRUE to remove missing values
-            gpp.n = sum(!is.na(gpp.nrr)), # of observations, excluding NAs. 
-            gpp.nrr.se=gpp.nrr.sd/sqrt(gpp.n))
-
-x3 <- group_by(roza_sum, nutrient, light) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(cr.nrr.mean = mean(cr.nrr, na.rm = TRUE), # na.rm = TRUE to remove missing values
-            cr.nrr.sd=sd(cr.nrr, na.rm = TRUE),  # na.rm = TRUE to remove missing values
-            cr.n = sum(!is.na(cr.nrr)), # of observations, excluding NAs. 
-            cr.nrr.se=cr.nrr.sd/sqrt(cr.n))
-
-roza_sum.nrr<-cbind(x1,x2,x3)
-roza_sum.nrr <- roza_sum.nrr[, !duplicated(colnames(roza_sum.nrr))]
-write.csv(roza_sum.nrr, "roza_sum.nrr.csv")
+anova(M2)
