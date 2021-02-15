@@ -90,6 +90,10 @@ ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=gpp.nrr))+g
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #inhibition or neutral
 
+ggplot(data=subset(d.nrr, (top=="glass")), aes(x=nutrient, y=gpp.es))+geom_boxplot()+theme_bw()+
+  ylab("GPP Effect Size")+geom_abline(slope = 0, intercept = 1)+geom_hline(yintercept = -0.7, lty="dashed")+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+
 ggplot(data=d.gpp, aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
   ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
