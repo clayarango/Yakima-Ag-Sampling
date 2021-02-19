@@ -64,10 +64,10 @@ ggplot(d.gpp, aes(x=nutrient, y=chla_ug_cm2)) + geom_boxplot() + theme_classic()
 #N+P+Si group looks evenly spread
 
 #calculate nrr for gpp and chla
-x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla_ug_cm2, na.rm=T)) 
+x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T)) 
 x
 d.gpp$gpp.nrr = d.gpp$gpp.area/0 #divide by control ave_gpp
-d.gpp$chla.nrr = d.gpp$chla_ug_cm2/1.88799110 #divide by control ave_chla
+d.gpp$chla.nrr = d.gpp$chla/1.8799114 #divide by control ave_chla
 #use to exclude outliers
 #x1<- ddply(subset(d.gpp, !(nds.id=="F6")), "nutrient", summarise, ave_chla = mean(chla_ug_cm2, na.rm=T)) 
 #x1
@@ -80,6 +80,10 @@ d.cr$gpp.nrr<-NA
 d.gpp$cr.nrr<-NA
 d.nrr<-rbind(d.cr, d.gpp)
 d.nrr$site.date<-"kiona_fall"
+d.nrr$gpp.es<-log(d.nrr$gpp.nrr)
+d.nrr$cr.es<-log(d.nrr$cr.nrr)
+d.nrr$chla.es<-log(d.nrr$chla.nrr)
+
 write.table(d.nrr, "kiona_fall_nrr.csv",  sep=",", quote=F, row.names =F)
 
 ###############
@@ -90,8 +94,20 @@ ggplot(data=subset(d.cr, !(nutrient=="control")), aes(x=nutrient, y=cr.nrr))+geo
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #no limitation
 
+ggplot(data=subset(d.nrr, (top=="sponge")), aes(x=nutrient, y=cr.es))+geom_boxplot()+theme_bw()+
+  ylab("CR Effect Size")+geom_hline(yintercept = 0.7, lty="dashed")+ geom_hline(yintercept = -0.7, lty="dashed")+
+  geom_hline(yintercept = 1.385)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#nothing over 1.385, so no significance?
+
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=gpp.nrr))+geom_boxplot()+theme_bw()+
   ylab("GPP NRR")+geom_abline(slope = 0, intercept = 1)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#no data
+
+ggplot(data=subset(d.nrr, top =="glass"),aes(x=nutrient, y=gpp.es))+geom_boxplot()+theme_bw()+
+  ylab("GPP Effect Size")+geom_hline(yintercept = 0.7, lty="dashed")+
+  geom_hline(yintercept = -0.7, lty="dashed")+ geom_hline(yintercept = 1.385)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #no data
 
@@ -99,6 +115,13 @@ ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+
   ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+ 
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #no limitation
+
+ggplot(data=subset(d.nrr, (top=="glass")), aes(x=nutrient, y=chla.es))+geom_boxplot()+theme_bw()+
+  ylab("Chla Effect Size")+ geom_hline(yintercept = 0.7, lty="dashed")+ geom_hline(yintercept = -0.7, lty="dashed")+    
+  geom_hline(yintercept = 1.385)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+
+#nothing over 1.385 so no significance?
 
 ##########
 #NRR Summary Files

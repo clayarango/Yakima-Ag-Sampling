@@ -88,6 +88,10 @@ d.cr$gpp.nrr<-NA
 d.gpp$cr.nrr<-NA
 d.nrr<-rbind(d.cr, d.gpp)
 d.nrr$site.date<-"cle_summer"
+d.nrr$gpp.es<-log(d.nrr$gpp.nrr)
+d.nrr$cr.es<-log(d.nrr$cr.nrr)
+d.nrr$chla.es<-log(d.nrr$chla.nrr)
+
 write.table(d.nrr, "cle_summer_nrr.csv",  sep=",", quote=F, row.names =F)
 
 ###############
@@ -98,15 +102,32 @@ ggplot(data=subset(d.cr, !(nutrient=="C")), aes(x=nutrient, y=cr.nrr))+geom_boxp
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #N limitation, possible Si inhibition
 
+ggplot(data=subset(d.nrr, (top=="sponge")), aes(x=nutrient, y=cr.es))+geom_boxplot()+theme_bw()+
+  ylab("CR Effect Size")+geom_hline(yintercept = 0.7, lty="dashed")+ geom_hline(yintercept = -0.7, lty="dashed")+
+  geom_hline(yintercept = 1.385)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#nothing over 1.385, so no significance?
+
 ggplot(data=subset(d.gpp, !(nutrient=="C")), aes(x=nutrient, y=gpp.nrr))+geom_boxplot()+theme_bw()+
   ylab("GPP NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #possible N limitation (but not NP), likely no limitation (i.e., light?)
 
+ggplot(data=subset(d.nrr, top =="glass"),aes(x=nutrient, y=gpp.es))+geom_boxplot()+theme_bw()+
+  ylab("GPP Effect Size")+geom_hline(yintercept = 0.7, lty="dashed")+
+  geom_hline(yintercept = -0.7, lty="dashed")+ geom_hline(yintercept = 1.385)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#nothing over 1.385 so no significance?
+
 ggplot(data=subset(d.gpp, !(nutrient=="C")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
   ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+ 
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #N limitation, possible N+P colimitation
+
+ggplot(data=subset(d.nrr, (top=="glass")), aes(x=nutrient, y=chla.es))+geom_boxplot()+theme_bw()+
+  ylab("Chla Effect Size")+ geom_hline(yintercept = 0.7, lty="dashed")+ geom_hline(yintercept = -0.7, lty="dashed")+    
+  geom_hline(yintercept = 1.385)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
 ##########
 #NRR Summary Files
