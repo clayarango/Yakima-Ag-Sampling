@@ -33,7 +33,7 @@ unique(d$P) #should be 0 and 1
 unique(d$Si) #should be 0 and 1
 unique(d$top) #should be "sponge" and "glass"
 #if need to change, use recode function below. 
-#d$top<-recode(d$top, "cellulose" ="sponge")
+d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #convert N and P vand Si alues (0 or 1 for absence or presence) to factors
@@ -78,6 +78,10 @@ d.cr$gpp.nrr<-NA
 d.gpp$cr.nrr<-NA
 d.nrr<-rbind(d.cr, d.gpp)
 d.nrr$site.date<-"mab_fall"
+d.nrr$gpp.es<-log(d.nrr$gpp.nrr)
+d.nrr$cr.es<-log(d.nrr$cr.nrr)
+d.nrr$chla.es<-log(d.nrr$chla.nrr)
+
 write.table(d.nrr, "mab_fall_nrr.csv",  sep=",", quote=F, row.names =F)
 
 ###############
@@ -88,15 +92,33 @@ ggplot(data=subset(d.cr, !(nutrient=="control")), aes(x=nutrient, y=cr.nrr))+geo
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #no limitation, Si inhibition?
 
+ggplot(data=subset(d.nrr, (top=="sponge")), aes(x=nutrient, y=cr.es))+geom_boxplot()+theme_bw()+
+  ylab("CR Effect Size")+geom_hline(yintercept = 0.7, lty="dashed")+ geom_hline(yintercept = -0.7, lty="dashed")+
+  geom_hline(yintercept = 1.385)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#possible Si inhibition? nothing over 1.385, so no significance?
+
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=gpp.nrr))+geom_boxplot()+theme_bw()+
   ylab("GPP NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #Si limitation, but not a similar response with N or P
 
+ggplot(data=subset(d.nrr, top =="glass"),aes(x=nutrient, y=gpp.es))+geom_boxplot()+theme_bw()+
+  ylab("GPP Effect Size")+geom_hline(yintercept = 0.7, lty="dashed")+
+  geom_hline(yintercept = -0.7, lty="dashed")+ geom_hline(yintercept = 1.385)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#unsure how to interpret this aside from no limitation
+
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
   ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+ 
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #no limitation
+
+ggplot(data=subset(d.nrr, (top=="glass")), aes(x=nutrient, y=chla.es))+geom_boxplot()+theme_bw()+
+  ylab("Chla Effect Size")+ geom_hline(yintercept = 0.7, lty="dashed")+ geom_hline(yintercept = -0.7, lty="dashed")+    
+  geom_hline(yintercept = 1.385)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#nothing over 1.385 so no significance?
 
 ##########
 #NRR Summary Files
