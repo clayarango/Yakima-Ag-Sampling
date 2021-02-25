@@ -65,7 +65,7 @@ ggplot(d.gpp, aes(x=nutrient, y=chla_ug_cm2)) + geom_boxplot() + theme_classic()
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T)) 
 x
 d.gpp$gpp.nrr = d.gpp$gpp.area/1.61646980 #divide by control ave_gpp
-d.gpp$chla.nrr = d.gpp$chla_ug_cm2/0.3782043 #divide by control ave_chla
+d.gpp$chla.nrr = d.gpp$chla/0.3782043 #divide by control ave_chla
 #use to exclude outliers
 #x1<- ddply(subset(d.gpp, !(nds.id=="F6")), "nutrient", summarise, ave_chla = mean(chla_ug_cm2, na.rm=T)) 
 #x1
@@ -107,7 +107,7 @@ ggplot(data=subset(d.nrr, top =="glass"),aes(x=nutrient, y=gpp.es))+geom_boxplot
   ylab("GPP Effect Size")+geom_hline(yintercept = 0.7, lty="dashed")+
   geom_hline(yintercept = -0.7, lty="dashed")+ geom_hline(yintercept = 1.385)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
-#not enough data
+#no limitation
 
 ggplot(data=subset(d.gpp, !(nutrient=="control")), aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
   ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+ 
@@ -148,14 +148,14 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are normally distributed
+   #residuals are normally distributed p = 0.7291
 hist(E1)  
 plot(M1)
 
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance test is bad
+   #variance test is OK p = 0.0853
 
 anova(M1)
   
@@ -210,7 +210,7 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are not normal 
+   #residuals are not normal p = 0.001 
 
 hist(E1, xlab="residuals", main="")
 plot(M1)
@@ -218,9 +218,27 @@ plot(M1)
 plot(filter(d.gpp, !is.na(gpp.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(gpp.area~nutrient, data=d.gpp)
-   #not OK
+   #variance not good 0.0007
 
-anova(M1)
+#try log normalizing
+d.gpp$l.gpp = log10(d.gpp$gpp.area+1)
+
+M2<-gls(l.gpp~N*P*Si, data=d.gpp, na.action=na.omit) 
+E2<-residuals(M2)
+qqnorm(E2)
+qqline(E2)
+ad.test(E2)
+#residuals are normal p = 0.74 
+
+hist(E2, xlab="residuals", main="")
+plot(M2)
+
+plot(filter(d.gpp, !is.na(gpp.area)) %>% dplyr::select(nutrient), 
+     E1, xlab="nutrient", ylab="Residuals")
+bartlett.test(l.gpp~nutrient, data=d.gpp)
+#variance good 0.07
+
+anova(M2)
   
 x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(gpp.mean = abs(mean(gpp.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
@@ -263,62 +281,37 @@ x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functi
             n = sum(!is.na(gpp.nrr)), # of observations, excluding NAs. 
             gpp.se=gpp.sd/sqrt(n))
 
-#BELOW HERE IS NOT EDITED
-
-
-
-
-
 ############################################################
 #analyze the CHL-A biomass on disks
 
-M1<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit)
+M1<-gls(chla~N*P*Si, data=d.gpp, na.action=na.omit)
 E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-  #residuals look bad (p=0.001)
+  #residuals look bad (p=0.0001)
 hist(E1)
 plot(M1)
 
-vf1 = varIdent(form = ~ 1|N*P)
-vf2 = varIdent(form = ~ 1|light)
-vf3 = varIdent(form = ~ 1|N*P*light)
-vf4 = varPower(form = ~ fitted(.)) 
-vf5 = varExp(form = ~ fitted(.))
-vf6 = varConstPower(form = ~ fitted(.))
-vf7 = varExp(form = ~ fitted(.)|nutrient)
+bartlett.test(chla~nutrient, data=d.gpp)
+  #Variance looks OK
 
-M2<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf1)
-M3<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf2)
-M4<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf3)
-M5<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf4)
-M6<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf5)
-M7<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf6)
-M8<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf7)
+#try log transformation
+d.gpp$l.chla = log10(d.gpp$chla+1)
 
-anova(M1,M2,M3,M4,M5,M6,M7,M8)
+M1<-gls(l.chla~N*P*Si, data=d.gpp, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+  #residuals look bad (p=0.0032)
+hist(E1)
+plot(M1)
 
-#M3 is best on AIC
+bartlett.test(l.chla~nutrient, data=d.gpp)
+  #variance is OK p = 0.29
 
-E3<-residuals(M3)
-qqnorm(E3)
-qqline(E3)
-ad.test(E3)
-#residuals are not normal (p=0.001)
-hist(E3, xlab="residuals", main="")
-plot(M3)
-  #hist and plot look good
-
-plot(filter(roza_sum.chla, !is.na(chla)) %>% dplyr::select(light), 
-     E3, xlab="light", ylab="Residuals")
-bartlett.test(chla~light, data=roza_sum.chla)
-
-plot(filter(roza_sum.chla, !is.na(chla)) %>% dplyr::select(nutrient), 
-     E3, xlab="nutrient", ylab="Residuals")
-bartlett.test(chla~nutrient, data=roza_sum.chla)
-
-anova(M3)
+anova(M1)
 
 #light is significant and N and P separately interact with light
 
