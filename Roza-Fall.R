@@ -170,7 +170,70 @@ bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test is not equal, p=0.02481
 
 anova(M1)
-  
+
+
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P
+M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.2155
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test no OK
+
+anova(M1) #interpretation, P limitation
+
+#remove NA for plotting
+xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
+interaction.plot(xx$N, xx$P, xx$cr.area)
+
+#N and Si
+M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.4208
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test no OK
+
+anova(M1) #interpretation, N limitation (presence of Si is lower than absence)
+
+#remove NA for plotting
+xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
+interaction.plot(xx$N, xx$Si, xx$cr.area)
+
+#P and Si
+M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.5487
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
+
+anova(M1) #interpretation, no P response (presence of Si and absence of P is depressed)
+
+#remove NA for plotting
+xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
+interaction.plot(xx$P, xx$Si, xx$cr.area)
+##########################################################
+##########################################################
+
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(cr.mean = abs(mean(cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
             cr.sd=abs(sd(cr.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values
