@@ -224,7 +224,7 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test not OK
 
 anova(M1) #interpretation, N and P limitation (each is limiting)
-interaction.plot(d.cr$N, d.cr$P, d.cr$cr.area)
+interaction.plot(d.cr$N, d.cr$P, d.cr$cr.area*-1)
 
 #N and Si
 M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
@@ -240,7 +240,7 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test not OK
 
 anova(M1) #interpretation, N limitation
-interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area)
+interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area*-1)
 
 #P and Si
 M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
@@ -256,7 +256,7 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test not OK
 
 anova(M1) #interpretation, P+Si limiting together
-interaction.plot(d.cr$P, d.cr$Si, d.cr$cr.area)
+interaction.plot(d.cr$P, d.cr$Si, d.cr$cr.area*-1)
 ##########################################################
 ##########################################################
 
