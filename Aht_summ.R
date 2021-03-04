@@ -167,10 +167,68 @@ anova(M1)
 #P:Si            1   7.3806  0.0107
 #N:P:Si          1   0.0524  0.8205
 
-with(d.cr, 
-     interaction.plot(P,Si,cr.area, 
-                      ylab="CR.Area", lty=c(1,12),lwd=2,ylim=c(-28,5),
-                      xlab="P", trace.label="Si"))
+
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P
+M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.3835
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
+
+anova(M1) #interpretation, N and P limitation
+
+#remove NA for plotting
+xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
+interaction.plot(xx$N, xx$P, xx$cr.area)
+
+#N and Si
+M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.2922
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
+
+anova(M1) #interpretation, N limitation
+
+#remove NA for plotting
+xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
+interaction.plot(xx$N, xx$Si, xx$cr.area)
+
+#P and Si
+M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.2969
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
+
+anova(M1) #P is significant only in the presence of silica
+
+#remove NA for plotting
+xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
+interaction.plot(xx$P, xx$Si, xx$cr.area)
+##########################################################
+##########################################################
 
 ggplot(data=d.cr, aes(x=nutrient, y = cr.area))+geom_boxplot()
 
