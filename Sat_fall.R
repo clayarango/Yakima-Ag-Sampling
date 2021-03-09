@@ -133,44 +133,69 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 
 anova(M1)
   #P and NPSi interaction signficant. in figure, Si appears higher, NP lower, all others equal to Control
+#P:Si            1    8.8278  0.0056
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P
+M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)#ugly
+ad.test(E1)
+#residuals are not normally distributed, p=0.004042
+hist(E1)#ok  
+plot(M1)
 
-ggplot(data=d.cr, aes(x=nutrient, y = cr.area))+geom_boxplot()
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
 
-x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by treatment
-  summarize(cr.mean = abs(mean(cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
-            cr.sd=abs(sd(cr.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values
-            n = sum(!is.na(cr.area)), # of observations, excluding NAs. 
-            cr.se=cr.sd/sqrt(n))
+anova(M1) #interpretation, no limitation
 
-ggplot(data=x, aes(x=nutrient, y=cr.mean)) + 
-  geom_bar(stat="identity", position=position_dodge(), color = "black") + 
-  geom_errorbar(aes(ymin=cr.mean, ymax=cr.mean+cr.se), width=0.2, 
-                position=position_dodge(0.9)) + 
-  xlab("Nutrient") +
-  ylab(expression(Respiration~(ug~O[2]~m^{-2}~h^{-1}))) +
-  ylim(0,20) +
-  labs(fill="Light") +
-  theme_bw() +
-  theme(panel.grid.major=element_blank(),
-        panel.grid.minor=element_blank(),
-        legend.title=element_text(size=6),
-        legend.key=element_blank(), 
-        legend.position=c(0.5,0.95), 
-        legend.text=element_text(size=8), 
-        legend.background=element_blank(), 
-        legend.direction="horizontal", 
-        legend.key.size=unit(0.3, "cm"), 
-        axis.title.y=element_text(size=8), 
-        axis.title.x=element_text(size=8), 
-        axis.text.x=element_text(size=8))
+#remove NA for plotting
+xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
+interaction.plot(xx$N, xx$P, xx$cr.area)
 
+#N and Si
+M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)#ugly
+ad.test(E1)
+#residuals are not normally distributed, p=0.01812
+hist(E1)  #ok
+plot(M1)
 
-#ggsave('output/figures/Aht_summer_CRNRR.tiff',
-#       units="in",
-#       width=3.25,
-#       height=3.25,
-#       dpi=1200,
-#       compression="lzw")
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
+
+anova(M1) #interpretation, no limitation
+
+#remove NA for plotting
+xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
+interaction.plot(xx$N, xx$Si, xx$cr.area)
+
+#P and Si
+M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.07299
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
+
+anova(M1) #interpretation, no limitation, Si offsets negative effects of P
+#P:Si            1    8.2328  0.0068
+
+#remove NA for plotting
+xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
+interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
+#plot is an X (CR declines in presence of P, but neutral with Si and P)
+##########################################################
 
 ############################################################
 #analyze the PRODUCTION data
@@ -226,7 +251,7 @@ ggplot(data=x, aes(x=nutrient, y=gpp.mean)) +
 M1<-gls(chla_ug_cm2~N*P*Si, data=d.gpp, na.action=na.omit) 
 E1<-residuals(M1)
 qqnorm(E1)
-qqline(E1)
+qqline(E1)#a bit wiggly
 ad.test(E1)
 #ok
 
@@ -238,4 +263,63 @@ plot(filter(d.gpp, !is.na(chla_ug_cm2)) %>% dplyr::select(nutrient),
 bartlett.test(gpp.area~nutrient, data=d.gpp)
 #ok
 
-anova(M1)
+anova(M1) #no limitation
+
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P
+M1<-gls(chla_ug_cm2~N*P, data=d.gpp, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)#wiggly
+ad.test(E1)
+#residuals not normally distributed, p=0.01438
+hist(E1)  #ok
+plot(M1)
+
+bartlett.test(chla_ug_cm2~nutrient, data=d.gpp)
+#variance test OK
+
+anova(M1) #interpretation, N limitation
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(N,P,chla_ug_cm2)))
+interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
+
+#N and Si
+M1<-gls(chla_ug_cm2~N*Si, data=d.gpp, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)#wiggly
+ad.test(E1)
+#residuals not normally distributed, p=0.03695
+hist(E1) #right-skewed 
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.gpp)
+#variance test OK
+
+anova(M1) #interpretation: no response
+
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(N,Si,chla_ug_cm2)))
+interaction.plot(xx$N, xx$Si, xx$chla_ug_cm2)
+
+#P and Si
+M1<-gls(chla_ug_cm2~P*Si, data=d.gpp, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)# wiggly
+ad.test(E1)
+#residuals normally distributed, p=0.08851
+hist(E1)  
+plot(M1)
+
+bartlett.test(chla_ug_cm2~nutrient, data=d.gpp)
+#variance OK
+
+anova(M1) #interpretation: no response
+
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(P,Si,chla_ug_cm2)))
+interaction.plot(xx$P, xx$Si, xx$chla_ug_cm2)

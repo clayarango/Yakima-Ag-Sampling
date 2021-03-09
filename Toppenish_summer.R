@@ -125,7 +125,6 @@ write.table(d.sum, "reec_summer_summ.csv",  sep=",", quote=F, row.names =F)
 ############################################################
 #analyze RESPIRATION data
 ############################################################
-
 M1<-gls(cr.area~N*P*Si, data=d.cr, na.action=na.omit)
 E1<-residuals(M1)
 qqnorm(E1)
@@ -141,8 +140,16 @@ bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test OK
 
 anova(M1)
-  #P and NPSi interaction signficant. in figure, Si appears higher, NP lower, all others equal to Control
-
+  #
+#numDF  F-value p-value
+#(Intercept)     1 833.0627  <.0001
+#N               1   9.7726  0.0038
+#P               1   3.6147  0.0666
+#Si              1   8.0539  0.0079
+#N:P             1   0.1440  0.7069
+#N:Si            1   9.5384  0.0042
+#P:Si            1   2.1673  0.1511
+#N:P:Si          1   3.3294  0.0777
 
 ##########################################################
 #do multiple 2 way ANOVAs to improve our ability to interpret
@@ -161,6 +168,7 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
 anova(M1) #interpretation, N limitation
+#N               1   6.3174  0.0167
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
@@ -180,10 +188,14 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
 anova(M1) #interpretation, N addition responds in the presence of Si
+#N               1   8.3492  0.0066
+#Si              1   6.6290  0.0144
+#N:Si            1   7.7931  0.0084
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
-interaction.plot(xx$N, xx$Si, xx$cr.area)
+interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
+#N increases in presence of Si
 
 #P and Si
 M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
@@ -199,10 +211,11 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
 anova(M1) #interpretation, Si limitation
+#Si              1   4.8066  0.0351
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
-interaction.plot(xx$P, xx$Si, xx$cr.area)
+interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 ##########################################################
 ##########################################################
 
@@ -323,5 +336,66 @@ bartlett.test(gpp.area~nutrient, data=d.gpp)
 #ok
 
 anova(M1)
+#N:P             1   4.23580  0.0478
 
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P
+M1<-gls(chla_ug_cm2~N*P, data=d.gpp, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)#ok
+ad.test(E1)
+#residuals are normally distributed, p=0.4521
+hist(E1)  #ok
+plot(M1)
+
+bartlett.test(chla_ug_cm2~nutrient, data=d.gpp)
+#variance test OK
+
+anova(M1) #interpretation: P inhibitory on N
+#P               1   4.07244  0.0511
+#N:P             1   4.57632  0.0393
+
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(N,P,chla_ug_cm2)))
+interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
+#Plot is sideways V
+#in presence of N, P increases (doesn't look that way on boxplot, though).
+#In presence of P, N decreases (supported by boxplot)
+
+#N and Si
+M1<-gls(chla_ug_cm2~N*Si, data=d.gpp, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)#S-shaped
+ad.test(E1)
+#residuals are normally distributed, p=0.09383
+hist(E1) #bimodal 
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.gpp)
+#variance test OK
+
+anova(M1) #interpretation: no response
+
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(N,Si,chla_ug_cm2)))
+interaction.plot(xx$N, xx$Si, xx$chla_ug_cm2)
+
+#P and Si
+M1<-gls(chla_ug_cm2~P*Si, data=d.gpp, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)#S-shaped
+ad.test(E1)
+#residuals not normally distributed, p=0.03568
+hist(E1)  #ok
+plot(M1)#ok
+
+bartlett.test(chla_ug_cm2~nutrient, data=d.gpp)
+#variance OK
+
+anova(M1) #interpretation: no response
 
