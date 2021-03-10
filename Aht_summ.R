@@ -185,10 +185,13 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
 anova(M1) #interpretation, N and P limitation
+#N               1  11.3964  0.0018
+#P               1   4.9140  0.0332
+#N:P             1   0.0751  0.7857
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
-interaction.plot(xx$N, xx$P, xx$cr.area)
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
 M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
@@ -204,10 +207,13 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
 anova(M1) #interpretation, N limitation
+#N               1  10.3180  0.0028
+#Si              1   0.1158  0.7357
+#N:Si            1   1.0894  0.3038
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
-interaction.plot(xx$N, xx$Si, xx$cr.area)
+interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 
 #P and Si
 M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
@@ -223,10 +229,13 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
 anova(M1) #P is significant only in the presence of silica
+#P               1   4.6804  0.0374
+#Si              1   0.2266  0.6370
+#P:Si            1   5.3667  0.0265
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
-interaction.plot(xx$P, xx$Si, xx$cr.area)
+interaction.plot(xx$P, xx$Si, xx$cr.area*-1) #CR increases with P and Si, but not individually
 ##########################################################
 ##########################################################
 
@@ -264,6 +273,86 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
 anova(M1)
+#N               1   20.5176  0.0001
+#P               1    0.6151  0.4388
+#Si              1    5.3094  0.0281
+#N:P             1    1.7464  0.1960
+#N:Si            1    1.7223  0.1990
+#P:Si            1    5.1347  0.0306
+#N:P:Si          1   20.1955  0.0001
+
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P
+d.gpp1<-subset(d.gpp,!nds.id=="F6")
+M1<-gls(chla_ug_cm2~N*P, data=d.gpp1, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)#ok
+ad.test(E1)
+#residuals are normally distributed, p=0.496
+hist(E1)  #ok
+plot(M1)
+
+bartlett.test(chla_ug_cm2~nutrient, subset(d.gpp,!nds.id=="F6"))
+#variance test OK
+
+anova(M1) #interpretation: N limitation
+#N               1   11.3644  0.0018
+#P               1    0.3407  0.5632
+#N:P             1    1.0625  0.3097
+
+
+#remove NA for plotting
+xx = na.omit(subset(d.gpp1, select = c(N,P,chla_ug_cm2)))
+interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
+#N increases chla, w or w/o P
+
+#N and Si
+M1<-gls(chla_ug_cm2~N*Si, data=d.gpp1, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)#wiggly
+ad.test(E1)
+#residuals are normally distributed, p=0.1983
+hist(E1) #ok
+plot(M1)
+
+bartlett.test(chla_ug_cm2~nutrient, data=d.gpp1)
+#variance test OK
+
+anova(M1) #interpretation: N limitation
+#N               1   12.2870  0.0013
+#Si              1    3.2360  0.0807
+#N:Si            1    1.1225  0.2966
+
+#remove NA for plotting
+xx = na.omit(subset(d.gpp1, select = c(N,Si,chla_ug_cm2)))
+interaction.plot(xx$N, xx$Si, xx$chla_ug_cm2)
+
+#P and Si
+M1<-gls(chla_ug_cm2~P*Si, data=d.gpp1, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)#wiggly
+ad.test(E1)
+#residuals normally distributed, p=0.2832
+hist(E1)  #ok
+plot(M1)#ok
+
+bartlett.test(chla_ug_cm2~nutrient, data=d.gpp1)
+#variance OK
+
+anova(M1) #interpretation: no response
+#P               1    0.3752  0.5442
+#Si              1    2.1887  0.1480
+#P:Si            1    2.0973  0.1565
+
+xx = na.omit(subset(d.gpp1, select = c(P,Si,chla_ug_cm2)))
+interaction.plot(xx$P, xx$Si, xx$chla_ug_cm2)
+#decline when P and Si combined, increase with P in absence of Si
+
 ############################################################
 #analyze the PRODUCTION data
 ############################################################
@@ -291,38 +380,5 @@ anova(M1)#doing anova anyway
 kruskal.test(gpp.area~nutrient, data=d.gpp, na.action=na.omit)#kruskal-wallis can only have 1 factor.
 
 
-x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(gpp.mean = abs(mean(gpp.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
-            gpp.sd=abs(sd(gpp.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values
-            n = sum(!is.na(gpp.area)), # of observations, excluding NAs. 
-            gpp.se=gpp.sd/sqrt(n))
-
-ggplot(data=x, aes(x=nutrient, y=gpp.mean)) + 
-  geom_bar(stat="identity", position=position_dodge(), color = "black") + 
-  geom_errorbar(aes(ymin=gpp.mean, ymax=gpp.mean+gpp.se), width=0.2, 
-                position=position_dodge(0.9)) + 
-  xlab("Nutrient") +
-  ylab(expression(Production~(ug~O[2]~m^{-2}~h^{-1}))) +
-  labs(fill="Light") +
-  theme_bw() +
-  theme(panel.grid.major=element_blank(),
-        panel.grid.minor=element_blank(), 
-        legend.title=element_text(size=6), 
-        legend.key=element_blank(),  
-        legend.position=c(0.5,0.95),  
-        legend.text=element_text(size=8),  
-        legend.background=element_blank(),  
-        legend.direction="horizontal",  
-        legend.key.size=unit(0.3, "cm"),  
-        axis.title.y=element_text(size=8),  
-        axis.title.x=element_text(size=8),  
-        axis.text.x=element_text(size=8))
-
-#ggsave('output/figures/gppByNutrient.tiff',
-#       units="in",
-#       width=3.25,
-#       height=3.25,
-#       dpi=1200,
-#       compression="lzw")
 
 

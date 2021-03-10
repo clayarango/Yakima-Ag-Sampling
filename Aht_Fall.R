@@ -156,9 +156,15 @@ plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient),
 bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test is ok
 
-anova(M1)
-  #co-limited by P and Si
-
+anova(M1)  #N inhibition
+#(Intercept)     1 672.5216  <.0001
+#N               1   4.8667  0.0347
+#P               1   1.6032  0.2146
+#Si              1   2.9798  0.0940
+#N:P             1   3.4407  0.0728
+#N:Si            1   1.2128  0.2790
+#P:Si            1   2.5467  0.1204
+#N:P:Si          1   2.8114  0.1033
 
 ##########################################################
 #do multiple 2 way ANOVAs to improve our ability to interpret
@@ -176,11 +182,14 @@ plot(M1)
 bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
-anova(M1) #interpretation, no limitation (N supression)
+anova(M1) #interpretation: N suppression
+#N               1   4.2165  0.0474
+#P               1   1.3891  0.2463
+#N:P             1   2.9810  0.0928
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
-interaction.plot(xx$N, xx$P, xx$cr.area)
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
 M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
@@ -195,11 +204,15 @@ plot(M1)
 bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
-anova(M1) #interpretation, no limitation (N supression)
+anova(M1) #interpretation, no limitation (N suppression)
+#N               1   4.1319  0.0495
+#Si              1   2.5299  0.1204
+#N:Si            1   1.0297  0.3170
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
-interaction.plot(xx$N, xx$Si, xx$cr.area)
+interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
+#decline in presence of N, but more dramatic decline with N alone (Si tempers a bit)
 
 #P and Si
 M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
@@ -215,10 +228,14 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
 anova(M1) #interpretation, no limitation
+#P               1   1.3019  0.2614
+#Si              1   2.4198  0.1286
+#P:Si            1   2.0681  0.1590
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
-interaction.plot(xx$P, xx$Si, xx$cr.area)
+interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
+#looks like P limitation, but NS
 ##########################################################
 ##########################################################
 
@@ -316,8 +333,8 @@ ggplot(data=x, aes(x=nutrient, y=gpp.mean)) +
 ############################################################
 #analyze the CHL-A biomass on disks
 ###########################################################
-
-M1<-gls(chla.nrr_1~N*P*Si, data=subset(d.gpp,!(nds.id=="B5")), na.action=na.omit) 
+d.gpp1<-subset(d.gpp,!(nds.id=="B5"))
+M1<-gls(chla.nrr_1~N*P*Si, data=d.gpp1, na.action=na.omit) 
 E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
@@ -332,5 +349,83 @@ plot(filter(d.gpp, !is.na(gpp.area)) %>% dplyr::select(nutrient),
 bartlett.test(gpp.area~nutrient, data=d.gpp)
 #OK
 
-anova(M1)
+anova(M1)# interpretation: Si, N serial inhibition; P, Si serial inhibition
+#N               1  17.54615  0.0002
+#P               1  10.03378  0.0036
+#Si              1  21.31226  0.0001
+#N:P             1   0.05818  0.8111
+#N:Si            1   5.32462  0.0284
+#P:Si            1   7.69659  0.0096
+#N:P:Si          1   1.46880  0.2353
 
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P
+d.gpp1<-subset(d.gpp,!nds.id=="B5")
+M1<-gls(chla~N*P, data=d.gpp1, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)#ok
+ad.test(E1)
+#residuals are normally distributed, p=0.7595
+hist(E1)  #ok
+plot(M1)
+
+bartlett.test(chla~nutrient, data=d.gpp1)
+#variance test OK
+
+anova(M1) #interpretation: N and P serial inhibition
+#N               1  8.92895  0.0053
+#P               1  5.10603  0.0306
+#N:P             1  0.00644  0.9365
+
+
+#remove NA for plotting
+xx = na.omit(subset(d.gpp1, select = c(N,P,chla)))
+interaction.plot(xx$N, xx$P, xx$chla)
+#N inhibition, P inhibition
+
+#N and Si
+M1<-gls(chla~N*Si, data=d.gpp1, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)#wiggly
+ad.test(E1)
+#residuals are normally distributed, p=0.3379
+hist(E1) #ok
+plot(M1)
+
+bartlett.test(chla~nutrient, data=d.gpp1)
+#variance test OK
+
+anova(M1) #interpretation: N inhibition, Si inhibition
+#N               1 12.11584  0.0014
+#Si              1 15.28690  0.0004
+#N:Si            1  3.42854  0.0730
+
+#remove NA for plotting
+xx = na.omit(subset(d.gpp1, select = c(N,Si,chla)))
+interaction.plot(xx$N, xx$Si, xx$chla)
+
+#P and Si
+M1<-gls(chla~P*Si, data=d.gpp1, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)#wiggly
+ad.test(E1)
+#residuals no normally distributed, p=0.02796
+hist(E1)  #ok
+plot(M1)#ok
+
+bartlett.test(chla~nutrient, data=d.gpp1)
+#variance OK
+
+anova(M1) #interpretation: no response
+#P               1  6.28981  0.0172
+#Si              1 10.63918  0.0026
+#P:Si            1  4.22278  0.0479
+
+xx = na.omit(subset(d.gpp1, select = c(P,Si,chla)))
+interaction.plot(xx$P, xx$Si, xx$chla)
+#Si and P inhibition; Si dampens P inhibition
