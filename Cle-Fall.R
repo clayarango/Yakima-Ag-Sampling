@@ -171,7 +171,6 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 
 anova(M1)
 
-#something is wrong with these because the interaction plots don't show all the data
 ##########################################################
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
@@ -191,7 +190,7 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 anova(M1) #interpretation, N and P limitation separately
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
-interaction.plot(xx$N, xx$P, xx$cr.area)
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
 M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
@@ -209,7 +208,7 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 anova(M1) #interpretation, N and Si limitation separately
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
-interaction.plot(xx$N, xx$Si, xx$cr.area)
+interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 
 interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area)
 
@@ -229,7 +228,7 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 anova(M1) #P + Si colimitation (presence of Si and absence of P = no response)
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
-interaction.plot(xx$P, xx$Si, xx$cr.area)
+interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 
 ##########################################################
 ##########################################################  
