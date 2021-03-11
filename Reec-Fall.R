@@ -82,7 +82,7 @@ write.table(d.nrr, "reec_fall_nrr.csv", sep=",", quote=F, row.names =F)
 ###############
 #plots of NRR and effect size
 ##############
-ggplot(data=subset(d.cr, !(nutrient=="C")), aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
+ggplot(data=d.cr, aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
   ylab("CR NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #inhibition
@@ -150,8 +150,14 @@ plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient),
 bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test is ok
 
-anova(M1)
-  #co-limited by P and Si
+anova(M1) #co-inhibited by P and Si
+#N               1   2.88396  0.0992
+#P               1   2.06316  0.1606
+#Si              1   4.02815  0.0533
+#N:P             1   0.35027  0.5581
+#N:Si            1   0.27318  0.6048
+#P:Si            1   9.11409  0.0049
+#N:P:Si          1   2.66291  0.1125
 
 ##########################################################
 #do multiple 2 way ANOVAs to improve our ability to interpret
@@ -169,8 +175,8 @@ plot(M1)
 bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
-anova(M1) #interpretation, no limitation
-interaction.plot(d.cr$N, d.cr$P, d.cr$cr.area)
+anova(M1) #no limitation
+interaction.plot(d.cr$N, d.cr$P, d.cr$cr.area*-1)
 
 #N and Si
 M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
@@ -185,8 +191,8 @@ plot(M1)
 bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
-anova(M1) #interpretation, no limitation
-interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area)
+anova(M1) #interpretation: no limitation
+interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area*-1)
 
 #P and Si
 M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
@@ -201,8 +207,11 @@ plot(M1)
 bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
-anova(M1) #interpretation, still no limitation (Si inhibition in absence of phosphorus)
-interaction.plot(d.cr$P, d.cr$Si, d.cr$cr.area)
+anova(M1) #interpretation:Si increases in presence of P)
+interaction.plot(d.cr$P, d.cr$Si, d.cr$cr.area*-1)
+#P               1   2.23551  0.1436
+#Si              1   4.21228  0.0475
+#P:Si            1   9.22573  0.0044
 ##########################################################
 ##########################################################
 

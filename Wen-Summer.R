@@ -174,7 +174,14 @@ plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient),
 bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test OK
 
-anova(M1)
+anova(M1) #P limitation, N limitation, various interactions
+#N               1  42.75147  <.0001
+#P               1  18.33570  0.0002
+#Si              1   7.92525  0.0085
+#N:P             1   1.57398  0.2193
+#N:Si            1   8.41162  0.0069
+#P:Si            1  29.37030  <.0001
+#N:P:Si          1   5.88350  0.0215
 
 
 ##########################################################
@@ -193,11 +200,14 @@ plot(M1)
 bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
-anova(M1) #N and P limitation
+anova(M1) #N and P independent limitation
+#N               1  17.72482  0.0002
+#P               1   7.60201  0.0093
+#N:P             1   0.48018  0.4930
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
-interaction.plot(xx$N, xx$P, xx$cr.area)
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
 M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
@@ -212,11 +222,11 @@ plot(M1)
 bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
-anova(M1) #interpretation, N limitation
+anova(M1) #interpretation: N limitation, Si inhibitory on N
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
-interaction.plot(xx$N, xx$Si, xx$cr.area)
+interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 
 #P and Si
 M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
@@ -231,11 +241,14 @@ plot(M1)
 bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
-anova(M1) #interpretation, no limitation because of antagonistic interaction
+anova(M1) #interpretation: simultaneous P and Si limitation
+#P               1   6.06118  0.0190
+#Si              1   2.30454  0.1382
+#P:Si            1  14.76178  0.0005
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
-interaction.plot(xx$P, xx$Si, xx$cr.area)
+interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 ##########################################################
 ##########################################################
 

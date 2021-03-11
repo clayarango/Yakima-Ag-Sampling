@@ -158,7 +158,15 @@ plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient),
 bartlett.test(cr.area~nutrient, data=d.cr)
    
 anova(M1)
-  
+#  numDF  F-value p-value
+#(Intercept)     1 406.8139  <.0001
+#N               1   1.6784  0.2075
+#P               1   0.0336  0.8562
+#Si              1   3.3334  0.0804
+#N:P             1   0.9049  0.3510
+#N:Si            1   0.8415  0.3681
+#P:Si            1   5.6730  0.0255
+#N:P:Si          1   6.3432  0.0189 
 
 ##########################################################
 #do multiple 2 way ANOVAs to improve our ability to interpret

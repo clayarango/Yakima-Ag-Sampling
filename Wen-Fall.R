@@ -143,7 +143,14 @@ plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient),
 bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test not OK, we'll probably need to mess with this one. looks like one point in N
 
-anova(M1)
+anova(M1) #interactions sign; interpretation below
+#N               1   0.00877  0.9260
+#P               1   0.11439  0.7374
+#Si              1   3.82858  0.0592
+#N:P             1  17.52458  0.0002
+#N:Si            1   0.00135  0.9709
+#P:Si            1   9.16447  0.0048
+#N:P:Si          1   4.97126  0.0329
   
 
 ##########################################################
@@ -162,11 +169,15 @@ plot(M1)
 bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test not OK
 
-anova(M1) #interpretation, no limitation due to antagonistic interaction
+anova(M1) #interpretation: N alone inhibitory; P alone inhibitory; in combo, neutral 
+#N               1   0.00632  0.9371
+#P               1   0.08242  0.7757
+#N:P             1  12.62637  0.0011
+
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
-interaction.plot(xx$N, xx$P, xx$cr.area)
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
 M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
@@ -181,11 +192,11 @@ plot(M1)
 bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test noy OK
 
-anova(M1) #interpretation, no limitation
+anova(M1) #interpretation: no response
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
-interaction.plot(xx$N, xx$Si, xx$cr.area)
+interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 
 #P and Si
 M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
@@ -200,11 +211,14 @@ plot(M1)
 bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
-anova(M1) #interpretation, no limitation due to antagonistic interacdtion
+anova(M1) #interpretation: P alone inhibitory; Si alone inhibitory; in combo, neutral
+#P               1   0.07555  0.7850
+#Si              1   2.52870  0.1205
+#P:Si            1   6.05293  0.0188
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
-interaction.plot(xx$P, xx$Si, xx$cr.area)
+interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 ##########################################################
 ##########################################################
 
