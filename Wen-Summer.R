@@ -44,8 +44,7 @@ ggplot(d.cr, aes(x=nutrient, y=cr.area))+geom_boxplot() +theme_classic()
 #ok
 
 #calculate nrr for cr
-x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed to ddply b/c allows
-#to specify by column name - I had a csv file with the relevant column in a different position.
+x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) 
 x
 d.cr$cr.nrr = d.cr$cr.area/-5.765783 #divide by control ave_cr
 
@@ -165,9 +164,9 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #deviates from QQ line (p= 0.0459)
-hist(E1)  
-plot(M1)#skewed
+   #deviates from QQ line (p= 0.0459). worse if logged
+hist(E1)#skewed b/c of 2 low-ish points. not too bad though. inclined to leave it.  
+plot(M1)
    
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")

@@ -43,8 +43,7 @@ ggplot(d.cr, aes(x=nutrient, y=cr.area))+geom_boxplot() +theme_classic()
 #ok
 
 #calculate nrr for cr
-x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) #changed to ddply b/c allows
-#to specify by column name - I had a csv file with the relevant column in a different position.
+x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) 
 x
 d.cr$cr.nrr = d.cr$cr.area/-15.02240 #divide by control ave_cr
 
@@ -126,22 +125,37 @@ write.table(d.sum, "reec_summer_summ.csv",  sep=",", quote=F, row.names =F)
 ############################################################
 #analyze RESPIRATION data
 ############################################################
-
-M1<-gls(cr.area~N*P*Si, data=d.cr, na.action=na.omit)
+d.cr1<-subset(d.cr, !(nds.id=="U1"))
+M1<-gls(cr.area~N*P*Si, data=d.cr1, na.action=na.omit)
 E1<-residuals(M1)
 qqnorm(E1)
-qqline(E1)
+qqline(E1)#mostly ok, except for a couple points
 ad.test(E1)
-   #residuals are normally distributed, p=0.20289
-hist(E1)  
+  #removed problematic point and now p = 0.3584   
+#residuals are normally distributed, p=0.20289
+  #logging makes it worse (p= 0.007278)
+hist(E1) #normal except one point 
 plot(M1)
    
-plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
+plot(filter(d.cr1, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
-bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance test not OK, we'll probably need to mess with this one
+bartlett.test(cr.area~nutrient, data=d.cr1)
+   #variance test not OK, even with logging and removing problematic point
+  #but after removing problematic point, variance looks ok
 
 anova(M1) #N limitation
+#Results with problematic point removed
+# numDF  F-value p-value
+#(Intercept)     1 919.7099  <.0001
+#N               1   6.5966  0.0153
+#P               1   0.2429  0.6256
+#Si              1   2.1390  0.1537
+#N:P             1   7.5672  0.0098
+#N:Si            1   0.6311  0.4330
+#P:Si            1   0.0119  0.9138
+#N:P:Si          1   0.1241  0.7271
+
+#Results with all data
 #N               1   7.8923  0.0084
 #P               1   0.8282  0.3696
 #Si              1   3.2453  0.0811
@@ -166,7 +180,7 @@ plot(M1)
 bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test not OK
 
-anova(M1) #interpretation: N limitation in presence of P
+anova(M1) #interpretation: P enhances N response
 #N               1   7.7230  0.0086
 #P               1   0.8104  0.3740
 #N:P             1   4.4240  0.0425
