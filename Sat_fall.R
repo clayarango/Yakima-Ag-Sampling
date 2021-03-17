@@ -132,7 +132,7 @@ bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test OK
 
 anova(M1)
-  #P and NPSi interaction signficant. in figure, Si appears higher, NP lower, all others equal to Control
+  #P:Si interaction significant. in figure, Si appears higher, NP lower, all others equal to Control
 #P:Si            1    8.8278  0.0056
 ##########################################################
 #do multiple 2 way ANOVAs to improve our ability to interpret
@@ -194,7 +194,7 @@ anova(M1) #interpretation, no limitation, Si offsets negative effects of P
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
-#plot is an X (CR declines in presence of P, but neutral with Si and P)
+#plot is an X (CR declines in presence of P alone and Si alone, but neutral with Si and P)
 ##########################################################
 
 ############################################################

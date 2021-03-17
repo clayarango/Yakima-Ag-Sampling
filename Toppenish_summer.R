@@ -139,10 +139,7 @@ plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient),
 bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test OK
 
-anova(M1)
-  #
-#numDF  F-value p-value
-#(Intercept)     1 833.0627  <.0001
+anova(M1) #simultaneous N and Si limitation (or maybe independent??)
 #N               1   9.7726  0.0038
 #P               1   3.6147  0.0666
 #Si              1   8.0539  0.0079
@@ -172,7 +169,7 @@ anova(M1) #interpretation, N limitation
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
-interaction.plot(xx$N, xx$P, xx$cr.area)
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
 M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
@@ -336,7 +333,13 @@ bartlett.test(gpp.area~nutrient, data=d.gpp)
 #ok
 
 anova(M1)
+#N               1   0.11757  0.7339
+#P               1   3.76941  0.0610
+#Si              1   0.07559  0.7851
 #N:P             1   4.23580  0.0478
+#N:Si            1   0.86221  0.3601
+#P:Si            1   0.00002  0.9969
+#N:P:Si          1   0.38346  0.5401
 
 ##########################################################
 #do multiple 2 way ANOVAs to improve our ability to interpret

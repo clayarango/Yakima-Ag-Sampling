@@ -106,7 +106,7 @@ ggplot(data=d.gpp, aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
   ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+ 
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
-ggplot(data=d.gpp, aes(x=nutrient, y=chla.nrr_1))+geom_boxplot()+theme_bw()+
+ggplot(data=subset(d.gpp, !(nds.id=="F6")),aes(x=nutrient, y=chla.nrr_1))+geom_boxplot()+theme_bw()+
   ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+ 
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
@@ -140,7 +140,6 @@ write.table(d.sum, "reec_summer_summ.csv",  sep=",", quote=F, row.names =F)
 ############################################################
 #analyze RESPIRATION data
 ############################################################
-
 M1<-gls(cr.area~N*P*Si, data=d.cr, na.action=na.omit)
 E1<-residuals(M1)
 qqnorm(E1)
@@ -153,12 +152,11 @@ plot(M1)# a little bit heteroscedastic but not dramatically so. less variation a
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance test OK
+   #variance test OK, p = 0.8888
 
 anova(M1)
   #N limitation. P and Si co-limitation (secondary co-limitation??)
 #            numDF  F-value p-value
-#(Intercept)     1 492.4297  <.0001
 #N               1  13.0729  0.0010
 #P               1   5.6370  0.0240
 #Si              1   0.2001  0.6577
@@ -235,7 +233,7 @@ anova(M1) #P is significant only in the presence of silica
 
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
-interaction.plot(xx$P, xx$Si, xx$cr.area*-1) #CR increases with P and Si, but not individually
+interaction.plot(xx$P, xx$Si, xx$cr.area*-1) #P offsets negative effect of Si
 ##########################################################
 ##########################################################
 
@@ -272,7 +270,7 @@ plot(filter(d.gpp, !is.na(chla_ug_cm2)) %>% dplyr::select(nutrient),
 bartlett.test(cr.area~nutrient, data=d.cr)
 #variance test OK
 
-anova(M1)
+anova(M1) #N limitation, Si limitation, P dampens Si but N overcomes
 #N               1   20.5176  0.0001
 #P               1    0.6151  0.4388
 #Si              1    5.3094  0.0281

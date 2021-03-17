@@ -362,24 +362,6 @@ anova(M1)# interpretation: Si, N serial inhibition; P, Si serial inhibition
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-d.gpp1<-subset(d.gpp,!nds.id=="B5")
-M1<-gls(chla~N*P, data=d.gpp1, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)#ok
-ad.test(E1)
-#residuals are normally distributed, p=0.7595
-hist(E1)  #ok
-plot(M1)
-
-bartlett.test(chla~nutrient, data=d.gpp1)
-#variance test OK
-
-anova(M1) #interpretation: N and P serial inhibition
-#N               1  8.92895  0.0053
-#P               1  5.10603  0.0306
-#N:P             1  0.00644  0.9365
-
 
 #remove NA for plotting
 xx = na.omit(subset(d.gpp1, select = c(N,P,chla)))
@@ -387,44 +369,11 @@ interaction.plot(xx$N, xx$P, xx$chla)
 #N inhibition, P inhibition
 
 #N and Si
-M1<-gls(chla~N*Si, data=d.gpp1, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)#wiggly
-ad.test(E1)
-#residuals are normally distributed, p=0.3379
-hist(E1) #ok
-plot(M1)
-
-bartlett.test(chla~nutrient, data=d.gpp1)
-#variance test OK
-
-anova(M1) #interpretation: N inhibition, Si inhibition
-#N               1 12.11584  0.0014
-#Si              1 15.28690  0.0004
-#N:Si            1  3.42854  0.0730
-
 #remove NA for plotting
 xx = na.omit(subset(d.gpp1, select = c(N,Si,chla)))
 interaction.plot(xx$N, xx$Si, xx$chla)
 
 #P and Si
-M1<-gls(chla~P*Si, data=d.gpp1, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)#wiggly
-ad.test(E1)
-#residuals no normally distributed, p=0.02796
-hist(E1)  #ok
-plot(M1)#ok
-
-bartlett.test(chla~nutrient, data=d.gpp1)
-#variance OK
-
-anova(M1) #interpretation: no response
-#P               1  6.28981  0.0172
-#Si              1 10.63918  0.0026
-#P:Si            1  4.22278  0.0479
 
 xx = na.omit(subset(d.gpp1, select = c(P,Si,chla)))
 interaction.plot(xx$P, xx$Si, xx$chla)

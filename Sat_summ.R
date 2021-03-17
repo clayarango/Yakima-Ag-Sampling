@@ -126,24 +126,31 @@ write.table(d.sum, "reec_summer_summ.csv",  sep=",", quote=F, row.names =F)
 #analyze RESPIRATION data
 ############################################################
 
-M1<-gls(cr.area~N*P*Si, data=d.cr, na.action=na.omit)
+M1<-gls(log(cr.area*-1)~N*P*Si, data=d.cr, na.action=na.omit)
 E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are more-or-less normally distributed, p=0.1898. A lot of wiggle around QQ line
+   #residuals are more-or-less normally distributed, p=0.1898. A lot of wiggle around QQ line.
+  #when logged, p = 0.1572
 hist(E1) #ok
 plot(M1)# a little bit heteroscedastic but not dramatically so. less variation as values increase
 
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
-bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance test p = 0.03735
+bartlett.test(log(cr.area*-1)~nutrient, data=d.cr)
+   #variance test p = 0.03735. large variation in control but not a clear outlier. One low Si point.
+#logged, p = 0.05247
 
 anova(M1)
-  #P and Si interaction significant. in figure, Si appears higher, NP lower, all others equal to Control
-
-#P:Si            1   4.8945  0.0344
+  #results when logged:
+#N               1    0.583  0.4508
+#P               1    0.190  0.6656
+#Si              1    0.458  0.5036
+#N:P             1    1.764  0.1939
+#N:Si            1    0.298  0.5888
+#P:Si            1    4.153  0.0502
+#N:P:Si          1    1.407  0.2446
 
 #############################################################
 #do multiple 2 way ANOVAs to improve our ability to interpret
@@ -328,6 +335,13 @@ bartlett.test(gpp.area~nutrient, data=d.gpp)
 #ok
 
 anova(M1)
+#N               1   6.71467  0.0143
+#P               1   0.31067  0.5811
+#Si              1   2.20533  0.1473
+#N:P             1   0.78162  0.3832
+#N:Si            1   9.46073  0.0043
+#P:Si            1   0.41403  0.5245
+#N:P:Si          1   2.89315  0.0987
 
 ##########################################################
 #do multiple 2 way ANOVAs to improve our ability to interpret

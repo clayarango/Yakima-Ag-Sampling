@@ -80,6 +80,10 @@ ggplot(data=d.cr, aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #inhibition of most; NPSi neutral
 
+ggplot(data=subset(d.cr,!nds.id=="A5"), aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
+  ylab("CR NRR")+geom_abline(slope = 0, intercept = 1)+
+  theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+
 ggplot(data=subset(d.nrr, (top=="sponge")), aes(x=nutrient, y=cr.es))+geom_boxplot()+theme_bw()+
   ylab("CR Effect Size")+geom_hline(yintercept = 0.7, lty="dashed")+ geom_hline(yintercept = -0.7, lty="dashed")+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())+
@@ -127,23 +131,34 @@ write.table(d.sum, "reec_summer_summ.csv",  sep=",", quote=F, row.names =F)
 ############################################################
 #analyze RESPIRATION data
 ############################################################
-
-M1<-gls(cr.area~N*P*Si, data=d.cr, na.action=na.omit)
+d.cr1<-subset(d.cr, !(nds.id=="A5"))
+M1<-gls(cr.area~N*P*Si, data=d.cr1, na.action=na.omit)
 E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)#ok except for 1 point
 ad.test(E1)
-   #residuals are normally distributed, p=0.1089
+   #residuals are normally distributed, p=0.1089, even better with A5 removed (0.707)
 hist(E1)  
 plot(M1)
 #ok
 
-plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
+plot(filter(d.cr1, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
-bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance test not OK, we'll probably need to mess with this one. looks like one point in N
+bartlett.test(cr.area~nutrient, data=d.cr1)
+   #variance test not OK, we'll probably need to mess with this one (p = 0.001245). looks like one point in N
+#when remove one point, p = 0.046, but looks ok! inclined to leave it
 
-anova(M1) #interactions sign; interpretation below
+anova(M1) #Si inhibition, 
+#one outlier removed. same patterns as with all data but p values generally smaller
+#N               1   0.4644  0.5006
+#P               1   1.0325  0.3174
+#Si              1   9.8544  0.0037
+#N:P             1  22.3530  <.0001
+#N:Si            1   0.3677  0.5487
+#P:Si            1  20.2559  0.0001
+#N:P:Si          1  12.9946  0.0011
+
+#all data
 #N               1   0.00877  0.9260
 #P               1   0.11439  0.7374
 #Si              1   3.82858  0.0592
@@ -176,7 +191,7 @@ anova(M1) #interpretation: N alone inhibitory; P alone inhibitory; in combo, neu
 
 
 #remove NA for plotting
-xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
+xx = na.omit(subset(d.cr1, select = c(N,P,cr.area)))
 interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
@@ -195,7 +210,7 @@ bartlett.test(cr.area~nutrient, data=d.cr)
 anova(M1) #interpretation: no response
 
 #remove NA for plotting
-xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
+xx = na.omit(subset(d.cr1, select = c(N,Si,cr.area)))
 interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 
 #P and Si
@@ -217,7 +232,7 @@ anova(M1) #interpretation: P alone inhibitory; Si alone inhibitory; in combo, ne
 #P:Si            1   6.05293  0.0188
 
 #remove NA for plotting
-xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
+xx = na.omit(subset(d.cr1, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 ##########################################################
 ##########################################################
