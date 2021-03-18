@@ -93,7 +93,7 @@ ggplot(data=subset(d.nrr, (top=="glass")), aes(x=nutrient, y=gpp.es))+geom_boxpl
   ylab("GPP Effect Size")+geom_abline(slope = 0, intercept = 1)+geom_hline(yintercept = -0.7, lty="dashed")+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 
-ggplot(data=d.gpp, aes(x=nutrient, y=chla.nrr))+geom_boxplot()+theme_bw()+
+ggplot(data=d.gpp, aes(x=nutrient, y=log(chla.nrr)))+geom_boxplot()+theme_bw()+
   ylab("Chlorophyll-a NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
 #limitation for nearly all
@@ -224,40 +224,6 @@ interaction.plot(d.cr$P, d.cr$Si, d.cr$cr.area*-1)
 ##########################################################
 ##########################################################
 
-x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(cr.mean = abs(mean(cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
-            cr.sd=abs(sd(cr.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values
-            n = sum(!is.na(cr.area)), # of observations, excluding NAs. 
-            cr.se=cr.sd/sqrt(n))
-
-ggplot(data=x, aes(x=nutrient, y=cr.mean)) + 
-  geom_bar(stat="identity", position=position_dodge(), color = "black") + 
-  geom_errorbar(aes(ymin=cr.mean, ymax=cr.mean+cr.se), width=0.2, 
-                position=position_dodge(0.9)) + 
-  xlab("Nutrient") +
-  ylab(expression(Respiration~(ug~O[2]~m^{-2}~h^{-1}))) +
-  ylim(0,20) +
-  labs(fill="Light") +
-  theme_bw() +
-  theme(panel.grid.major=element_blank(),
-        panel.grid.minor=element_blank(),
-        legend.title=element_text(size=6),
-        legend.key=element_blank(), 
-        legend.position=c(0.5,0.95), 
-        legend.text=element_text(size=8), 
-        legend.background=element_blank(), 
-        legend.direction="horizontal", 
-        legend.key.size=unit(0.3, "cm"), 
-        axis.title.y=element_text(size=8), 
-        axis.title.x=element_text(size=8), 
-        axis.text.x=element_text(size=8))
-
-#ggsave('output/figures/Ring_summer.tiff',
-#       units="in",
-#       width=3.25,
-#       height=3.25,
-#       dpi=1200,
-#       compression="lzw")
 
 ############################################################
 #analyze the PRODUCTION data
@@ -275,56 +241,54 @@ plot(M1)
 
 plot(filter(d.gpp, !is.na(gpp.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
+
 bartlett.test(gpp.area~nutrient, data=d.gpp)
    #ok
 
 anova(M1)
   
-x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(gpp.mean = abs(mean(gpp.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
-            gpp.sd=abs(sd(gpp.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values
-            n = sum(!is.na(gpp.area)), # of observations, excluding NAs. 
-            gpp.se=gpp.sd/sqrt(n))
-
-ggplot(data=x, aes(x=nutrient, y=gpp.mean)) + 
-  geom_bar(stat="identity", position=position_dodge(), color = "black") + 
-  geom_errorbar(aes(ymin=gpp.mean, ymax=gpp.mean+gpp.se), width=0.2, 
-                position=position_dodge(0.9)) + 
-  xlab("Nutrient") +
-  ylab(expression(Production~(ug~O[2]~m^{-2}~h^{-1}))) +
-  labs(fill="Light") +
-  theme_bw() +
-  theme(panel.grid.major=element_blank(),
-        panel.grid.minor=element_blank(), 
-        legend.title=element_text(size=6), 
-        legend.key=element_blank(),  
-        legend.position=c(0.5,0.95),  
-        legend.text=element_text(size=8),  
-        legend.background=element_blank(),  
-        legend.direction="horizontal",  
-        legend.key.size=unit(0.3, "cm"),  
-        axis.title.y=element_text(size=8),  
-        axis.title.x=element_text(size=8),  
-        axis.text.x=element_text(size=8))
-
-#ggsave('output/figures/gppByNutrient.tiff',
-#       units="in",
-#       width=3.25,
-#       height=3.25,
-#       dpi=1200,
-#       compression="lzw")
 
 
 ############################################################
 #analyze the CHL-A biomass on disks
 
-M1<-gls(chla~N*P*Si, data=d.gpp, na.action=na.omit)
+M1<-gls(log(chla)~N*P*Si, data=d.gpp, na.action=na.omit)
 E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
 #residuals NOT ok
+#with ln, p = 0.065
 hist(E1)
 plot(M1) # variance increases with mean!
 
+plot(filter(d.gpp, !is.na(chla)) %>% dplyr::select(nutrient), 
+     E1, xlab="nutrient", ylab="Residuals")
+
+#can't do bartlett test b/c no variance in control, so instead created data frame without control
+b<-subset(d.gpp, !(nutrient=="C"))
+
+bartlett.test(log(chla)~nutrient, data=b) #p = 0.069
+
 anova(M1)
+#N               1   1.37757  0.2501
+#P               1   1.42451  0.2423
+#Si              1   1.74922  0.1963
+#N:P             1   1.06962  0.3096
+#N:Si            1   3.61945  0.0671
+#P:Si            1   9.58250  0.0043
+#N:P:Si          1   5.03540  0.0326
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P  
+xx = na.omit(subset(d.gpp, select = c(N,P,chla)))
+interaction.plot(xx$N, xx$P, xx$chla)
+
+#N and Si Si inhibited in presence of N (but NS)
+xx = na.omit(subset(d.gpp, select = c(N,Si,chla)))
+interaction.plot(xx$N, xx$Si, xx$chla)
+
+#P and Si P reduces resposne to Si
+xx = na.omit(subset(d.gpp, select = c(P,Si,chla)))
+interaction.plot(xx$P, xx$Si, xx$chla)

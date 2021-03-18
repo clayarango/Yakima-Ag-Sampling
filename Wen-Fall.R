@@ -347,3 +347,27 @@ bartlett.test(gpp.area~nutrient, data=d.gpp)
 #ok
 
 anova(M1)
+#N               1   5.31942  0.0277
+#P               1   0.05507  0.8160
+#Si              1   0.67029  0.4190
+#N:P             1   0.18818  0.6673
+#N:Si            1   0.05267  0.8199
+#P:Si            1  10.85644  0.0024
+#N:P:Si          1   5.12526  0.0305
+
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(N,P,chla)))
+interaction.plot(xx$N, xx$P, xx$chla)
+
+#N and Si
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(N,Si,chla)))
+interaction.plot(xx$N, xx$Si, xx$chla)
+
+#P and Si
+xx = na.omit(subset(d.gpp, select = c(P,Si,chla)))
+interaction.plot(xx$P, xx$Si, xx$chla)

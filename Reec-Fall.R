@@ -272,57 +272,48 @@ bartlett.test(gpp.area~nutrient, data=d.gpp)
 
 anova(M1)
   
-x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(gpp.mean = abs(mean(gpp.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
-            gpp.sd=abs(sd(gpp.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values
-            n = sum(!is.na(gpp.area)), # of observations, excluding NAs. 
-            gpp.se=gpp.sd/sqrt(n))
-
-ggplot(data=x, aes(x=nutrient, y=gpp.mean)) + 
-  geom_bar(stat="identity", position=position_dodge(), color = "black") + 
-  geom_errorbar(aes(ymin=gpp.mean, ymax=gpp.mean+gpp.se), width=0.2, 
-                position=position_dodge(0.9)) + 
-  xlab("Nutrient") +
-  ylab(expression(Production~(ug~O[2]~m^{-2}~h^{-1}))) +
-  labs(fill="Light") +
-  theme_bw() +
-  theme(panel.grid.major=element_blank(),
-        panel.grid.minor=element_blank(), 
-        legend.title=element_text(size=6), 
-        legend.key=element_blank(),  
-        legend.position=c(0.5,0.95),  
-        legend.text=element_text(size=8),  
-        legend.background=element_blank(),  
-        legend.direction="horizontal",  
-        legend.key.size=unit(0.3, "cm"),  
-        axis.title.y=element_text(size=8),  
-        axis.title.x=element_text(size=8),  
-        axis.text.x=element_text(size=8))
-
-#ggsave('output/figures/gppByNutrient.tiff',
-#       units="in",
-#       width=3.25,
-#       height=3.25,
-#       dpi=1200,
-#       compression="lzw")
-
-
-
-
-
-
 
 ############################################################
 #analyze the CHL-A biomass on disks
+#########################################################
 
-M1<-gls(chla~N*P*Si, data=d.gpp, na.action=na.omit)
+M1<-gls(log(chla)~N*P*Si, data=d.gpp, na.action=na.omit)
 E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
   #residuals ok
 hist(E1)
-plot(M1)
+plot(M1)#some increase in variance
+
+plot(filter(d.gpp, !is.na(chla)) %>% dplyr::select(nutrient), 
+     E1, xlab="nutrient", ylab="Residuals")
+bartlett.test(log(chla)~nutrient, data=d.gpp)
+#variance not quite ok, p = 0.03 
+#logging results in p = 0.5871
 
 anova(M1)
+#N               1   0.18067  0.6736
+#P               1   1.36197  0.2518
+#Si              1   1.08709  0.3049
+#N:P             1   4.65056  0.0387
+#N:Si            1   0.47887  0.4939
+#P:Si            1   4.48820  0.0420
+#N:P:Si          1   0.72059  0.4023
+#N and P
 
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P  P offsets negative effects of N alone and P alone
+xx = na.omit(subset(d.gpp, select = c(N,P,chla)))
+interaction.plot(xx$N, xx$P, xx$chla)
+
+#N and Si
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(N,Si,chla)))
+interaction.plot(xx$N, xx$Si, xx$chla)
+
+#P and Si
+xx = na.omit(subset(d.gpp, select = c(P,Si,chla)))
+interaction.plot(xx$P, xx$Si, xx$chla)

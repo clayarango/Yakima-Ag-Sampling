@@ -248,43 +248,7 @@ anova(M1) #interpretation: simultaneous P and Si limitation
 #remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
-##########################################################
-##########################################################
 
-x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(cr.mean = abs(mean(cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
-            cr.sd=abs(sd(cr.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values
-            n = sum(!is.na(cr.area)), # of observations, excluding NAs. 
-            cr.se=cr.sd/sqrt(n))
-
-ggplot(data=x, aes(x=nutrient, y=cr.mean)) + 
-  geom_bar(stat="identity", position=position_dodge(), color = "black") + 
-  geom_errorbar(aes(ymin=cr.mean, ymax=cr.mean+cr.se), width=0.2, 
-                position=position_dodge(0.9)) + 
-  xlab("Nutrient") +
-  ylab(expression(Respiration~(ug~O[2]~m^{-2}~h^{-1}))) +
-  ylim(0,20) +
-  labs(fill="Light") +
-  theme_bw() +
-  theme(panel.grid.major=element_blank(),
-        panel.grid.minor=element_blank(),
-        legend.title=element_text(size=6),
-        legend.key=element_blank(), 
-        legend.position=c(0.5,0.95), 
-        legend.text=element_text(size=8), 
-        legend.background=element_blank(), 
-        legend.direction="horizontal", 
-        legend.key.size=unit(0.3, "cm"), 
-        axis.title.y=element_text(size=8), 
-        axis.title.x=element_text(size=8), 
-        axis.text.x=element_text(size=8))
-
-#ggsave('output/figures/Ring_summer.tiff',
-#       units="in",
-#       width=3.25,
-#       height=3.25,
-#       dpi=1200,
-#       compression="lzw")
 
 ############################################################
 #analyze the PRODUCTION data
@@ -313,44 +277,19 @@ x <- group_by(d.gpp, nutrient) %>%  # Grouping function causes subsequent functi
             n = sum(!is.na(gpp.area)), # of observations, excluding NAs. 
             gpp.se=gpp.sd/sqrt(n))
 
-ggplot(data=x, aes(x=nutrient, y=gpp.mean)) + 
-  geom_bar(stat="identity", position=position_dodge(), color = "black") + 
-  geom_errorbar(aes(ymin=gpp.mean, ymax=gpp.mean+gpp.se), width=0.2, 
-                position=position_dodge(0.9)) + 
-  xlab("Nutrient") +
-  ylab(expression(Production~(ug~O[2]~m^{-2}~h^{-1}))) +
-  labs(fill="Light") +
-  theme_bw() +
-  theme(panel.grid.major=element_blank(),
-        panel.grid.minor=element_blank(), 
-        legend.title=element_text(size=6), 
-        legend.key=element_blank(),  
-        legend.position=c(0.5,0.95),  
-        legend.text=element_text(size=8),  
-        legend.background=element_blank(),  
-        legend.direction="horizontal",  
-        legend.key.size=unit(0.3, "cm"),  
-        axis.title.y=element_text(size=8),  
-        axis.title.x=element_text(size=8),  
-        axis.text.x=element_text(size=8))
 
-#ggsave('output/figures/gppByNutrient.tiff',
-#       units="in",
-#       width=3.25,
-#       height=3.25,
-#       dpi=1200,
-#       compression="lzw")
 
 
 ############################################################
 #analyze the CHL-A biomass on disks
 ############################################################
-M1<-gls(log(chla+1)~N*P*Si, data=subset(d.gpp, !(nds.id=="G8")), na.action=na.omit) 
+d.gpp1<-subset(d.gpp, !(nds.id=="G8"))
+M1<-gls(chla~N*P*Si, data=d.gpp1, na.action=na.omit) 
 E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1) #ugh - WAY off
 ad.test(E1)
-#p<0.00001
+#p<0.00001, p = 0.000334 with square root transformation
 #log-transform doesn't do much
 
 hist(E1, xlab="residuals", main="") #good!
@@ -358,13 +297,29 @@ plot(M1) #huge increase in variation with magnitude
 
 plot(filter(subset(d.gpp, !(nds.id=="G8")), !is.na(chla)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
-bartlett.test(gpp.area~nutrient, data=d.gpp)
-#N way more variation than other treatments
-#log transform doesn't help
+bartlett.test(log(chla)~nutrient, data=d.gpp1)
+#N way more variation than other treatments; P and PSi almost no variation. not much we can do here.
+#neither log transform nor square root helps
 
 anova(M1)
+#N               1 37.60024  <.0001
+#P               1  2.51261  0.1238
+#Si              1  0.46426  0.5010
+#N:P             1  0.22276  0.6405
+#N:Si            1  1.83080  0.1865
+#P:Si            1  5.45885  0.0266
+#N:P:Si          1  8.39505  0.0071
 
+################################
+##2-way interaction plots#####
+#################################
 
+#remove NA for plotting
+xx = na.omit(subset(d.gpp1, select = c(N,P,chla)))
+interaction.plot(xx$N, xx$P, xx$chla)
 
+xx = na.omit(subset(d.gpp1, select = c(N,Si,chla)))
+interaction.plot(xx$N, xx$Si, xx$chla)
 
-
+xx = na.omit(subset(d.gpp1, select = c(Si,P,chla)))
+interaction.plot(xx$Si, xx$P, xx$chla)
