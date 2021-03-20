@@ -90,6 +90,7 @@ write.table(d.nrr, "cen_lan_fall_nrr.csv",  sep=",", quote=F, row.names =F)
 ggplot(data=subset(d.cr, !(nutrient=="control")), aes(x=nutrient, y=cr.nrr))+geom_boxplot()+theme_bw()+
   ylab("CR NRR")+geom_abline(slope = 0, intercept = 1)+
   theme(axis.title.x=element_blank(), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+#maybe N+P+SI colimitation? probably no limitation
 
 ggplot(data=subset(d.nrr, (top=="sponge")), aes(x=nutrient, y=cr.es))+geom_boxplot()+theme_bw()+
   ylab("CR Effect Size")+geom_hline(yintercept = 0.7, lty="dashed")+ geom_hline(yintercept = -0.7, lty="dashed")+
@@ -355,3 +356,61 @@ bartlett.test(chla_ug_cm2~nutrient, data=d.gpp)
 
 anova(M1)
 
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P
+M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.8839
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
+
+anova(M1) #interpretation, N and P limitation separately
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(N,P,chla_ug_cm2)))
+interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
+
+#N and Si
+M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.8783
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
+
+anova(M1) #interpretation, N and Si limitation separately
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(N,Si,chla_ug_cm2)))
+interaction.plot(xx$N, xx$Si, xx$chla_ug_cm2)
+
+interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area)
+
+#P and Si
+M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.09356
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
+
+anova(M1) #P + Si colimitation (presence of Si and absence of P = no response)
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(P,Si,chla_ug_cm2)))
+interaction.plot(xx$P, xx$Si, xx$chla_ug_cm2)

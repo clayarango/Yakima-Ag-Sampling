@@ -370,7 +370,7 @@ E2<-residuals(M2)
 qqnorm(E2)
 qqline(E2)
 ad.test(E2)
-#residuals are not normal, p=0.07118
+#residuals are normal, p=0.07118
 
 hist(E2)  
 plot(M2)
@@ -378,6 +378,65 @@ plot(M2)
 plot(filter(d.gpp, !is.na(chla)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(l.chla~nutrient, data=d.gpp)
-#variance test p=0.007904
+#variance test is not good p=0.007904
 
 anova(M2)
+
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P
+M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.8839
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
+
+anova(M1) #interpretation, N and P limitation separately
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(N,P,chla)))
+interaction.plot(xx$N, xx$P, xx$chla)
+
+#N and Si
+M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.8783
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
+
+anova(M1) #interpretation, N and Si limitation separately
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(N,Si,chla)))
+interaction.plot(xx$N, xx$Si, xx$chla)
+
+interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area)
+
+#P and Si
+M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.09356
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
+
+anova(M1) #P + Si colimitation (presence of Si and absence of P = no response)
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(P,Si,chla)))
+interaction.plot(xx$P, xx$Si, xx$chla)

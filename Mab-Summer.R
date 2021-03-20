@@ -376,76 +376,61 @@ bartlett.test(l.chla~nutrient, data=d.gpp)
 
 anova(M1)
 
-#light is significant and N and P separately interact with light
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P
+M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.8839
+hist(E1)  
+plot(M1)
 
-x<-roza_sum.chla[complete.cases(roza_sum.chla$chla),]
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
 
-with(x, 
-     interaction.plot(nutrient,light,chla, 
-                      ylim=c(0,1.5),lty=c(1,12),lwd=2,ylab="Chlorophyll a", 
-                      xlab="Nutrient", trace.label="Light"))
+anova(M1) #interpretation, N and P limitation separately
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(N,P,chla_ug_cm2)))
+interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
 
-x <- group_by(roza_sum.chla, nutrient, light) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(chla.mean = mean(chla, na.rm = TRUE), # na.rm = TRUE to remove missing values
-            chla.sd=sd(chla, na.rm = TRUE),  # na.rm = TRUE to remove missing values
-            n = sum(!is.na(chla)), # of observations, excluding NAs. 
-            chla.se=chla.sd/sqrt(n))
+#N and Si
+M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.8783
+hist(E1)  
+plot(M1)
 
-ggplot(data=x, 
-       aes(x=nutrient, y=chla.mean, fill=light)) + 
-  geom_bar(stat="identity", position=position_dodge(), color = "black") + 
-  geom_errorbar(aes(ymin=chla.mean, ymax=chla.mean+chla.se), width=0.2, 
-                position=position_dodge(0.9)) + 
-  scale_fill_manual(values=c("white","black")) +
-  xlab("Nutrient") +
-  ylab(expression(Chlorophyll~a~(ug~cm^{-2}))) +
-  ylim(0,1.7) +
-  labs(fill="Light") +
-  theme_bw() +
-  theme(panel.grid.major=element_blank(), 
-        panel.grid.minor=element_blank(), 
-        legend.title=element_text(size=6), 
-        legend.key=element_blank(), 
-        legend.position=c(0.5,0.95), 
-        legend.text=element_text(size=8), 
-        legend.background=element_blank(), 
-        legend.direction="horizontal", 
-        legend.key.size=unit(0.3, "cm"), 
-        axis.title.y=element_text(size=8), 
-        axis.title.x=element_text(size=8), 
-        axis.text.x=element_text(size=8))
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
 
-ggsave('output/figures/chlaByNutrientLight.tiff',
-       units="in",
-       width=3.25,
-       height=3.25,
-       dpi=1200,
-       compression="lzw")
+anova(M1) #interpretation, N and Si limitation separately
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(N,Si,chla_ug_cm2)))
+interaction.plot(xx$N, xx$Si, xx$chla_ug_cm2)
 
+interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area)
 
+#P and Si
+M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed, p=0.09356
+hist(E1)  
+plot(M1)
 
-############################################################
-############################################################
-#calculate nrr mean and standard error
-x1 <- group_by(roza_sum, nutrient, light) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(chla.nrr.mean = mean(chla.nrr, na.rm = TRUE), # na.rm = TRUE to remove missing values
-            chla.nrr.sd=sd(chla.nrr, na.rm = TRUE),  # na.rm = TRUE to remove missing values
-            chla.n = sum(!is.na(chla.nrr)), # of observations, excluding NAs. 
-            chla.nrr.se=chla.nrr.sd/sqrt(chla.n))
+bartlett.test(cr.area~nutrient, data=d.cr)
+#variance test OK
 
-
-x2 <- group_by(roza_sum, nutrient, light) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(gpp.nrr.mean = mean(gpp.nrr, na.rm = TRUE), # na.rm = TRUE to remove missing values
-            gpp.nrr.sd=sd(gpp.nrr, na.rm = TRUE),  # na.rm = TRUE to remove missing values
-            gpp.n = sum(!is.na(gpp.nrr)), # of observations, excluding NAs. 
-            gpp.nrr.se=gpp.nrr.sd/sqrt(gpp.n))
-
-x3 <- group_by(roza_sum, nutrient, light) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(cr.nrr.mean = mean(cr.nrr, na.rm = TRUE), # na.rm = TRUE to remove missing values
-            cr.nrr.sd=sd(cr.nrr, na.rm = TRUE),  # na.rm = TRUE to remove missing values
-            cr.n = sum(!is.na(cr.nrr)), # of observations, excluding NAs. 
-            cr.nrr.se=cr.nrr.sd/sqrt(cr.n))
-
-roza_sum.nrr<-cbind(x1,x2,x3)
-roza_sum.nrr <- roza_sum.nrr[, !duplicated(colnames(roza_sum.nrr))]
-write.csv(roza_sum.nrr, "roza_sum.nrr.csv")
+anova(M1) #P + Si colimitation (presence of Si and absence of P = no response)
+#remove NA for plotting
+xx = na.omit(subset(d.gpp, select = c(P,Si,chla_ug_cm2)))
+interaction.plot(xx$P, xx$Si, xx$chla_ug_cm2)
