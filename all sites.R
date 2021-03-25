@@ -7,6 +7,7 @@ library(nlme)
 library(plyr)
 library(dplyr)
 library(ggplot2)
+library(tidyr)
 
 #load NRR data and combine
 
@@ -108,11 +109,33 @@ nds_all<-rbind(aht_fall, aht_summ, cen_fall, cen_summ, cle_summ, cle_fall, kiona
                mab_fall, mab_summ, reec_fall, reec_summ, ring_fall, ring_summ, roza_fall, roza_summ,
                satus_fall, satus_summ, topp, wenas_summ, wenas_fall)
 
+nds_all$site.date<-recode(nds_all$site.date, "cen_lan_summer" = "cen_summer", "cen_lan_fall" = "cen_fall")
+
+nds_all<-nds_all%>%separate(site.date, c("stream", "season"))
+unique(nds_all$stream)
+unique(nds_all$season)
+
 #load water chem data
 chem<-read.csv("nds_water_chem.csv")
+unique(chem$stream)
+unique(chem$season)
+nds_all$stream<-recode(nds_all$stream, "mab"="mabton", "aht"="ahtanum", "cen"="century", "cle"="cleelum",
+                       "reec"="reecer", "ring"="ringer")
+str(nds_all)
+str(chem)
 
+#remove extraneous columns prior to merge
+chem$Site<-NULL
+chem$no_DOC_TDN<-NULL
+chem_sum<-ddply(chem, c("stream", "season", "type", "position", "river_mile"),summarise, Si.mgL=mean(Si_mgL),
+                oP.mgPL=mean(oP_mgL), NH4.mgNL=mean(NH4_mgNL), NO3.mgNL=mean(NO3_mgNL), DOC.mgL=mean(doc.mg.l, na.rm=T),
+                TDN.mgL=mean(tdn.mg.l, na.rm=T)) 
 
+nds_chem<-merge(nds_all, chem_sum, by=c("stream", "season"), all=T)
 
+write.table(nds_chem, "NDS_chem_all.csv", sep = ",", quote=F, row.names=F)
+  
+  
 ###OLD CODE##########
 #Load data
 aht.s<-read.csv("aht_summer.csv")
