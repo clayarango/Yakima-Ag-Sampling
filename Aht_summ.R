@@ -63,7 +63,7 @@ d.gpp$gpp.nrr = d.gpp$gpp.area/3.099015 #divide by control ave_gpp
 d.gpp$chla.nrr = d.gpp$chla_ug_cm2/2.985545 #divide by control ave_chla
 x1<- ddply(subset(d.gpp, !(nds.id=="F6")), "nutrient", summarise, ave_chla = mean(chla_ug_cm2, na.rm=T)) 
 x1
-d.gpp$chla.nrr_1<-d.gpp$chla_ug_cm2/2.700340
+d.gpp$chla.nrr<-d.gpp$chla_ug_cm2/2.700340
   
 #now combine into one and export
 d.cr$chla.nrr<-NA

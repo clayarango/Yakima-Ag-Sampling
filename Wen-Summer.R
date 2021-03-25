@@ -65,16 +65,17 @@ d.gpp$gpp.nrr = d.gpp$gpp.area/0.6824351 #divide by control ave_gpp
 d.gpp$chla.nrr = d.gpp$chla/0.22347695 #divide by control ave_chla
 x1g<-ddply(subset(d.gpp, !(nds.id=="C8")), "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T))
 x1g
-d.gpp$gpp.nrr_1 = d.gpp$gpp.area/0.2308552 #NRR with weird controls removed.
+d.gpp$gpp.nrr = d.gpp$gpp.area/0.2308552 #NRR with weird control removed.
 x1c<-ddply(subset(d.gpp, !(nds.id=="G8")), "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T))
 x1c
-d.gpp$chla.nrr_1=d.gpp$chla/0.04351025
+d.gpp$chla.nrr=d.gpp$chla/0.04351025
+#note: chose to keep G8 out of the chla calcs and C8 out of the GPP calcs.
 
 #combine files and export
 d.cr$gpp.nrr_1<-NA
 d.cr$chla.nrr_1<-NA
 d.nrr<-rbind(d.cr, d.gpp)
-d.nrr$site_date<-"wenas_summer"
+d.nrr$site.date<-"wenas_summer"
 d.nrr$cr.es<-log(d.nrr$cr.nrr)
 d.nrr$gpp.es<-log(d.nrr$gpp.nrr)
 d.nrr$chla.es<-log(d.nrr$chla.nrr)

@@ -1,5 +1,5 @@
 #Author:  Sarah Roley
-#Date Created: 17-May-2019
+#Date Created: 17-May-2019, updated 23-March-2021
 #Script to analyze all sites together re NDS deployment with C. Arango and A. Alexiades
 
 #packages
@@ -8,6 +8,112 @@ library(plyr)
 library(dplyr)
 library(ggplot2)
 
+#load NRR data and combine
+
+mab_fall<-read.csv("NRR files/mab_fall_nrr.csv")
+mab_fall<-mab_fall%>%rename(chla=chla_ug_cm2)
+unique(mab_fall$nutrient)
+mab_fall$chla_mgL<-NULL
+mab_fall$notes<-NULL
+cen_fall<-read.csv("NRR files/cen_lan_fall_nrr.csv")
+unique(cen_fall$nutrient)
+cen_fall$notes<-NULL
+cen_fall$chla_mgL<-NULL
+cen_fall<-cen_fall%>%rename(chla=chla_ug_cm2)
+cen_summ<-read.csv("NRR files/cen_lan_summer_nrr.csv")
+cen_summ$chla_mgL<-NULL
+cen_summ<-cen_summ%>%rename(chla=chla_ug_cm2)
+unique(cen_summ$nutrient)
+cen_summ$Notes<-NULL
+cle_summ<-read.csv("NRR files/cle_summer_nrr.csv")
+unique(cle_summ$nutrient)
+cle_summ$nutrient<-recode(cle_summ$nutrient, "N+P"= "NP", "P+Si"="PSi", "N+P+Si"="NPSi", "N+Si"="NSi", "C"="control")
+cle_summ$id<-NULL
+cle_fall<-read.csv("NRR files/cle_fall_nrr.csv")
+cle_fall$nutrient<-recode(cle_fall$nutrient, "N+P"= "NP", "P+Si"="PSi", "N+P+Si"="NPSi", "N+Si"="NSi", "C"="control")
+cle_fall$id<-NULL
+kiona_fall<-read.csv("NRR files/kiona_fall_nrr.csv")
+unique(kiona_fall$nutrient)
+kiona_fall$id<-NULL
+kiona_summ<-read.csv("NRR files/kiona_summer_nrr.csv")
+unique(kiona_summ$nutrient)
+kiona_summ$Notes<-NULL
+mab_summ<-read.csv("NRR files/mab_summer_nrr.csv")
+mab_summ$notes<-NULL
+mab_summ$chla_mgL<-NULL
+mab_summ<-mab_summ%>%rename(chla=chla_ug_cm2)
+unique(mab_summ$nutrient)
+ring_fall<-read.csv("NRR files/ring_fall_nrr.csv")       
+ring_fall$nutrient<-recode(ring_fall$nutrient, "N+P"= "NP", "P+Si"="PSi", "N+P+Si"="NPSi", "N+Si"="NSi", "C"="control")
+ring_fall$id<-NULL
+ring_summ<-read.csv("NRR files/ring_summer_nrr.csv")
+ring_summ$nutrient<-recode(ring_summ$nutrient, "N+P"= "NP", "P+Si"="PSi", "N+P+Si"="NPSi", "N+Si"="NSi", "C"="control")
+ring_summ$id<-NULL
+roza_fall<-read.csv("NRR files/roza_fall_nrr.csv")
+roza_fall$nutrient<-recode(roza_fall$nutrient, "N+P"= "NP", "P+Si"="PSi", "N+P+Si"="NPSi", "N+Si"="NSi", "C"="control")
+roza_fall$id<-NULL
+roza_summ<-read.csv("NRR files/roza_summer_nrr.csv")
+roza_summ$nutrient<-recode(roza_summ$nutrient, "N+P"= "NP", "P+Si"="PSi", "N+P+Si"="NPSi", "N+Si"="NSi", "C"="control")
+roza_summ$id<-NULL
+topp<-read.csv("NRR files/toppenish_summer_nrr.csv")
+topp$notes<-NULL
+topp<-topp%>%rename(chla=chla_ug_cm2)
+topp$chla_mgL<-NULL
+wenas_summ<-read.csv("NRR files/wenas_summer_nrr.csv")
+wenas_summ$id<-NULL
+#need to remove G8 for chla and chla.nrr; remove C8 for gpp and gpp.nrr
+wenas_summ$gpp.area<-ifelse(wenas_summ$nds.id=="C8", NA, wenas_summ$gpp.area)
+wenas_summ$gpp.nrr<-ifelse(wenas_summ$nds.id=="C8", NA, wenas_summ$gpp.nrr)
+wenas_summ$gpp.es<-ifelse(wenas_summ$nds.id=="C8", NA, wenas_summ$gpp.es)
+wenas_summ$chla<-ifelse(wenas_summ$nds.id=="G8", NA, wenas_summ$chla)
+wenas_summ$chla.nrr<-ifelse(wenas_summ$nds.id=="G8", NA, wenas_summ$chla.nrr)
+wenas_summ$chla.es<-ifelse(wenas_summ$nds.id=="G8", NA, wenas_summ$chla.es)
+
+wenas_fall<-read.csv("NRR files/wenas_fall_nrr.csv")
+wenas_fall<-wenas_fall%>%rename(site.date=site_date)
+wenas_fall$id<-NULL
+satus_fall<-read.csv("NRR files/satus_fall_nrr.csv")
+satus_fall<-satus_fall%>%rename(chla=chla_ug_cm2)
+satus_fall$chla_mgL<-NULL
+satus_fall$notes<-NULL
+satus_summ<-read.csv("NRR files/satus_summer_nrr.csv")
+satus_summ<-satus_summ%>%rename(chla=chla_ug_cm2)
+satus_summ$chla_mgL<-NULL
+satus_summ$Notes<-NULL
+aht_fall<-read.csv("NRR files/aht_fall_nrr.csv")
+aht_fall$notes<-NULL
+#need to remove B5 for chla, chla.nrr, and chla.es
+aht_fall$chla<-ifelse(aht_fall$nds.id=="B5", NA, aht_fall$chla)
+aht_fall$chla.nrr<-ifelse(aht_fall$nds.id=="B5", NA, aht_fall$chla.nrr)
+aht_fall$chla.es<-ifelse(aht_fall$nds.id=="B5", NA, aht_fall$chla.es)
+
+aht_summ<-read.csv("NRR files/aht_summer_nrr.csv")
+aht_summ$chla_mgL<-NULL
+aht_summ$chla_mg<-NULL
+aht_summ<-aht_summ%>%rename(chla=chla_ug_cm2)
+aht_summ$Notes<-NULL
+#need to address outliers
+aht_summ$chla<-ifelse(aht_summ$nds.id=="F6", NA, aht_summ$chla)
+aht_summ$chla.nrr<-ifelse(aht_summ$nds.id=="F6", NA, aht_summ$chla.nrr)
+aht_summ$chla.es<-ifelse(aht_summ$nds.id=="F6", NA, aht_summ$chla.es)
+
+reec_summ<-read.csv("NRR files/reec_summer_nrr.csv")
+reec_summ$id<-NULL
+reec_summ<-reec_summ%>%rename(site.date=site_date)
+reec_fall<-read.csv("NRR files/reec_fall_nrr.csv")
+reec_fall$id<-NULL
+reec_fall<-reec_fall%>%rename(site.date=site_date)
+
+nds_all<-rbind(aht_fall, aht_summ, cen_fall, cen_summ, cle_summ, cle_fall, kiona_fall, kiona_summ,
+               mab_fall, mab_summ, reec_fall, reec_summ, ring_fall, ring_summ, roza_fall, roza_summ,
+               satus_fall, satus_summ, topp, wenas_summ, wenas_fall)
+
+#load water chem data
+chem<-read.csv("nds_water_chem.csv")
+
+
+
+###OLD CODE##########
 #Load data
 aht.s<-read.csv("aht_summer.csv")
 aht.f<-read.csv("aht_fall.csv")

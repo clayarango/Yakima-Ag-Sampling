@@ -64,7 +64,7 @@ d.gpp$chla.nrr = d.gpp$chla/1.4299814 #divide by control ave_chla
 d.gpp$cr.nrr<-NA
 x1<- ddply(subset(d.gpp,!(nds.id=="B5")), "nutrient", summarise,  ave_chla = mean(chla, na.rm=T)) 
 x1
-d.gpp$chla.nrr_1 = d.gpp$chla/1.7693330
+d.gpp$chla.nrr = d.gpp$chla/1.7693330 #divide by control with B5 removed (outlier)
 d.cr$chla.nrr_1<-NA
 
 #combine files and export
