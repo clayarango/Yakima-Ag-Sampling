@@ -13,7 +13,6 @@ library(tidyr)
 
 mab_fall<-read.csv("NRR files/mab_fall_nrr.csv")
 mab_fall<-mab_fall%>%rename(chla=chla_ug_cm2)
-unique(mab_fall$nutrient)
 mab_fall$chla_mgL<-NULL
 mab_fall$notes<-NULL
 cen_fall<-read.csv("NRR files/cen_lan_fall_nrr.csv")

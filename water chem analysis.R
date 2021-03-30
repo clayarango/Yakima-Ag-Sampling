@@ -19,16 +19,16 @@ P<-subset(nds_chem, P==1)
 Si<-subset(nds_chem, Si==1)
 
 #N limitation/inhibition
-ggplot(subset(N, nutrient=="N"), aes(x=DIN.mgNL, y=chla))+
+ggplot(subset(N, nutrient=="N"), aes(x=DIN.mgNL, y=chla.nrr))+
   geom_point(aes(color=factor(season)))+
   theme_classic()+scale_color_manual(values=c("goldenrod2", "plum3"))
 #no pattern
 
-ggplot(subset(N, nutrient=="N"), aes(x=NO3.mgNL, y=chla))+geom_point(aes(color=factor(season)))+
+ggplot(subset(N, nutrient=="N"), aes(x=NO3.mgNL, y=chla.nrr))+geom_point(aes(color=factor(season)))+
   theme_classic()+scale_color_manual(values=c("goldenrod2", "plum3"))
 #general increase with NO3 but lots of variability
 
-ggplot(subset(N, nutrient=="N"), aes(x=NH4.mgNL, y=chla))+geom_point(aes(color=factor(season)))+
+ggplot(subset(N, nutrient=="N"), aes(x=NH4.mgNL, y=chla.nrr))+geom_point(aes(color=factor(season)))+
   theme_classic()+scale_color_manual(values=c("goldenrod2", "plum3"))
 #general increase with NH4 
 

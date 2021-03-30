@@ -68,7 +68,7 @@ x1g
 d.gpp$gpp.nrr = d.gpp$gpp.area/0.2308552 #NRR with weird control removed.
 x1c<-ddply(subset(d.gpp, !(nds.id=="G8")), "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T))
 x1c
-d.gpp$chla.nrr=d.gpp$chla/0.04351025
+d.gpp$chla.nrr=d.gpp$chla/0.03803029
 #note: chose to keep G8 out of the chla calcs and C8 out of the GPP calcs.
 
 #combine files and export
