@@ -51,6 +51,7 @@ ring_summ<-read.csv("NRR files/ring_summer_nrr.csv")
 ring_summ$nutrient<-recode(ring_summ$nutrient, "N+P"= "NP", "P+Si"="PSi", "N+P+Si"="NPSi", "N+Si"="NSi", "C"="control")
 ring_summ$id<-NULL
 roza_fall<-read.csv("NRR files/roza_fall_nrr.csv")
+unique(roza_fall$nutrient)
 roza_fall$nutrient<-recode(roza_fall$nutrient, "N+P"= "NP", "P+Si"="PSi", "N+P+Si"="NPSi", "N+Si"="NSi", "C"="control")
 roza_fall$id<-NULL
 roza_summ<-read.csv("NRR files/roza_summer_nrr.csv")
@@ -110,6 +111,7 @@ nds_all<-rbind(aht_fall, aht_summ, cen_fall, cen_summ, cle_summ, cle_fall, kiona
                satus_fall, satus_summ, topp, wenas_summ, wenas_fall)
 
 nds_all$site.date<-recode(nds_all$site.date, "cen_lan_summer" = "cen_summer", "cen_lan_fall" = "cen_fall")
+nds_all$nutrient<-recode(nds_all$nutrient, "C" = "control")
 
 nds_all<-nds_all%>%separate(site.date, c("stream", "season"))
 unique(nds_all$stream)
@@ -127,13 +129,23 @@ str(chem)
 #remove extraneous columns prior to merge
 chem$Site<-NULL
 chem$no_DOC_TDN<-NULL
+#take seasonal average (sample taken at deployment and at retrieval)
 chem_sum<-ddply(chem, c("stream", "season", "type", "position", "river_mile"),summarise, Si.mgL=mean(Si_mgL),
                 oP.mgPL=mean(oP_mgL), NH4.mgNL=mean(NH4_mgNL), NO3.mgNL=mean(NO3_mgNL), DOC.mgL=mean(doc.mg.l, na.rm=T),
                 TDN.mgL=mean(tdn.mg.l, na.rm=T)) 
 
 nds_chem<-merge(nds_all, chem_sum, by=c("stream", "season"), all=T)
 
+#additional useful chem metrics
+nds_chem$DIN.mgNL<-nds_chem$NO3.mgNL+nds_chem$NH4.mgNL
+nds_chem$N.P.ratio<-(nds_chem$DIN.mgNL/14)/(nds_chem$oP.mgPL/31)
+nds_chem$N.Si.ratio<-(nds_chem$DIN.mgNL/14)/(nds_chem$Si.mgL/28)
+nds_chem$P.Si.ratio<-(nds_chem$oP.mgPL/31)/(nds_chem$Si.mgL/28)
+
 write.table(nds_chem, "NDS_chem_all.csv", sep = ",", quote=F, row.names=F)
+
+unique(nds_chem$nutrient)
+
   
   
 ###OLD CODE##########
