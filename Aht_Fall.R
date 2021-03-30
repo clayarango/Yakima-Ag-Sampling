@@ -147,14 +147,14 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are normally distributed
+   #residuals are normally distributed p = 0.5832
 hist(E1)  
 plot(M1)
 
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance test is ok
+   #variance test is ok p = 0.8068
 
 anova(M1)  #N inhibition
 #(Intercept)     1 672.5216  <.0001
@@ -170,69 +170,15 @@ anova(M1)  #N inhibition
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.1159
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation: N suppression
-#N               1   4.2165  0.0474
-#P               1   1.3891  0.2463
-#N:P             1   2.9810  0.0928
-
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
 interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
-M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.06525
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, no limitation (N suppression)
-#N               1   4.1319  0.0495
-#Si              1   2.5299  0.1204
-#N:Si            1   1.0297  0.3170
-
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
 interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 #decline in presence of N, but more dramatic decline with N alone (Si tempers a bit)
 
 #P and Si
-M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.2388
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, no limitation
-#P               1   1.3019  0.2614
-#Si              1   2.4198  0.1286
-#P:Si            1   2.0681  0.1590
-
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 #looks like P limitation, but NS
@@ -339,7 +285,7 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-#residuals ok
+#residuals ok p = 0.5832
 
 hist(E1, xlab="residuals", main="")
 plot(M1)
@@ -347,7 +293,7 @@ plot(M1)
 plot(filter(d.gpp, !is.na(gpp.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(gpp.area~nutrient, data=d.gpp)
-#OK
+#OK p = 0.2611
 
 anova(M1)# interpretation: Si, N serial inhibition; P, Si serial inhibition
 #N               1  17.54615  0.0002

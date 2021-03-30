@@ -65,15 +65,6 @@ ggplot(d.gpp, aes(x=nutrient, y=chla)) + geom_boxplot() + theme_classic()
 #looks OK
 #missing AA8 due to lost in field
 
-#substitute b.d. chlorophyll with 1/2 detection limit using
-#3*SD(y/x)/slope, where SD(y/x) is standard error of the chlorophyll regression
-#make vectors for the x (chla) and y (RFU) values found in spreadsheet
-#y = c(4.76, 399.36, 760.83, 1244.42, 3162.66, 5616.53)
-#x = c(0, 0.025, 0.05, 0.1, 0.25, 0.5)
-#summary(lm(y~x))
-#chlabd = (345.52/11181.76)/2
-
-
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T)) 
 x
@@ -176,58 +167,13 @@ anova(M1)
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.8839
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, N and P limitation separately
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
 interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
-M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.8783
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, N and Si limitation separately
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
 interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 
-interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area)
-
-#P and Si
-M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.09356
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #P + Si colimitation (presence of Si and absence of P = no response)
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 
@@ -362,57 +308,13 @@ anova(M1)
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.8839
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, N and P limitation separately
-#remove NA for plotting
 xx = na.omit(subset(d.gpp, select = c(N,P,chla)))
 interaction.plot(xx$N, xx$P, xx$chla)
 
 #N and Si
-M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.8783
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, N and Si limitation separately
-#remove NA for plotting
 xx = na.omit(subset(d.gpp, select = c(N,Si,chla)))
 interaction.plot(xx$N, xx$Si, xx$chla)
 
-interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area)
-
 #P and Si
-M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.09356
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #P + Si colimitation (presence of Si and absence of P = no response)
-#remove NA for plotting
 xx = na.omit(subset(d.gpp, select = c(P,Si,chla)))
 interaction.plot(xx$P, xx$Si, xx$chla)

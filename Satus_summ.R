@@ -80,16 +80,38 @@ qqnorm(E1)
 qqline(E1)
 ad.test(E1)
    #residuals are more-or-less normally distributed, p=0.06625. A lot of wiggle around QQ line
+    #p = 0.1898
 hist(E1) #ok
 plot(M1)# a little bit heteroscedastic but not dramatically so. less variation as values increase
 
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance test OK
+   #variance test p = 0.03735
 
 anova(M1)
   #P and NPSi interaction signficant. in figure, Si appears higher, NP lower, all others equal to Control
+
+#try normalizing
+d.cr$l.cr.area = log10(d.cr$cr.area*-1)
+
+M2<-gls(l.cr.area~N*P*Si, data=d.cr, na.action=na.omit)
+E2<-residuals(M2)
+qqnorm(E2)
+qqline(E2)
+ad.test(E2)
+#residuals are normal, p=0.1572
+hist(E2)  
+plot(M2)
+
+plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
+     E1, xlab="nutrient", ylab="Residuals")
+bartlett.test(l.cr.area~nutrient, data=d.cr)
+#variance test is equal, p=0.05247
+anova(M2)
+
+
+
 
 ggplot(data=d.cr, aes(x=nutrient, y = cr.area))+geom_boxplot()
 
@@ -128,6 +150,21 @@ ggplot(data=x, aes(x=nutrient, y=cr.mean)) +
 #       height=3.25,
 #       dpi=1200,
 #       compression="lzw")
+
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P
+xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
+
+#N and Si
+xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
+interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
+
+#P and Si
+xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
+interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 
 ############################################################
 #analyze the PRODUCTION data
@@ -183,118 +220,39 @@ ggplot(data=x, aes(x=nutrient, y=gpp.mean)) +
         axis.title.x=element_text(size=8),  
         axis.text.x=element_text(size=8))
 
-#ggsave('output/figures/gppByNutrient.tiff',
-#       units="in",
-#       width=3.25,
-#       height=3.25,
-#       dpi=1200,
-#       compression="lzw")
-
-
-#BELOW HERE IS NOT EDITED
-
-
-
-
-
 ############################################################
 #analyze the CHL-A biomass on disks
-
-M1<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit)
+M1<-gls(chla_ug_cm2~N*P*Si, data=d.gpp, na.action=na.omit)
 E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-  #residuals look bad (p=0.001)
-hist(E1)
+#residuals are not normal, p=0.8999
+
+hist(E1)  
 plot(M1)
 
-vf1 = varIdent(form = ~ 1|N*P)
-vf2 = varIdent(form = ~ 1|light)
-vf3 = varIdent(form = ~ 1|N*P*light)
-vf4 = varPower(form = ~ fitted(.)) 
-vf5 = varExp(form = ~ fitted(.))
-vf6 = varConstPower(form = ~ fitted(.))
-vf7 = varExp(form = ~ fitted(.)|nutrient)
+plot(filter(d.gpp, !is.na(chla)) %>% dplyr::select(nutrient), 
+     E1, xlab="nutrient", ylab="Residuals")
+bartlett.test(chla_ug_cm2~nutrient, data=d.gpp)
+#variance test p=0.1341
 
-M2<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf1)
-M3<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf2)
-M4<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf3)
-M5<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf4)
-M6<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf5)
-M7<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf6)
-M8<-gls(chla~N*P*light, data=roza_sum.chla, na.action=na.omit, weights=vf7)
+anova(M1)
 
-anova(M1,M2,M3,M4,M5,M6,M7,M8)
+##########################################################
+#do multiple 2 way ANOVAs to improve our ability to interpret
+##########################################################
+#N and P
+xx = na.omit(subset(d.gpp, select = c(N,P,chla_ug_cm2)))
+interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
 
-#M3 is best on AIC
+#N and Si
+xx = na.omit(subset(d.gpp, select = c(N,Si,chla_ug_cm2)))
+interaction.plot(xx$N, xx$Si, xx$chla_ug_cm2)
 
-E3<-residuals(M3)
-qqnorm(E3)
-qqline(E3)
-ad.test(E3)
-#residuals are not normal (p=0.001)
-hist(E3, xlab="residuals", main="")
-plot(M3)
-  #hist and plot look good
-
-plot(filter(roza_sum.chla, !is.na(chla)) %>% dplyr::select(light), 
-     E3, xlab="light", ylab="Residuals")
-bartlett.test(chla~light, data=roza_sum.chla)
-
-plot(filter(roza_sum.chla, !is.na(chla)) %>% dplyr::select(nutrient), 
-     E3, xlab="nutrient", ylab="Residuals")
-bartlett.test(chla~nutrient, data=roza_sum.chla)
-
-anova(M3)
-
-#light is significant and N and P separately interact with light
-
-x<-roza_sum.chla[complete.cases(roza_sum.chla$chla),]
-
-with(x, 
-     interaction.plot(nutrient,light,chla, 
-                      ylim=c(0,1.5),lty=c(1,12),lwd=2,ylab="Chlorophyll a", 
-                      xlab="Nutrient", trace.label="Light"))
-
-x <- group_by(roza_sum.chla, nutrient, light) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
-  summarize(chla.mean = mean(chla, na.rm = TRUE), # na.rm = TRUE to remove missing values
-            chla.sd=sd(chla, na.rm = TRUE),  # na.rm = TRUE to remove missing values
-            n = sum(!is.na(chla)), # of observations, excluding NAs. 
-            chla.se=chla.sd/sqrt(n))
-
-ggplot(data=x, 
-       aes(x=nutrient, y=chla.mean, fill=light)) + 
-  geom_bar(stat="identity", position=position_dodge(), color = "black") + 
-  geom_errorbar(aes(ymin=chla.mean, ymax=chla.mean+chla.se), width=0.2, 
-                position=position_dodge(0.9)) + 
-  scale_fill_manual(values=c("white","black")) +
-  xlab("Nutrient") +
-  ylab(expression(Chlorophyll~a~(ug~cm^{-2}))) +
-  ylim(0,1.7) +
-  labs(fill="Light") +
-  theme_bw() +
-  theme(panel.grid.major=element_blank(), 
-        panel.grid.minor=element_blank(), 
-        legend.title=element_text(size=6), 
-        legend.key=element_blank(), 
-        legend.position=c(0.5,0.95), 
-        legend.text=element_text(size=8), 
-        legend.background=element_blank(), 
-        legend.direction="horizontal", 
-        legend.key.size=unit(0.3, "cm"), 
-        axis.title.y=element_text(size=8), 
-        axis.title.x=element_text(size=8), 
-        axis.text.x=element_text(size=8))
-
-ggsave('output/figures/chlaByNutrientLight.tiff',
-       units="in",
-       width=3.25,
-       height=3.25,
-       dpi=1200,
-       compression="lzw")
-
-
+#P and Si
+xx = na.omit(subset(d.gpp, select = c(P,Si,chla_ug_cm2)))
+interaction.plot(xx$P, xx$Si, xx$chla_ug_cm2)
 
 ############################################################
 ############################################################
