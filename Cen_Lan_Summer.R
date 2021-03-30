@@ -155,7 +155,7 @@ plot(M1)
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance OK
+   #variance p = 0.05234
 
 anova(M1)
 
@@ -164,59 +164,14 @@ anova(M1)
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.5259
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, no limitation
-
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
 interaction.plot(xx$N, xx$P, xx$cr.area)
 
 #N and Si
-M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.7471
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, no limitation
-
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
 interaction.plot(xx$N, xx$Si, xx$cr.area)
 
 #P and Si
-M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.05119
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #no limitation (Si somewhat suppressive)
-
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 ##########################################################

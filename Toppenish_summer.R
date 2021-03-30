@@ -137,7 +137,7 @@ plot(M1)# ok
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(cr.area~nutrient, data=d.cr)
-   #variance test OK
+   #variance test OK p = 0.2108
 
 anova(M1) #simultaneous N and Si limitation (or maybe independent??)
 #N               1   9.7726  0.0038
@@ -152,65 +152,15 @@ anova(M1) #simultaneous N and Si limitation (or maybe independent??)
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are not normally distributed, p=0.01756
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, N limitation
-#N               1   6.3174  0.0167
-
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
 interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
-M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.3478
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, N addition responds in the presence of Si
-#N               1   8.3492  0.0066
-#Si              1   6.6290  0.0144
-#N:Si            1   7.7931  0.0084
-
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
 interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 #N increases in presence of Si
 
 #P and Si
-M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.0675
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, Si limitation
-#Si              1   4.8066  0.0351
-
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 ##########################################################
@@ -330,7 +280,7 @@ plot(M1) #ok
 plot(filter(d.gpp, !is.na(chla_ug_cm2)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
 bartlett.test(gpp.area~nutrient, data=d.gpp)
-#ok
+#ok p = 0.5275
 
 anova(M1)
 #N               1   0.11757  0.7339

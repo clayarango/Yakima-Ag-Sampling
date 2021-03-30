@@ -141,7 +141,7 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-   #residuals are normally distributed
+   #residuals are normally distributed p = 0.304
 hist(E1)  
 plot(M1)
 
@@ -163,58 +163,18 @@ anova(M1) #co-inhibited by P and Si
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.9534
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #no limitation
-interaction.plot(d.cr$N, d.cr$P, d.cr$cr.area*-1)
+xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
-M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are no normally distributed, p=0.7968
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation: no limitation
-interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area*-1)
+xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
+interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 
 #P and Si
-M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are no normally distributed, p=0.3122
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation:Si increases in presence of P)
-interaction.plot(d.cr$P, d.cr$Si, d.cr$cr.area*-1)
-#P               1   2.23551  0.1436
-#Si              1   4.21228  0.0475
-#P:Si            1   9.22573  0.0044
+xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
+interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 ##########################################################
 ##########################################################
-
 
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(cr.mean = abs(mean(cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
@@ -282,7 +242,7 @@ E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-  #residuals ok
+  #residuals ok p = 0.3355
 hist(E1)
 plot(M1)#some increase in variance
 
@@ -301,6 +261,39 @@ anova(M1)
 #P:Si            1   4.48820  0.0420
 #N:P:Si          1   0.72059  0.4023
 #N and P
+
+
+M1<-gls(chla~N*P*Si, data=d.gpp, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals look good (p=0.1124)
+hist(E1)
+plot(M1)
+
+bartlett.test(chla~nutrient, data=d.gpp)
+#data look bad p=0.03039
+
+#log transformation
+d.gpp$l.chla = log10(d.gpp$chla+1)
+
+M2<-gls(l.chla~N*P*Si, data=d.gpp, na.action=na.omit) 
+E2<-residuals(M2)
+qqnorm(E2)
+qqline(E2)
+ad.test(E2)
+#residuals are not normal, p=0.2517
+
+hist(E2, xlab="residuals", main="")
+plot(M2)
+
+plot(filter(d.gpp, !is.na(gpp.area)) %>% dplyr::select(nutrient), 
+     E1, xlab="nutrient", ylab="Residuals")
+bartlett.test(l.chla~nutrient, data=d.gpp)
+#data look good p=0.1068
+
+anova(M2)
 
 ##########################################################
 #do multiple 2 way ANOVAs to improve our ability to interpret

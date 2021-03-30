@@ -63,14 +63,6 @@ ggplot(d.gpp, aes(x=nutrient, y=gpp.area)) + geom_boxplot() + theme_classic()
 
 ggplot(d.gpp, aes(x=nutrient, y=chla)) + geom_boxplot() + theme_classic()
 
-#substitute b.d. chlorophyll with 1/2 detection limit using
-#3*SD(y/x)/slope, where SD(y/x) is standard error of the chlorophyll regression
-#make vectors for the x (chla) and y (RFU) values found in spreadsheet
-#y = c(3.39, 397.33, 693, 1390.66, 3003.32, 5897.49)
-#x = c(0, 0.025, 0.05, 0.1, 0.25, 0.5)
-#summary(lm(y~x))
-#chlabd = (188.47/11627.13)/2
-
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla, na.rm=T)) 
 x
@@ -163,6 +155,7 @@ plot(M1)
 
 plot(filter(d.cr, !is.na(cr.area)) %>% dplyr::select(nutrient), 
      E1, xlab="nutrient", ylab="Residuals")
+
 bartlett.test(cr.area~nutrient, data=d.cr)
    #variance test 0.02909, we'll probably need to mess with this one
 
@@ -207,56 +200,38 @@ bartlett.test(cube.cr.area~nutrient, data=d.cr)
 
 anova(M3)
 
+d.cr$sqr.cr.area = (d.cr$cr.area*-1)^(1/2)
+
+M4<-gls(sqr.cr.area~N*P*Si, data=d.cr, na.action=na.omit)
+E4<-residuals(M3)
+qqnorm(E4)
+qqline(E4)
+ad.test(E4)
+#residuals are not normally distributed p = 0.04861
+hist(E4)  
+plot(M4)
+
+plot(filter(d.cr, !is.na(cube.cr.area)) %>% dplyr::select(nutrient), 
+     E3, xlab="nutrient", ylab="Residuals")
+bartlett.test(sqr.cr.area~nutrient, data=d.cr)
+#variance test 0.06906
+
+anova(M4)
+
 ##########################################################
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.871
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test not OK
-
-anova(M1) #interpretation, N and P limitation (each is limiting)
-interaction.plot(d.cr$N, d.cr$P, d.cr$cr.area*-1)
+xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
-M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.1418
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test not OK
-
-anova(M1) #interpretation, N limitation
-interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area*-1)
+xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
+interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 
 #P and Si
-M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.1194
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test not OK
-
-anova(M1) #interpretation, P+Si limiting together
-interaction.plot(d.cr$P, d.cr$Si, d.cr$cr.area*-1)
+xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
+interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 ##########################################################
 ##########################################################
 
@@ -438,55 +413,65 @@ plot(filter(d.gpp, !is.na(gpp.area)) %>% dplyr::select(nutrient),
 bartlett.test(l.chla~nutrient, data=d.gpp)
 #not good, 3.008e-6
 
-anova(M1)
+#try cube root transformation, but need to make the values positive
+
+d.gpp$cube.chla.area = (d.gpp$chla)^(1/3)
+
+M3<-gls(cube.chla.area~N*P*Si, data=d.gpp, na.action=na.omit)
+E3<-residuals(M3)
+qqnorm(E3)
+qqline(E3)
+ad.test(E3)
+#residuals are not normally distributed p = 0.0001921
+hist(E3)  
+plot(M3)
+
+plot(filter(d.cr, !is.na(cube.cr.area)) %>% dplyr::select(nutrient), 
+     E3, xlab="nutrient", ylab="Residuals")
+bartlett.test(cube.chla.area~nutrient, data=d.gpp)
+#variance test p 5.332-e5
+
+#try sqr root
+d.gpp$sqr.chla.area = (d.gpp$chla)^(1/2)
+
+M4<-gls(sqr.chla.area~N*P*Si, data=d.gpp, na.action=na.omit)
+E4<-residuals(M4)
+qqnorm(E4)
+qqline(E4)
+ad.test(E4)
+#residuals are not normally distributed p = 3.29e-5
+hist(E4)  
+plot(M4)
+
+plot(filter(d.cr, !is.na(cube.cr.area)) %>% dplyr::select(nutrient), 
+     E3, xlab="nutrient", ylab="Residuals")
+bartlett.test(sqr.chla.area~nutrient, data=d.gpp)
+#variance test p = 3.397e-6
+
+#try non-parametric Aligned Rank Test
+install.packages("ARTool")
+library(ARTool)
+
+M5 = art(chla ~  N*P*Si, data=d.gpp)
+
+summary(M5) #supposed to be at or about 0
+
+shapiro.test(residuals(M5))
+qqnorm(residuals(M5)); qqline(residuals(M5))
+anova(M5)
+anova(M5, type = 3)#type 3 is better for interaction terms 
 
 ##########################################################
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-M1<-gls(chla~N*P, data=d.gpp, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.871
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test not OK
-
-anova(M1) #interpretation, N and P limitation (each is limiting)
-interaction.plot(d.gpp$N, d.gpp$P, d.gpp$chla)
+xx = na.omit(subset(d.gpp, select = c(N,P,chla)))
+interaction.plot(xx$N, xx$P, xx$chla)
 
 #N and Si
-M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.1418
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test not OK
-
-anova(M1) #interpretation, N limitation
-interaction.plot(d.gpp$N, d.gpp$Si, d.gpp$chla)
+xx = na.omit(subset(d.gpp, select = c(N,Si,chla)))
+interaction.plot(xx$N, xx$Si, xx$chla)
 
 #P and Si
-M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.1194
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test not OK
-
-anova(M1) #interpretation, P+Si limiting together
-interaction.plot(d.gpp$P, d.gpp$Si, d.gpp$chla)
+xx = na.omit(subset(d.gpp, select = c(P,Si,chla)))
+interaction.plot(xx$P, xx$Si, xx$chla)
