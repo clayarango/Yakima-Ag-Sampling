@@ -133,6 +133,8 @@ chem_sum<-ddply(chem, c("stream", "season", "type", "position", "river_mile"),su
                 oP.mgPL=mean(oP_mgL), NH4.mgNL=mean(NH4_mgNL), NO3.mgNL=mean(NO3_mgNL), DOC.mgL=mean(doc.mg.l, na.rm=T),
                 TDN.mgL=mean(tdn.mg.l, na.rm=T)) 
 
+write.table(chem_sum, "chem_summary.csv", sep=",", quote=F, row.names=F)
+
 nds_chem<-merge(nds_all, chem_sum, by=c("stream", "season"), all=T)
 
 #additional useful chem metrics

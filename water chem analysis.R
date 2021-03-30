@@ -11,6 +11,9 @@ library(tidyr)
 #data (created in "all sites" by combining NDS files and water chem file)
 nds_chem<-read.csv("NDS_chem_all.csv")
 
+
+
+
 ###########################
 #univariate relationships
 ###########################
