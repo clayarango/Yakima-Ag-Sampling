@@ -254,15 +254,15 @@ anova(M5, type = 3)#type 3 is better for interaction terms
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-xx = na.omit(subset(d.cr1, select = c(N,P,cr.area)))
+xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
 interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
-xx = na.omit(subset(d.cr1, select = c(N,Si,cr.area)))
+xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
 interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 
 #P and Si
-xx = na.omit(subset(d.cr1, select = c(P,Si,cr.area)))
+xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 
 ##########################################################
@@ -390,12 +390,10 @@ anova(M1)
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-#remove NA for plotting
 xx = na.omit(subset(d.gpp, select = c(N,P,chla)))
 interaction.plot(xx$N, xx$P, xx$chla)
 
 #N and Si
-#remove NA for plotting
 xx = na.omit(subset(d.gpp, select = c(N,Si,chla)))
 interaction.plot(xx$N, xx$Si, xx$chla)
 

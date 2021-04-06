@@ -229,7 +229,7 @@ anova(M1) #N limitation, Si limitation, P dampens Si but N overcomes
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-xx = na.omit(subset(d.gpp1, select = c(N,P,chla_ug_cm2)))
+xx = na.omit(subset(d.gpp, select = c(N,P,chla_ug_cm2)))
 interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
 #N increases chla, w or w/o P
 
@@ -238,7 +238,7 @@ xx = na.omit(subset(d.gpp1, select = c(N,Si,chla_ug_cm2)))
 interaction.plot(xx$N, xx$Si, xx$chla_ug_cm2)
 
 #P and Si
-xx = na.omit(subset(d.gpp1, select = c(P,Si,chla_ug_cm2)))
+xx = na.omit(subset(d.gpp, select = c(P,Si,chla_ug_cm2)))
 interaction.plot(xx$P, xx$Si, xx$chla_ug_cm2)
 #decline when P and Si combined, increase with P in absence of Si
 

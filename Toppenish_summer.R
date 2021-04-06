@@ -155,6 +155,7 @@ anova(M1) #simultaneous N and Si limitation (or maybe independent??)
 xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
 interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
+
 #N and Si
 xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
 interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
@@ -295,60 +296,14 @@ anova(M1)
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-M1<-gls(chla_ug_cm2~N*P, data=d.gpp, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)#ok
-ad.test(E1)
-#residuals are normally distributed, p=0.4521
-hist(E1)  #ok
-plot(M1)
-
-bartlett.test(chla_ug_cm2~nutrient, data=d.gpp)
-#variance test OK
-
-anova(M1) #interpretation: P inhibitory on N
-#P               1   4.07244  0.0511
-#N:P             1   4.57632  0.0393
-
-#remove NA for plotting
 xx = na.omit(subset(d.gpp, select = c(N,P,chla_ug_cm2)))
 interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
-#Plot is sideways V
-#in presence of N, P increases (doesn't look that way on boxplot, though).
-#In presence of P, N decreases (supported by boxplot)
 
 #N and Si
-M1<-gls(chla_ug_cm2~N*Si, data=d.gpp, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)#S-shaped
-ad.test(E1)
-#residuals are normally distributed, p=0.09383
-hist(E1) #bimodal 
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.gpp)
-#variance test OK
-
-anova(M1) #interpretation: no response
-
-#remove NA for plotting
 xx = na.omit(subset(d.gpp, select = c(N,Si,chla_ug_cm2)))
 interaction.plot(xx$N, xx$Si, xx$chla_ug_cm2)
 
 #P and Si
-M1<-gls(chla_ug_cm2~P*Si, data=d.gpp, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)#S-shaped
-ad.test(E1)
-#residuals not normally distributed, p=0.03568
-hist(E1)  #ok
-plot(M1)#ok
-
-bartlett.test(chla_ug_cm2~nutrient, data=d.gpp)
-#variance OK
-
-anova(M1) #interpretation: no response
+xx = na.omit(subset(d.gpp, select = c(P,Si,chla_ug_cm2)))
+interaction.plot(xx$P, xx$Si, xx$chla_ug_cm2)
 
