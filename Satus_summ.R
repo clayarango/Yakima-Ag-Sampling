@@ -47,7 +47,7 @@ d.gpp = subset(d, top=="glass", data=d)
 #calculate nrr for cr
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T))
 x
-d.cr$cr.nrr = d.cr$cr.area/-21.02584 #divide by control ave_cr
+d.cr$cr.nrr = d.cr$cr.area/-25.18067 #divide by control ave_cr
 
 #calculate nrr for gpp and chla
 x<- ddply(d.gpp, "nutrient", summarise, ave_gpp = mean(gpp.area, na.rm=T), ave_chla = mean(chla_ug_cm2, na.rm=T)) 
