@@ -37,7 +37,8 @@ t.test(cr.nrr~type, data=subset(N, season=="summer"))
 #1.319428               1.172824 
 
 
-ggplot(N, aes(x=season, y=chla.nrr))+geom_boxplot(aes(color=factor(type)))+theme_classic()
+ggplot(N, aes(x=season, y=chla.nrr))+geom_boxplot(aes(color=factor(type)))+theme_classic()+
+  scale_y_continuous(limits=c(0,20))
 
 t.test(chla.nrr~type, data=subset(N, season=="fall"))
 #t = 1.3332, df = 127.58, p-value = 0.1848
