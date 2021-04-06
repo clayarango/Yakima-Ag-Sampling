@@ -414,17 +414,6 @@ anova(M5, type = 3)#type 3 is better for interaction terms
 ################################
 ##2-way interaction plots#####
 #################################
-
-#remove NA for plotting
-xx = na.omit(subset(d.gpp1, select = c(N,P,chla)))
-interaction.plot(xx$N, xx$P, xx$chla)
-
-xx = na.omit(subset(d.gpp1, select = c(N,Si,chla)))
-interaction.plot(xx$N, xx$Si, xx$chla)
-
-xx = na.omit(subset(d.gpp1, select = c(Si,P,chla)))
-interaction.plot(xx$Si, xx$P, xx$chla)
-
 #N+P
 xx = na.omit(subset(d.gpp, select = c(N,P,chla)))
 interaction.plot(xx$N, xx$P, xx$chla)

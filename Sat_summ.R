@@ -156,63 +156,16 @@ anova(M1)
 #do multiple 2 way ANOVAs to improve our ability to interpret
 #############################################################
 #N and P
-M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.6022
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test not OK
-
-anova(M1) #interpretation, no limitation
-
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
 interaction.plot(xx$N, xx$P, xx$cr.area*-1)
 
 #N and Si
-M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.4768
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, no limitation
-
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(N,Si,cr.area)))
 interaction.plot(xx$N, xx$Si, xx$cr.area)
 
 #P and Si
-M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.1897
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test not OK
-
-anova(M1) #interpretation, no P + Si co-limitation, P addition responds to the presence of Si
-#P:Si            1   4.4930  0.0412
-
-#remove NA for plotting
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
-#plot is an X (CR declines in presence of P, but neutral with Si and P)
 ##########################################################
 ##########################################################
 
@@ -347,68 +300,14 @@ anova(M1)
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-M1<-gls(chla_ug_cm2~N*P, data=d.gpp, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)#ok
-ad.test(E1)
-#residuals are normally distributed, p=0.6054
-hist(E1)  #ok
-plot(M1)
-
-bartlett.test(chla_ug_cm2~nutrient, data=d.gpp)
-#variance test OK
-
-anova(M1) #interpretation, N limitation
-#remove NA for plotting
 xx = na.omit(subset(d.gpp, select = c(N,P,chla_ug_cm2)))
 interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
 
 #N and Si
-M1<-gls(chla_ug_cm2~N*Si, data=d.gpp, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)#ok
-ad.test(E1)
-#residuals are normally distributed, p=0.7027
-hist(E1) #ok  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.gpp)
-#variance test OK
-
-anova(M1) #interpretation, N limitation; presence of Si reduces N
-#numDF   F-value p-value
-#(Intercept)     1 131.31334  <.0001
-#N               1   6.64097  0.0142
-#Si              1   2.18113  0.1484
-#N:Si            1   9.35690  0.0042
-
-#remove NA for plotting
 xx = na.omit(subset(d.gpp, select = c(N,Si,chla_ug_cm2)))
 interaction.plot(xx$N, xx$Si, xx$chla_ug_cm2)
 
 #P and Si
-M1<-gls(chla_ug_cm2~P*Si, data=d.gpp, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)#quite wiggly
-ad.test(E1)
-#residuals not normally distributed, p=0.01816
-hist(E1)  
-plot(M1)#not quite normal, but no tail either
-
-bartlett.test(chla_ug_cm2~nutrient, data=d.gpp)
-#variance OK
-
-anova(M1) #interpretation: no response
-#numDF  F-value p-value
-#(Intercept)     1 92.18363  <.0001
-#P               1  0.21570  0.6451
-#Si              1  1.53118  0.2239
-#P:Si            1  0.28747  0.5951
-
-#remove NA for plotting
 xx = na.omit(subset(d.gpp, select = c(P,Si,chla_ug_cm2)))
 interaction.plot(xx$P, xx$Si, xx$chla_ug_cm2)
 

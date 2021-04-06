@@ -280,7 +280,7 @@ ggplot(data=x, aes(x=nutrient, y=gpp.mean)) +
 #analyze the CHL-A biomass on disks
 ###########################################################
 d.gpp1<-subset(d.gpp,!(nds.id=="B5"))
-M1<-gls(chla.nrr_1~N*P*Si, data=d.gpp1, na.action=na.omit) 
+M1<-gls(chla~N*P*Si, data=d.gpp1, na.action=na.omit) 
 E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
@@ -308,19 +308,15 @@ anova(M1)# interpretation: Si, N serial inhibition; P, Si serial inhibition
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-
-#remove NA for plotting
 xx = na.omit(subset(d.gpp1, select = c(N,P,chla)))
 interaction.plot(xx$N, xx$P, xx$chla)
 #N inhibition, P inhibition
 
 #N and Si
-#remove NA for plotting
 xx = na.omit(subset(d.gpp1, select = c(N,Si,chla)))
 interaction.plot(xx$N, xx$Si, xx$chla)
 
 #P and Si
-
 xx = na.omit(subset(d.gpp1, select = c(P,Si,chla)))
 interaction.plot(xx$P, xx$Si, xx$chla)
 #Si and P inhibition; Si dampens P inhibition
