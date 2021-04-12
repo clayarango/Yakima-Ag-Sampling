@@ -388,3 +388,88 @@ interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area)
 #P and Si
 xx = na.omit(subset(d.gpp, select = c(P,Si,chla)))
 interaction.plot(xx$P, xx$Si, xx$chla)
+
+
+##########################################################
+#Analyze chl-a by removing all Si treatments
+##########################################################
+d.gppNoSi = subset(d.gpp, Si==0)
+
+M1<-gls(chla~N*P, data=d.gppNoSi, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals look good (p=0.1494)
+hist(E1)
+plot(M1)
+
+bartlett.test(chla~nutrient, data=d.gpp)
+#data look bad p=0.0006
+
+#log transformation
+d.gppNoSi$l.chla = log10(d.gppNoSi$chla+1)
+
+M2<-gls(l.chla~N*P, data=d.gppNoSi, na.action=na.omit) 
+E2<-residuals(M2)
+qqnorm(E2)
+qqline(E2)
+ad.test(E2)
+#residuals are not normal, p=0.50
+
+hist(E2, xlab="residuals", main="")
+plot(M2)
+bartlett.test(l.chla~nutrient, data=d.gppNoSi)
+#not good, p = 0.034
+
+#try cube root transformation
+
+d.gppNoSi$cube.chla.area = (d.gppNoSi$chla)^(1/3)
+
+M3<-gls(cube.chla.area~N*P, data=d.gppNoSi, na.action=na.omit)
+E3<-residuals(M3)
+qqnorm(E3)
+qqline(E3)
+ad.test(E3)
+#residuals are normally distributed p = 0.521
+hist(E3)  
+plot(M3)
+
+bartlett.test(cube.chla.area~nutrient, data=d.gppNoSi)
+#variance test p 0.03354
+
+#try sqr root
+d.gppNoSi$sqr.chla.area = (d.gppNoSi$chla)^(1/2)
+
+M4<-gls(sqr.chla.area~N*P, data=d.gppNoSi, na.action=na.omit)
+E4<-residuals(M4)
+qqnorm(E4)
+qqline(E4)
+ad.test(E4)
+#residuals are normally distributed p = 0.365
+hist(E4)  
+plot(M4)
+
+bartlett.test(sqr.chla.area~nutrient, data=d.gppNoSi)
+#variance test p = 0.02622
+
+#try non-parametric Aligned Rank Test
+install.packages("ARTool")
+library(ARTool)
+
+d.gppNoSi = na.omit(subset(d.gppNoSi, select = c(N,P,chla)))
+
+M5 = art(chla ~  N*P, data=d.gppNoSi)
+
+summary(M5) #supposed to be at or about 0
+
+shapiro.test(residuals(M5))
+qqnorm(residuals(M5)); qqline(residuals(M5))
+anova(M5)
+anova(M5, type = 3)#type 3 is better for interaction terms 
+
+#Interpret Interaction
+#N and P
+xx = na.omit(subset(d.gppNoSi, select = c(N,P,chla)))
+interaction.plot(xx$N, xx$P, xx$chla)
+

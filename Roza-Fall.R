@@ -388,3 +388,43 @@ interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area)
 #P and Si
 xx = na.omit(subset(d.gpp, select = c(P,Si,chla)))
 interaction.plot(xx$P, xx$Si, xx$chla)
+
+##########################################################
+#Analyze chl-a by removing all Si treatments
+##########################################################
+d.gppNoSi = subset(d.gpp, Si==0)
+
+M1<-gls(chla~N*P, data=d.gppNoSi, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals look passable (p=0.049)
+hist(E1)
+plot(M1)
+
+bartlett.test(chla~nutrient, data=d.gpp)
+#data look bad p=0.019
+
+#log transformation
+d.gppNoSi$l.chla = log10(d.gppNoSi$chla+1)
+
+M2<-gls(l.chla~N*P, data=d.gppNoSi, na.action=na.omit) 
+E2<-residuals(M2)
+qqnorm(E2)
+qqline(E2)
+ad.test(E2)
+#residuals are passable, p=0.047
+
+hist(E2, xlab="residuals", main="")
+plot(M2)
+bartlett.test(l.chla~nutrient, data=d.gppNoSi)
+#good, p = 0.95
+
+anova(M2)
+
+#Interpret Interaction
+#N and P
+xx = na.omit(subset(d.gppNoSi, select = c(N,P,chla)))
+interaction.plot(xx$P, xx$N, xx$chla)
+

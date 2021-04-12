@@ -365,57 +365,85 @@ anova(M4)
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-M1<-gls(cr.area~N*P, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.8839
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, N and P limitation separately
-#remove NA for plotting
 xx = na.omit(subset(d.gpp, select = c(N,P,chla_ug_cm2)))
 interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
 
 #N and Si
-M1<-gls(cr.area~N*Si, data=d.cr, na.action=na.omit)
-E1<-residuals(M1)
-qqnorm(E1)
-qqline(E1)
-ad.test(E1)
-#residuals are normally distributed, p=0.8783
-hist(E1)  
-plot(M1)
-
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
-
-anova(M1) #interpretation, N and Si limitation separately
-#remove NA for plotting
 xx = na.omit(subset(d.gpp, select = c(N,Si,chla_ug_cm2)))
 interaction.plot(xx$N, xx$Si, xx$chla_ug_cm2)
 
-interaction.plot(d.cr$N, d.cr$Si, d.cr$cr.area)
-
 #P and Si
-M1<-gls(cr.area~P*Si, data=d.cr, na.action=na.omit)
+xx = na.omit(subset(d.gpp, select = c(P,Si,chla_ug_cm2)))
+interaction.plot(xx$P, xx$Si, xx$chla_ug_cm2)
+
+##########################################################
+#Analyze chl-a by removing all Si treatments
+##########################################################
+d.gppNoSi = subset(d.gpp, Si==0)
+
+M1<-gls(chla~N*P, data=d.gppNoSi, na.action=na.omit)
 E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-#residuals are normally distributed, p=0.09356
-hist(E1)  
+#residuals look bad (p=0.002)
+hist(E1)
 plot(M1)
 
-bartlett.test(cr.area~nutrient, data=d.cr)
-#variance test OK
+bartlett.test(chla~nutrient, data=d.gpp)
+#data look good p=0.10
 
-anova(M1) #P + Si colimitation (presence of Si and absence of P = no response)
-#remove NA for plotting
-xx = na.omit(subset(d.gpp, select = c(P,Si,chla_ug_cm2)))
-interaction.plot(xx$P, xx$Si, xx$chla_ug_cm2)
+#log transformation
+d.gppNoSi$l.chla = log10(d.gppNoSi$chla+1)
+
+M2<-gls(l.chla~N*P, data=d.gppNoSi, na.action=na.omit) 
+E2<-residuals(M2)
+qqnorm(E2)
+qqline(E2)
+ad.test(E2)
+#residuals are not normal, p=0.018
+
+hist(E2, xlab="residuals", main="")
+plot(M2)
+bartlett.test(l.chla~nutrient, data=d.gppNoSi)
+#good, p = 0.7256
+
+#try cube root transformation
+
+d.gppNoSi$cube.chla.area = (d.gppNoSi$chla)^(1/3)
+
+M3<-gls(cube.chla.area~N*P, data=d.gppNoSi, na.action=na.omit)
+E3<-residuals(M3)
+qqnorm(E3)
+qqline(E3)
+ad.test(E3)
+#residuals are normally distributed p = 0.400
+hist(E3)  
+plot(M3)
+
+bartlett.test(cube.chla.area~nutrient, data=d.gppNoSi)
+#variance test p 0.68
+
+#try sqr root
+d.gppNoSi$sqr.chla.area = (d.gppNoSi$chla)^(1/2)
+
+M4<-gls(sqr.chla.area~N*P, data=d.gppNoSi, na.action=na.omit)
+E4<-residuals(M4)
+qqnorm(E4)
+qqline(E4)
+ad.test(E4)
+#residuals are normally distributed p = 0.14
+hist(E4)  
+plot(M4)
+
+bartlett.test(sqr.chla.area~nutrient, data=d.gppNoSi)
+#variance test p = 0.75
+
+anova(M4)
+
+#Interpret Interaction
+#N and P
+xx = na.omit(subset(d.gppNoSi, select = c(N,P,chla)))
+interaction.plot(xx$N, xx$P, xx$chla)
+
+#Serial N and P limitation
