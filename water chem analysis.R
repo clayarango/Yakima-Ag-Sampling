@@ -201,9 +201,9 @@ ggplot(Si_sum_g, aes(x=river_mile, y=chl_a.nrr))+geom_point(aes(color=factor(sea
   theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr), width=6)+
   scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)+scale_y_continuous(limits=c(0,5))
 
-##########
-#water chem
-#########
+####################
+#water chem figures
+####################
 library(gridExtra)
 
 NO3<-ggplot(nds_chem, aes(x=river_mile, y = NO3.mgNL))+geom_point(aes(shape=factor(type), color=factor(season)), size=3)+
@@ -254,6 +254,165 @@ PSi<-ggplot(nds_chem, aes(x=river_mile, y = P.Si.ratio))+geom_point(aes(shape=fa
   scale_color_manual(values=c("goldenrod2", "orchid3"))+ggtitle("P:Si")
 
 grid.arrange(NP, NSi, PSi, ncol=3)
+
+###########
+#water chem stats
+#########
+chem$river_mile<-ifelse(chem$stream=="ahtanum", 106, chem$river_mile)
+
+#How does water chem compare summer to fall?
+chem<-read.csv("chem_summary.csv")
+chem$DIN.mgNL<-chem$NH4.mgNL+chem$NO3.mgNL
+chem$N.P.ratio<-(chem$DIN.mgNL/14)/(chem$oP.mgPL/31)
+chem$N.Si.ratio<-(chem$DIN.mgNL/14)/(chem$Si.mgL/28)
+chem$P.Si.ratio<-(chem$oP.mgPL/31)/(chem$Si.mgL/28)
+
+#paired t-tests. first need to shift to wide
+chem_wide<-reshape(chem, timevar="season", v.names=c("Si.mgL", "oP.mgPL", "NH4.mgNL", "NO3.mgNL", "DOC.mgL", "TDN.mgL",
+                                                     "DIN.mgNL", "N.P.ratio", "N.Si.ratio", "P.Si.ratio"), 
+                   idvar=c("stream", "type", "river_mile"), direction="wide", drop="position")
+#drop toppenish b/c no pair
+chem_wide<-subset(chem_wide, !(stream=="toppenish"))
+
+#all data combined
+t.test(chem_wide$Si.mgL.fall, chem_wide$Si.mgL.summer, paired=T)#t = 4.0888, df = 9, p-value = 0.002722
+t.test(chem_wide$oP.mgPL.fall, chem_wide$oP.mgPL.summer, paired = T)#t = 1.6701, df = 9, p-value = 0.1292
+t.test(chem_wide$NH4.mgNL.fall, chem_wide$NH4.mgNL.summer, paired = T)#t = -0.93564, df = 9, p-value = 0.3739
+t.test(chem_wide$NO3.mgNL.fall, chem_wide$NO3.mgNL.summer, paired = T)#t = 0.9758, df = 9, p-value = 0.3547
+t.test(chem_wide$DIN.mgNL.fall, chem_wide$DIN.mgNL.summer, paired = T)#t = 0.38253, df = 9, p-value = 0.7109
+t.test(chem_wide$TDN.mgL.fall, chem_wide$TDN.mgL.summer, paired = T)#t = -1.4657, df = 9, p-value = 0.1768
+t.test(chem_wide$DOC.mgL.fall, chem_wide$DOC.mgL.summer, paired = T)#t = 2.2534, df = 9, p-value = 0.05072
+t.test(chem_wide$N.P.ratio.fall, chem_wide$N.P.ratio.summer, paired = T)#t = -1.6554, df = 9, p-value = 0.1322
+t.test(chem_wide$N.Si.ratio.fall, chem_wide$N.Si.ratio.summer, paired = T)#t = -0.24664, df = 9, p-value = 0.8107
+t.test(chem_wide$P.Si.ratio.fall, chem_wide$P.Si.ratio.summer, paired = T)#t = 1.9864, df = 9, p-value = 0.078252
+
+#So: When all combined, only Si has a consistent seasonal pattern of more Si in fall.
+
+#mainstem only
+chem_m<-subset(chem_wide, type=="mainstem")
+
+t.test(chem_m$Si.mgL.fall, chem_m$Si.mgL.summer, paired = T) #t = 6.3335, df = 5, p-value = 0.001447
+t.test(chem_m$oP.mgPL.fall, chem_m$oP.mgPL.summer, paired = T)#t = 5.602, df = 5, p-value = 0.002504
+t.test(chem_m$NH4.mgNL.fall, chem_m$NH4.mgNL.summer, paired = T)#t = 0.29006, df = 5, p-value = 0.7834
+t.test(chem_m$NO3.mgNL.fall, chem_m$NO3.mgNL.summer, paired = T)#t = 3.2675, df = 5, p-value = 0.02226
+t.test(chem_m$DIN.mgNL.fall, chem_m$DIN.mgNL.summer, paired=T)#t = 2.3745, df = 5, p-value = 0.0636
+t.test(chem_m$TDN.mgL.fall, chem_m$TDN.mgL.summer, paired = T)#t = -0.68538, df = 5, p-value = 0.5236
+t.test(chem_m$DOC.mgL.fall, chem_m$DOC.mgL.summer, paired = T)#t = 2.1604, df = 5, p-value = 0.08314
+t.test(chem_m$N.P.ratio.fall, chem_m$N.P.ratio.summer, paired = T)#t = -1.36, df = 5, p-value = 0.2319
+t.test(chem_m$N.Si.ratio.fall, chem_m$N.Si.ratio.summer, paired = T)#t = 1.3671, df = 5, p-value = 0.2299
+t.test(chem_m$P.Si.ratio.fall, chem_m$P.Si.ratio.summer, paired = T)#t = 3.4637, df = 5, p-value = 0.01797
+
+#So: in the mainstem, Si, NO3, and SRP decrease summer-fall. P decreases more than Si - P:Si decreases summer-fall
+
+#tribs only
+chem_t<-subset(chem_wide, type=="trib")
+t.test(chem_t$Si.mgL.fall, chem_t$Si.mgL.summer, paired = T) #t = 1.466, df = 3, p-value = 0.2389
+t.test(chem_t$oP.mgPL.fall, chem_t$oP.mgPL.summer, paired = T)#t = 0.41106, df = 3, p-value = 0.7086
+t.test(chem_t$NH4.mgNL.fall, chem_t$NH4.mgNL.summer, paired = T)#t = -1.8817, df = 3, p-value = 0.1564
+t.test(chem_t$NO3.mgNL.fall, chem_t$NO3.mgNL.summer, paired = T)# = -0.59059, df = 3, p-value = 0.5963
+t.test(chem_t$DIN.mgNL.fall, chem_t$DIN.mgNL.summer, paired=T)#t = -1.042, df = 3, p-value = 0.374
+t.test(chem_t$TDN.mgL.fall, chem_t$TDN.mgL.summer, paired = T)#t = -1.6188, df = 3, p-value = 0.2039
+t.test(chem_t$DOC.mgL.fall, chem_t$DOC.mgL.summer, paired = T)#t = 1.139, df = 3, p-value = 0.3374
+t.test(chem_t$N.P.ratio.fall, chem_t$N.P.ratio.summer, paired = T)#t = -0.81551, df = 3, p-value = 0.4745
+t.test(chem_t$N.Si.ratio.fall, chem_t$N.Si.ratio.summer, paired = T)#t = -1.1372, df = 3, p-value = 0.3381
+t.test(chem_t$P.Si.ratio.fall, chem_t$P.Si.ratio.summer, paired = T)#t = 0.10447, df = 3, p-value = 0.9234
+
+#no consistent relationships across tributaries, which indicates different mechanisms at each tributary site
+
+#effect of river mile
+library(mgcv)
+
+#different values in summer vs fall so makes sense to have separate equations. but what if all in one?
+nit1<-lm(NO3.mgNL~river_mile+type + season, data=chem) 
+summary(nit1)
+#Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)   1.654855   0.269214   6.147 1.07e-05 ***
+#  river_mile   -0.010260   0.002060  -4.982 0.000114 ***
+#  typetrib      0.017424   0.179390   0.097 0.923762    
+#seasonsummer  0.009767   0.177784   0.055 0.956830  
+
+#Residual standard error: 0.4061 on 17 degrees of freedom
+#Multiple R-squared:  0.5938,	Adjusted R-squared:  0.5221 
+#F-statistic: 8.284 on 3 and 17 DF,  p-value: 0.001293
+
+nit2<-lm(NO3.mgNL~river_mile, data=chem)
+summary(nit2)
+#Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  1.667390   0.228204   7.307 6.27e-07 ***
+#  river_mile  -0.010260   0.001948  -5.267 4.40e-05 ***
+
+#Residual standard error: 0.3843 on 19 degrees of freedom
+#Multiple R-squared:  0.5935,	Adjusted R-squared:  0.5721 
+#F-statistic: 27.74 on 1 and 19 DF,  p-value: 4.395e-05
+
+nit3<-lm(NO3.mgNL~river_mile, data=subset(chem, type=="mainstem"))
+summary(nit3)
+#Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  1.67014    0.17117   9.757 1.99e-06 ***
+#  river_mile  -0.01036    0.00143  -7.242 2.78e-05 ***
+#Residual standard error: 0.2522 on 10 degrees of freedom
+#Multiple R-squared:  0.8399,	Adjusted R-squared:  0.8239 
+#F-statistic: 52.45 on 1 and 10 DF,  p-value: 2.783e-05
+
+nit4<-lm(NO3.mgNL~river_mile+season, data=subset(chem, type=="mainstem")) #BEST MODEL for mainstem NO3-#
+summary(nit4)
+# Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)   1.800755   0.161481  11.151 1.43e-06 ***
+#  river_mile   -0.010356   0.001241  -8.343 1.58e-05 ***
+#  seasonsummer -0.261236   0.126427  -2.066   0.0688 .  
+
+#Residual standard error: 0.219 on 9 degrees of freedom
+#Multiple R-squared:  0.8914,	Adjusted R-squared:  0.8673 
+#F-statistic: 36.94 on 2 and 9 DF,  p-value: 4.584e-05
+
+nit5<-lm(NO3.mgNL~river_mile, data=subset(chem, type=="mainstem"| season=="summer"))
+summary(nit5)
+#Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  1.818081   0.235173   7.731 1.31e-06 ***
+#  river_mile  -0.011222   0.002005  -5.596 5.10e-05 ***
+#Residual standard error: 0.3766 on 15 degrees of freedom
+#Multiple R-squared:  0.6761,	Adjusted R-squared:  0.6545 
+#F-statistic: 31.31 on 1 and 15 DF,  p-value: 5.104e-05
+
+nit6<-lm(NO3.mgNL~river_mile, data=subset(chem, type=="mainstem"| season=="fall"))
+summary(nit6)
+#Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  1.510794   0.184218   8.201 1.02e-06 ***
+#  river_mile  -0.009335   0.001549  -6.027 3.10e-05 ***
+
+#Residual standard error: 0.2887 on 14 degrees of freedom
+#Multiple R-squared:  0.7218,	Adjusted R-squared:  0.702 
+#F-statistic: 36.33 on 1 and 14 DF,  p-value: 3.105e-05
+AIC(nit6) #9.5
+AIC(nit5) #18.92
+AIC(nit4)#2.15
+AIC(nit3)#4.8
+AIC(nit2)#23.3
+AIC(nit1)#27.3
+
+#So: According to AIC and r2, the best model for mainstem NO3- is river mile and season
+
+nit7<-lm(NO3.mgNL~river_mile, data=subset(chem, type=="trib"))
+summary(nit7)
+#Estimate Std. Error t value Pr(>|t|)  
+#(Intercept)  1.637268   0.716290   2.286   0.0562 .
+#river_mile  -0.009892   0.006302  -1.570   0.1605 
+#Residual standard error: 0.5564 on 7 degrees of freedom
+#Multiple R-squared:  0.2603,	Adjusted R-squared:  0.1546 
+#F-statistic: 2.463 on 1 and 7 DF,  p-value: 0.1605
+
+nit8<-lm(NO3.mgNL~river_mile+season, data=subset(chem, type=="trib"))
+summary(nit8)
+#Estimate Std. Error t value Pr(>|t|)
+#(Intercept)   1.362016   0.763788   1.783    0.125
+#river_mile   -0.009311   0.006311  -1.475    0.191
+#seasonsummer  0.380698   0.373767   1.019    0.348
+
+#Residual standard error: 0.5549 on 6 degrees of freedom
+#Multiple R-squared:  0.3694,	Adjusted R-squared:  0.1591 
+#F-statistic: 1.757 on 2 and 6 DF,  p-value: 0.2508
+
+#continue with geographic patterns in water chem#
 
 ###########################
 #univariate relationships
