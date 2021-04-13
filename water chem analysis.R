@@ -11,9 +11,49 @@ library(tidyr)
 #data (created in "all sites" by combining NDS files and water chem file)
 nds_chem<-read.csv("NDS_chem_all.csv")
 
+nds_chem$river_mile<-ifelse(nds_chem$stream=="ahtanum", 106, nds_chem$river_mile)
+
 N<-subset(nds_chem, N==1)
+N_sponge<-subset(N, top=="sponge")
+N_glass<-subset(N, top =="glass")
+
+N_sum_s<-ddply(N_sponge, c("stream", "nutrient", "season", "river_mile", "top", "type"), summarise, cr=mean(cr.area, na.rm=T), 
+               cr_nrr=mean(cr.nrr, na.rm=T), se_cr=(sd(cr.area, na.rm=T)/sqrt(sum(!is.na(cr.area)))),
+              se_cr_nrr=(sd(cr.nrr, na.rm=T)/sqrt(sum(!is.na(cr.nrr)))))
+
+N_sum_g<-ddply(N_glass, c("stream", "nutrient", "season", "river_mile", "top","type"), summarise, gpp=mean(gpp.area, na.rm=T),
+               chl_a=mean(chla, na.rm=T), chl_a.nrr=mean(chla.nrr, na.rm=T), gpp.nrr=mean(gpp.nrr, na.rm=T), 
+              se_gpp=(sd(gpp.area, na.rm=T)/sqrt(sum(!is.na(gpp.area)))), 
+               se_chla=(sd(chla, na.rm=T)/sqrt(sum(!is.na(chla)))), 
+               se_chla_nrr=(sd(chla.nrr, na.rm=T)/sqrt(sum(!is.na(chla.nrr)))))
+
 P<-subset(nds_chem, P==1)
+P_sponge<-subset(P, top=="sponge")
+P_glass<-subset(P, top =="glass")
+
+P_sum_s<-ddply(P_sponge, c("stream", "nutrient", "season", "river_mile", "top","type"), summarise, cr=mean(cr.area, na.rm=T), 
+               cr_nrr=mean(cr.nrr, na.rm=T), se_cr=(sd(cr.area, na.rm=T)/sqrt(sum(!is.na(cr.area)))),
+               se_cr_nrr=(sd(cr.nrr, na.rm=T)/sqrt(sum(!is.na(cr.nrr)))))
+
+P_sum_g<-ddply(P_glass, c("stream", "nutrient", "season", "river_mile", "top","type"), summarise, gpp=mean(gpp.area, na.rm=T),
+               chl_a=mean(chla, na.rm=T), chl_a.nrr=mean(chla.nrr, na.rm=T), gpp.nrr=mean(gpp.nrr, na.rm=T), 
+               se_gpp=(sd(gpp.area, na.rm=T)/sqrt(sum(!is.na(gpp.area)))), 
+               se_chla=(sd(chla, na.rm=T)/sqrt(sum(!is.na(chla)))), 
+               se_chla_nrr=(sd(chla.nrr, na.rm=T)/sqrt(sum(!is.na(chla.nrr)))))
+
 Si<-subset(nds_chem, Si==1)
+Si_sponge<-subset(P, top=="sponge")
+Si_glass<-subset(P, top =="glass")
+
+Si_sum_s<-ddply(Si_sponge, c("stream", "nutrient", "season", "river_mile", "top","type"), summarise, cr=mean(cr.area, na.rm=T), 
+               cr_nrr=mean(cr.nrr, na.rm=T), se_cr=(sd(cr.area, na.rm=T)/sqrt(sum(!is.na(cr.area)))),
+               se_cr_nrr=(sd(cr.nrr, na.rm=T)/sqrt(sum(!is.na(cr.nrr)))))
+
+Si_sum_g<-ddply(Si_glass, c("stream", "nutrient", "season", "river_mile", "top","type"), summarise, gpp=mean(gpp.area, na.rm=T),
+               chl_a=mean(chla, na.rm=T), chl_a.nrr=mean(chla.nrr, na.rm=T), gpp.nrr=mean(gpp.nrr, na.rm=T), 
+               se_gpp=(sd(gpp.area, na.rm=T)/sqrt(sum(!is.na(gpp.area)))), 
+               se_chla=(sd(chla, na.rm=T)/sqrt(sum(!is.na(chla)))), 
+               se_chla_nrr=(sd(chla.nrr, na.rm=T)/sqrt(sum(!is.na(chla.nrr)))))
 
 ########
 #N limitation
@@ -53,9 +93,24 @@ t.test(chla.nrr~type, data=subset(N, season=="summer"))
 #1.836982               5.615544
 
 #How does river position affect N limitation? Hypothesis: lower in WS (lower river mile) = less N limitation
-ggplot(N, aes(x=river_mile, y=cr.nrr))+geom_point(aes(color=factor(type)))+theme_classic()+
-  facet_wrap(~season)
-#summer, higher river mile = bigger response in mainstem
+ggplot(N_sum_s, aes(x=river_mile, y=cr_nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
+  theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=cr_nrr-se_cr_nrr, ymax=cr_nrr+se_cr_nrr), width=6)+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)
+#summer, higher river mile = bigger response in mainstem (more upstream). Minimal response in tribs, except for NPSi
+#fall: bigger response with river mile for NPSi and maybe N
+#NSi no change with river mile, inhibition
+
+ggplot(N_sum_g, aes(x=river_mile, y=chl_a.nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
+  theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr), width=6)+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)
+#wenas dwarfs all others - scale so that patterns at other sites visible. Reecer also high for NSi
+
+ggplot(N_sum_g, aes(x=river_mile, y=chl_a.nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
+  theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr), width=6)+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)+scale_y_continuous(limits=c(0,5))
+#fall: no response and no pattern with river mile - all waver around 1
+#summer: really strong response in some tribs (wenas) and also some mainstem (Cle Elum)
+#aside from those, no real patterns with river mile. Instead, scattered responses to N addition.
 
 ggplot(N, aes(x=position, y=chla.nrr))+geom_point(aes(color=factor(type)))+theme_classic()+
   facet_wrap(~season)
@@ -70,7 +125,6 @@ unique(trib$position)
 unique(trib$river_mile)
 main<-subset(N, type=="mainstem")
 unique(main$river_mile)
-#Ahtanum and Century Landing have the same river mile. Need to fix - Ahtanum flows in downstream of CenLand.
 
 #####
 #P limitation
@@ -101,6 +155,29 @@ t.test(cr.nrr~season, data=subset(P, type=="trib"))
 #95 percent confidence interval:  -0.3782296 -0.1866705
 #  mean in group fall mean in group summer 
 #0.8459391            1.1283892
+
+P_sum_s$nutrient<-factor(P_sum_s$nutrient,levels= c("P", "NP", "NPSi", "PSi"))
+
+ggplot(P_sum_s, aes(x=river_mile, y=cr_nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
+  theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=cr_nrr-se_cr_nrr, ymax=cr_nrr+se_cr_nrr), width=6)+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)
+#only a response when N present
+#only a response in summer, except Cle Elum
+#in summer, general increase in response with river mile for NP and NPSi, but some variation
+
+P_sum_g$nutrient<-factor(P_sum_g$nutrient,levels= c("P", "NP", "NPSi", "PSi"))
+ggplot(P_sum_g, aes(x=river_mile, y=chl_a.nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
+  theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr), width=6)+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)
+#high value from Wenas obscures others
+
+ggplot(P_sum_g, aes(x=river_mile, y=chl_a.nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
+  theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr), width=6)+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)+scale_y_continuous(limits=c(0,10))
+#with the exception of Wenas, mostly limitation occurs when N present.
+#limitation almost always occurs in summer.
+
+
 
 ###########################
 #univariate relationships
