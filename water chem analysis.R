@@ -42,8 +42,8 @@ P_sum_g<-ddply(P_glass, c("stream", "nutrient", "season", "river_mile", "top","t
                se_chla_nrr=(sd(chla.nrr, na.rm=T)/sqrt(sum(!is.na(chla.nrr)))))
 
 Si<-subset(nds_chem, Si==1)
-Si_sponge<-subset(P, top=="sponge")
-Si_glass<-subset(P, top =="glass")
+Si_sponge<-subset(Si, top=="sponge")
+Si_glass<-subset(Si, top =="glass")
 
 Si_sum_s<-ddply(Si_sponge, c("stream", "nutrient", "season", "river_mile", "top","type"), summarise, cr=mean(cr.area, na.rm=T), 
                cr_nrr=mean(cr.nrr, na.rm=T), se_cr=(sd(cr.area, na.rm=T)/sqrt(sum(!is.na(cr.area)))),
@@ -177,7 +177,83 @@ ggplot(P_sum_g, aes(x=river_mile, y=chl_a.nrr))+geom_point(aes(color=factor(seas
 #with the exception of Wenas, mostly limitation occurs when N present.
 #limitation almost always occurs in summer.
 
+######
+#Si
+######
 
+Si_sum_s$nutrient<-factor(Si_sum_s$nutrient,levels= c("Si", "NSi", "NPSi", "PSi"))
+
+ggplot(Si_sum_s, aes(x=river_mile, y=cr_nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
+  theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=cr_nrr-se_cr_nrr, ymax=cr_nrr+se_cr_nrr), width=6)+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)
+#neutral or inhibition, no patterns in mainstem vs. tribs or with location, except NPSi
+
+Si_sum_g$nutrient<-factor(Si_sum_g$nutrient,levels= c("Si", "NSi", "NPSi", "PSi"))
+
+ggplot(Si_sum_g, aes(x=river_mile, y=chl_a.nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
+  theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr), width=6)+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)
+#high values from Wenas, Reecer, Cle Elum
+#limitation only in summer
+#no apparent pattern with geography
+
+ggplot(Si_sum_g, aes(x=river_mile, y=chl_a.nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
+  theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr), width=6)+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)+scale_y_continuous(limits=c(0,5))
+
+##########
+#water chem
+#########
+library(gridExtra)
+
+NO3<-ggplot(nds_chem, aes(x=river_mile, y = NO3.mgNL))+geom_point(aes(shape=factor(type), color=factor(season)), size=3)+
+  theme_bw()+theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank(), 
+                   panel.grid.minor=element_blank(), panel.grid.major=element_blank())+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+ggtitle("NO3-")
+
+SRP<-ggplot(nds_chem, aes(x=river_mile, y = oP.mgPL))+geom_point(aes(shape=factor(type), color=factor(season)), size=3)+
+  theme_bw()+theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank(), 
+                   panel.grid.minor=element_blank(), panel.grid.major=element_blank())+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+ggtitle("SRP")
+
+Si<-ggplot(nds_chem, aes(x=river_mile, y = Si.mgL))+geom_point(aes(shape=factor(type), color=factor(season)), size=3)+
+  theme_bw()+theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank(), 
+                   panel.grid.minor=element_blank(), panel.grid.major=element_blank())+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+ggtitle("Si")
+
+NH4<-ggplot(nds_chem, aes(x=river_mile, y = NH4.mgNL))+geom_point(aes(shape=factor(type), color=factor(season)), size=3)+
+  theme_bw()+theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank(), 
+                   panel.grid.minor=element_blank(), panel.grid.major=element_blank())+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+ggtitle("NH4")
+
+DOC<-ggplot(nds_chem, aes(x=river_mile, y = DOC.mgL))+geom_point(aes(shape=factor(type), color=factor(season)), size=3)+
+  theme_bw()+theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank(), 
+                   panel.grid.minor=element_blank(), panel.grid.major=element_blank())+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+ggtitle("DOC")
+
+TDN<-ggplot(nds_chem, aes(x=river_mile, y = TDN.mgL))+geom_point(aes(shape=factor(type), color=factor(season)), size=3)+
+  theme_bw()+theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank(), 
+                   panel.grid.minor=element_blank(), panel.grid.major=element_blank())+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+ggtitle("TDN")
+
+grid.arrange(NO3, SRP, Si, NH4, DOC, TDN, ncol=3)
+
+NP<-ggplot(nds_chem, aes(x=river_mile, y = N.P.ratio))+geom_point(aes(shape=factor(type), color=factor(season)), size=3)+
+  theme_bw()+theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank(), 
+                   panel.grid.minor=element_blank(), panel.grid.major=element_blank())+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+ggtitle("N:P")+geom_hline(yintercept = 16)
+
+NSi<-ggplot(nds_chem, aes(x=river_mile, y = N.Si.ratio))+geom_point(aes(shape=factor(type), color=factor(season)), size=3)+
+  theme_bw()+theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank(), 
+                   panel.grid.minor=element_blank(), panel.grid.major=element_blank())+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+ggtitle("N:Si")
+
+PSi<-ggplot(nds_chem, aes(x=river_mile, y = P.Si.ratio))+geom_point(aes(shape=factor(type), color=factor(season)), size=3)+
+  theme_bw()+theme(legend.position="none", axis.title.x=element_blank(), axis.title.y=element_blank(), 
+                   panel.grid.minor=element_blank(), panel.grid.major=element_blank())+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+ggtitle("P:Si")
+
+grid.arrange(NP, NSi, PSi, ncol=3)
 
 ###########################
 #univariate relationships
