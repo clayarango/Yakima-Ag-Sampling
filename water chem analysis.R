@@ -21,11 +21,15 @@ N_sum_s<-ddply(N_sponge, c("stream", "nutrient", "season", "river_mile", "top", 
                cr_nrr=mean(cr.nrr, na.rm=T), se_cr=(sd(cr.area, na.rm=T)/sqrt(sum(!is.na(cr.area)))),
               se_cr_nrr=(sd(cr.nrr, na.rm=T)/sqrt(sum(!is.na(cr.nrr)))))
 
+N_sum_s<-merge(chem, N_sum_s, by=c("stream", "season", "type", "river_mile"), all=T)
+
 N_sum_g<-ddply(N_glass, c("stream", "nutrient", "season", "river_mile", "top","type"), summarise, gpp=mean(gpp.area, na.rm=T),
                chl_a=mean(chla, na.rm=T), chl_a.nrr=mean(chla.nrr, na.rm=T), gpp.nrr=mean(gpp.nrr, na.rm=T), 
               se_gpp=(sd(gpp.area, na.rm=T)/sqrt(sum(!is.na(gpp.area)))), 
                se_chla=(sd(chla, na.rm=T)/sqrt(sum(!is.na(chla)))), 
                se_chla_nrr=(sd(chla.nrr, na.rm=T)/sqrt(sum(!is.na(chla.nrr)))))
+
+N_sum_g<-merge(chem, N_sum_g, by=c("stream", "season", "type", "river_mile"), all=T)
 
 P<-subset(nds_chem, P==1)
 P_sponge<-subset(P, top=="sponge")
@@ -100,6 +104,61 @@ ggplot(N_sum_s, aes(x=river_mile, y=cr_nrr))+geom_point(aes(color=factor(season)
 #fall: bigger response with river mile for NPSi and maybe N
 #NSi no change with river mile, inhibition
 
+#is limitation predicted by water chem? yes, in summer
+ggplot(N_sum_s, aes(x=NO3.mgNL, y=cr_nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
+  theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=cr_nrr-se_cr_nrr, ymax=cr_nrr+se_cr_nrr))+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)
+#yes, exponential decline in NRR with DIN and NO3.
+
+nl<-function(x){1.568-0.008*x}
+ne<-function(x){1.63*exp(x*-0.0077)}
+
+ggplot(N_sum_s, aes(x=N.P.ratio, y=cr_nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
+  theme_bw()+theme(panel.grid.major=element_blank(), panel.grid.minor=element_blank())+ facet_wrap(~nutrient)+
+  geom_errorbar(aes(ymin=cr_nrr-se_cr_nrr, ymax=cr_nrr+se_cr_nrr))+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)+geom_vline(xintercept = 16)+
+  stat_function(data=subset(N_sum_s, nutrient=="N"), fun=nl)+
+  stat_function(data=subset(N_sum_s, nutrient=="N"), fun=ne)
+#yes, linear decline in NRR with N:P ratio, although N limitation continues past Redfield ratio
+
+ggplot(N_sum_s, aes(x=N.Si.ratio, y=cr_nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
+  theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=cr_nrr-se_cr_nrr, ymax=cr_nrr+se_cr_nrr))+
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)+geom_vline(xintercept = 0.8)
+
+#stats - linear models 
+np1<-lm(cr.nrr~N.P.ratio, data=subset(N_sponge, season=="summer"| nutrient=="N"))
+summary(np1) #r2=0.094, p = 0.000003, aic=561
+
+np2<-lm(cr.nrr~N.P.ratio, data=subset(N_sponge, season=="summer"| nutrient=="NP"))
+summary(np2)#r2 = 0.094, p = 0.0000004, aic=521
+
+np3<-lm(cr.nrr~N.P.ratio, data=subset(N_sponge, season=="summer"| nutrient=="NPSi"))
+summary(np3) #r2 = 0.103, p = 0.0000001, aic=512
+
+np<-lm(cr.nrr~N.P.ratio, data=subset(N_sponge, season=="summer"| !nutrient=="NSi"))
+summary(np) #r2 = 0.08, p = 0.000000089, aic=656
+
+#stats - exponential models
+enp1<-gnls(cr.nrr~a*exp(N.P.ratio*b), data=subset(N_sponge, season=="summer"| nutrient=="N"), 
+           start=list(a=2.8, b=-0.02),na.action=na.omit)
+summary(enp1) #AIC = 513
+
+enp2<-gnls(cr.nrr~a*exp(N.P.ratio*b), data=subset(N_sponge, season=="summer"| nutrient=="NP"), 
+           start=list(a=2.8, b=-0.02),na.action=na.omit)
+summary(enp2) #AIC = 518
+
+enp3<-gnls(cr.nrr~a*exp(N.P.ratio*b), data=subset(N_sponge, season=="summer"| nutrient=="NPSi"), 
+           start=list(a=2.8, b=-0.02),na.action=na.omit)
+summary(enp3) #AIC = 508
+
+enp<-gnls(cr.nrr~a*exp(N.P.ratio*b), data=subset(N_sponge, season=="summer"| !nutrient=="NSi"),
+          start=list(a=2.8, b=-0.02),na.action=na.omit)
+summary(enp)#AIC = 651
+
+#conclusion: exponential models for individual nutrients best fit.
+
+
+#N and chla                                                                                              
 ggplot(N_sum_g, aes(x=river_mile, y=chl_a.nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
   theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr), width=6)+
   scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)
@@ -258,15 +317,16 @@ grid.arrange(NP, NSi, PSi, ncol=3)
 ###########
 #water chem stats
 #########
+chem<-read.csv("chem_summary.csv")
 chem$river_mile<-ifelse(chem$stream=="ahtanum", 106, chem$river_mile)
 
-#How does water chem compare summer to fall?
-chem<-read.csv("chem_summary.csv")
+#ratios
 chem$DIN.mgNL<-chem$NH4.mgNL+chem$NO3.mgNL
 chem$N.P.ratio<-(chem$DIN.mgNL/14)/(chem$oP.mgPL/31)
 chem$N.Si.ratio<-(chem$DIN.mgNL/14)/(chem$Si.mgL/28)
 chem$P.Si.ratio<-(chem$oP.mgPL/31)/(chem$Si.mgL/28)
 
+#How does water chem compare summer to fall?
 #paired t-tests. first need to shift to wide
 chem_wide<-reshape(chem, timevar="season", v.names=c("Si.mgL", "oP.mgPL", "NH4.mgNL", "NO3.mgNL", "DOC.mgL", "TDN.mgL",
                                                      "DIN.mgNL", "N.P.ratio", "N.Si.ratio", "P.Si.ratio"), 
@@ -413,6 +473,190 @@ summary(nit8)
 #F-statistic: 1.757 on 2 and 6 DF,  p-value: 0.2508
 
 #continue with geographic patterns in water chem#
+si1<-lm(Si.mgL~river_mile+season, data=subset(chem, type=="mainstem"))
+summary(si1)
+#Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  26.212963   1.299183  20.177  8.4e-09 ***
+#  river_mile   -0.085330   0.009987  -8.544  1.3e-05 ***
+#  seasonsummer -4.465881   1.017155  -4.391  0.00174 **
+
+#Residual standard error: 1.762 on 9 degrees of freedom
+#Multiple R-squared:  0.9111,	Adjusted R-squared:  0.8914 
+#F-statistic: 46.14 on 2 and 9 DF,  p-value: 1.859e-05
+AIC(si1) #52.2
+
+si2<-lm(Si.mgL~river_mile, data=subset(chem, type=="mainstem"))
+summary(si2)
+#Estimate Std. Error t value Pr(>|t|)    
+#(Intercept) 23.98002    2.01033  11.928 3.09e-07 ***
+#  river_mile  -0.08533    0.01679  -5.081 0.000477 ***
+
+#Residual standard error: 2.963 on 10 degrees of freedom
+#Multiple R-squared:  0.7208,	Adjusted R-squared:  0.6929 
+#F-statistic: 25.82 on 1 and 10 DF,  p-value: 0.0004771
+AIC(si2)#63.9
+
+#polynomial relationship?
+si3<-gnls(Si.mgL~a*river_mile^2 + b*river_mile, subset(chem, type=="mainstem"), start=list(a=-0.0005, b= 0.02))
+summary(si3)
+# AIC      BIC    logLik
+#81.11475 82.56947 -37.55737
+
+#Residual standard error: 6.06178 
+#Degrees of freedom: 12 total; 10 residual
+
+#SO: best model, according to AIC, is the linear model that includes season.
+
+amm1<-lm(NH4.mgNL~river_mile + season + type, chem)
+summary(amm1)
+#Estimate Std. Error t value Pr(>|t|)   
+#(Intercept)   0.4339907  0.1204583   3.603   0.0022 **
+# river_mile   -0.0028317  0.0009215  -3.073   0.0069 **
+#seasonsummer  0.0612678  0.0795485   0.770   0.4518   
+#typetrib      0.0835045  0.0802668   1.040   0.3128
+
+#Residual standard error: 0.1817 on 17 degrees of freedom
+#Multiple R-squared:  0.3979,	Adjusted R-squared:  0.2917 
+#F-statistic: 3.745 on 3 and 17 DF,  p-value: 0.03118
+AIC(amm1) #-6.463
+
+amm2<-lm(NH4.mgNL~river_mile+type, chem)
+summary(amm2)
+AIC(amm2) #-7.74
+
+#Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  0.4666526  0.1114654   4.187 0.000555 ***
+# river_mile  -0.0028504  0.0009108  -3.130 0.005790 ** 
+#typetrib     0.0869353  0.0792323   1.097 0.287007   
+
+#Residual standard error: 0.1797 on 18 degrees of freedom
+#Multiple R-squared:  0.3769,	Adjusted R-squared:  0.3077 
+#F-statistic: 5.444 on 2 and 18 DF,  p-value: 0.01416
+
+amm3<-lm(NH4.mgNL~river_mile, chem)
+summary(amm3)
+#Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  0.5021028  0.1072511   4.682 0.000163 ***
+# river_mile  -0.0028338  0.0009155  -3.095 0.005957 ** 
+
+#Residual standard error: 0.1806 on 19 degrees of freedom
+#Multiple R-squared:  0.3352,	Adjusted R-squared:  0.3002 
+#F-statistic: 9.581 on 1 and 19 DF,  p-value: 0.005957
+AIC(amm3) #-8.4
+
+amm4<-lm(NH4.mgNL~river_mile, subset(chem, season=="fall"))
+summary(amm4)
+AIC(amm4)#-14.76
+#Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  0.4636700  0.0819584   5.657 0.000477 ***
+#  river_mile  -0.0027979  0.0006917  -4.045 0.003710 ** 
+
+#Residual standard error: 0.0958 on 8 degrees of freedom
+#Multiple R-squared:  0.6716,	Adjusted R-squared:  0.6306 
+#F-statistic: 16.36 on 1 and 8 DF,  p-value: 0.00371
+
+amm4b<-lm(NH4.mgNL~river_mile, subset(chem, season=="summer"))
+summary(amm4b)
+#r2=0.15, p = 0.133, AIC = 3.72
+
+amm5<-lm(NH4.mgNL~river_mile, subset(chem, type=="trib"))
+summary(amm5)
+#Estimate Std. Error t value Pr(>|t|)   
+#(Intercept)  0.889778   0.215904   4.121  0.00445 **
+#  river_mile  -0.005913   0.001900  -3.113  0.01702 *
+
+#Residual standard error: 0.1677 on 7 degrees of freedom
+#Multiple R-squared:  0.5805,	Adjusted R-squared:  0.5206 
+#F-statistic: 9.688 on 1 and 7 DF,  p-value: 0.01702
+
+AIC(amm5) #-2.86
+
+amm5a<-lm(NH4.mgNL~river_mile, subset(chem, type=="mainstem"))
+summary(amm5a) #r2 = 0.25, p = 0.06
+
+#so: NH4 decreases with river mile in the fall but not the summer. relationship true for all sites together and for tribs,
+#but not for mainstem alone
+
+srp1<-lm(oP.mgPL~river_mile+season+type, chem)
+summary(srp1)
+#Estimate Std. Error t value Pr(>|t|)  
+#(Intercept)   0.0615071  0.0221274   2.780   0.0128 *
+#  river_mile   -0.0001519  0.0001693  -0.898   0.3819  
+#seasonsummer -0.0205507  0.0146125  -1.406   0.1776  
+#typetrib      0.0426181  0.0147445   2.890   0.0102 *
+
+#Residual standard error: 0.03338 on 17 degrees of freedom
+#Multiple R-squared:  0.3835,	Adjusted R-squared:  0.2747 
+#F-statistic: 3.525 on 3 and 17 DF,  p-value: 0.03759
+AIC(srp1) #-77.63
+
+srp2<-gnls(oP.mgPL~a*river_mile^2 + b*river_mile, subset(chem, type=="mainstem"), start=list(a=-0.000002, b= 0.056))
+summary(srp2)
+#AIC      BIC   logLik
+#-51.99662 -50.5419 28.99831
+
+srp32<-gnls(oP.mgPL~a*river_mile^2 + b*river_mile, chem, start=list(a=-0.000002, b= 0.056))
+summary(srp32)
+#AIC      BIC   logLik
+#-70.89606 -67.7625 38.44803
+
+#  Value    Std.Error   t-value p-value
+#a -0.000006278 0.0000024069 -2.608375  0.0173
+#b  0.001255088 0.0003373271  3.720686  0.0014
+
+srp3<-lm(oP.mgPL~river_mile, chem)
+AIC(srp3)#-71.99
+
+srp4<-lm(oP.mgPL~river_mile+type, chem)
+AIC(srp4)#-77.3
+summary(srp4)
+#Estimate Std. Error t value Pr(>|t|)  
+#(Intercept)  0.0505516  0.0212660   2.377   0.0287 *
+#  river_mile  -0.0001457  0.0001738  -0.838   0.4128  
+#typetrib     0.0414674  0.0151164   2.743   0.0134 *
+
+#Residual standard error: 0.03428 on 18 degrees of freedom
+#Multiple R-squared:  0.3118,	Adjusted R-squared:  0.2353 
+#F-statistic: 4.077 on 2 and 18 DF,  p-value: 0.03464
+
+srp5<-lm(oP.mgPL~type, chem)
+AIC(srp5)#-78.52
+summary(srp5)
+
+NP1<-lm(N.P.ratio~river_mile, chem)
+summary(NP1)
+AIC(NP1)#175.3
+NP2<-lm(N.P.ratio~river_mile+season+type, chem)
+AIC(NP2)#172.8
+summary(NP2)
+#Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)   79.65399    8.60269   9.259 4.73e-08 ***
+#river_mile    -0.45423    0.06581  -6.902 2.56e-06 ***
+#seasonsummer  10.03382    5.68106   1.766   0.0953 .  
+#typetrib     -10.48549    5.73236  -1.829   0.0850 . 
+
+#Residual standard error: 12.98 on 17 degrees of freedom
+#Multiple R-squared:  0.7634,	Adjusted R-squared:  0.7217 
+#F-statistic: 18.28 on 3 and 17 DF,  p-value: 1.455e-05
+
+NP3<-lm(N.P.ratio~river_mile+type, chem)
+AIC(NP3)#174
+NP4<-lm(N.P.ratio~river_mile+season, chem)
+AIC(NP4)#174
+
+
+NS1<-lm(N.Si.ratio~river_mile+season+type, chem)
+AIC(NS1) #-61
+NS2<-lm(N.Si.ratio~river_mile, chem)
+AIC(NS2)#-63
+summary(NS2)
+#Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)  0.2025709  0.0287633   7.043 1.05e-06 ***
+# river_mile  -0.0012201  0.0002455  -4.970 8.51e-05 ***
+
+#Residual standard error: 0.04844 on 19 degrees of freedom
+#Multiple R-squared:  0.5652,	Adjusted R-squared:  0.5423 
+#F-statistic:  24.7 on 1 and 19 DF,  p-value: 8.51e-05
 
 ###########################
 #univariate relationships
