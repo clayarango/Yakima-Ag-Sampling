@@ -17,6 +17,15 @@ N<-subset(nds_chem, N==1)
 N_sponge<-subset(N, top=="sponge")
 N_glass<-subset(N, top =="glass")
 
+chem<-read.csv("chem_summary.csv")
+chem$river_mile<-ifelse(chem$stream=="ahtanum", 106, chem$river_mile)
+
+#ratios
+chem$DIN.mgNL<-chem$NH4.mgNL+chem$NO3.mgNL
+chem$N.P.ratio<-(chem$DIN.mgNL/14)/(chem$oP.mgPL/31)
+chem$N.Si.ratio<-(chem$DIN.mgNL/14)/(chem$Si.mgL/28)
+chem$P.Si.ratio<-(chem$oP.mgPL/31)/(chem$Si.mgL/28)
+
 N_sum_s<-ddply(N_sponge, c("stream", "nutrient", "season", "river_mile", "top", "type"), summarise, cr=mean(cr.area, na.rm=T), 
                cr_nrr=mean(cr.nrr, na.rm=T), se_cr=(sd(cr.area, na.rm=T)/sqrt(sum(!is.na(cr.area)))),
               se_cr_nrr=(sd(cr.nrr, na.rm=T)/sqrt(sum(!is.na(cr.nrr)))))
@@ -97,9 +106,28 @@ t.test(chla.nrr~type, data=subset(N, season=="summer"))
 #1.836982               5.615544
 
 #How does river position affect N limitation? Hypothesis: lower in WS (lower river mile) = less N limitation
+ns<-function(x){0.6266+0.00605*x}
+nps<-function(x){0.5816+0.0063*x}
+npsis<-function(x){0.5823+0.0064*x}
+nsis<-function(x){0.593+0.0054*x}
+
+nf<-function(x){0.452+0.005*x}
+npf<-function(x){0.5066+0.0045*x}
+npsif<-function(x){0.456+0.0055*x}
+nsif<-function(x){0.6127+0.0026*x}
+
 ggplot(N_sum_s, aes(x=river_mile, y=cr_nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
   theme_classic()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=cr_nrr-se_cr_nrr, ymax=cr_nrr+se_cr_nrr), width=6)+
-  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)
+  scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)+
+  stat_function(data=subset(N_sum_s, nutrient=="N"), fun=nf, lty="dashed")+
+  stat_function(data=subset(N_sum_s, nutrient=="N"), fun=ns)+
+  stat_function(data=subset(N_sum_s, nutrient=="NP"), fun=npf, lty="dashed")+
+  stat_function(data=subset(N_sum_s, nutrient=="NP"), fun=nps)+
+  stat_function(data=subset(N_sum_s, nutrient=="NPSi"), fun=npsif, lty="dashed")+
+  stat_function(data=subset(N_sum_s, nutrient=="NPSi"), fun=npsis)+
+  stat_function(data=subset(N_sum_s, nutrient=="NSi"), fun=nsif, lty="dashed")+
+  stat_function(data=subset(N_sum_s, nutrient=="NSi"), fun=nsis)
+
 #summer, higher river mile = bigger response in mainstem (more upstream). Minimal response in tribs, except for NPSi
 #fall: bigger response with river mile for NPSi and maybe N
 #NSi no change with river mile, inhibition
@@ -126,6 +154,32 @@ ggplot(N_sum_s, aes(x=N.Si.ratio, y=cr_nrr))+geom_point(aes(color=factor(season)
   scale_color_manual(values=c("goldenrod2", "orchid3"))+geom_hline(yintercept = 1)+geom_vline(xintercept = 0.8)
 
 #stats - linear models 
+rm1<-lm(cr.nrr~river_mile, data=subset(N_sponge, season=="summer"| nutrient=="N"))
+summary(rm1) #r2=0.133, p = 0.000000001, AIC = 505
+
+rmf<-lm(cr.nrr~river_mile, data=subset(N_sponge, season=="fall"| nutrient=="N"))
+summary(rmf) #r2 = 0.13, p = 0.000000003
+
+rm2<-lm(cr.nrr~river_mile, data=subset(N_sponge, season=="summer"| nutrient=="NP"))
+summary(rm2)#r2 = 0.141, p = 0.0000000004, AIC = 508
+
+rmf2<-lm(cr.nrr~river_mile, data=subset(N_sponge, season=="fall"| nutrient=="NP"))
+summary(rmf2) #r2 = 0.127, p = 0.000000006
+
+rm3<-lm(cr.nrr~river_mile, data=subset(N_sponge, season=="summer"| nutrient=="NPSi"))
+summary(rm3)#r2 = 0.145, p = 0.0000000002, AIC = 499.9
+
+rmf3<-lm(cr.nrr~river_mile, data=subset(N_sponge, season=="fall"| nutrient=="NPSi"))
+summary(rmf3) #r2 = 0.123, p = 0.00000001
+
+rm4<-lm(cr.nrr~river_mile, data=subset(N_sponge, season=="summer"| nutrient=="NSi"))
+summary(rm4) #r2 = 0.09, p = 0.0000008, AIC = 564
+
+rmf4<-lm(cr.nrr~river_mile, data=subset(N_sponge, season=="fall"| nutrient=="NSi"))
+summary(rmf4) #r2 = 0.06, p = 0.00007
+
+
+
 np1<-lm(cr.nrr~N.P.ratio, data=subset(N_sponge, season=="summer"| nutrient=="N"))
 summary(np1) #r2=0.094, p = 0.000003, aic=561
 
