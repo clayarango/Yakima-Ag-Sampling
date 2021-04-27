@@ -150,6 +150,37 @@ xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 #plot is an X (CR declines in presence of P alone and Si alone, but neutral with Si and P)
 
+
+##########################################################
+#Analyze CR by removing all Si treatments
+##########################################################
+d.crNoSi = subset(d.cr, Si==0)
+
+M1<-gls(cr.area~N*P, data=d.crNoSi, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed p = 0.64
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.crNoSi)
+#variance test 0.37
+
+anova(M1)
+
+##########################################################
+#do 2 way ANOVAs to interpret
+##########################################################
+#N and P
+xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
+
+#N limitation
+##########################################################
+
+
 ############################################################
 #analyze the PRODUCTION data
 ############################################################
@@ -259,4 +290,4 @@ anova(M1)
 xx = na.omit(subset(d.gppNoSi, select = c(N,P,chla_ug_cm2)))
 interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
 
-#Serial N and P limitation
+#no limitation

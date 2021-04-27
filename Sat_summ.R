@@ -166,9 +166,91 @@ interaction.plot(xx$N, xx$Si, xx$cr.area)
 #P and Si
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
-##########################################################
-##########################################################
 
+##########################################################
+#Analyze CR by removing all Si treatments
+##########################################################
+d.crNoSi = subset(d.cr, Si==0)
+
+M1<-gls(cr.area~N*P, data=d.crNoSi, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed p = 0.157
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.crNoSi)
+#variance test 0.012
+
+d.crNoSi$l.cr.area = log10(d.crNoSi$cr.area*-1)
+
+M2<-gls(l.cr.area~N*P, data=d.crNoSi, na.action=na.omit)
+E2<-residuals(M2)
+qqnorm(E2)
+qqline(E2)
+ad.test(E2)
+#residuals are not normally distributed p = 0.44
+hist(E2)  
+plot(M2)
+
+bartlett.test(l.cr.area~nutrient, data=d.crNoSi)
+#variance test 0.018
+
+#try cube root transformation, but need to make the values positive
+
+d.crNoSi$cube.cr.area = (d.crNoSi$cr.area*-1)^(1/3)
+
+M3<-gls(cube.cr.area~N*P, data=d.crNoSi, na.action=na.omit)
+E3<-residuals(M3)
+qqnorm(E3)
+qqline(E3)
+ad.test(E3)
+#residuals are not normally distributed p = 0.37
+hist(E3)  
+plot(M3)
+
+bartlett.test(cube.cr.area~nutrient, data=d.crNoSi)
+#variance test 0.017
+
+d.crNoSi$sqr.cr.area = (d.crNoSi$cr.area*-1)^(1/2)
+
+M4<-gls(sqr.cr.area~N*P, data=d.crNoSi, na.action=na.omit)
+E4<-residuals(M3)
+qqnorm(E4)
+qqline(E4)
+ad.test(E4)
+#residuals are not normally distributed p = 0.37
+hist(E4)  
+plot(M4)
+
+bartlett.test(sqr.cr.area~nutrient, data=d.crNoSi)
+#variance test 0.016
+
+#try non-parametric Aligned Rank Test
+install.packages("ARTool")
+library(ARTool)
+
+d.crNoSi = na.omit(subset(d.crNoSi, select = c(N,P,cr.area)))
+
+M5 = art(cr.area ~  N*P, data=d.crNoSi)
+
+summary(M5) #supposed to be at or about 0
+
+shapiro.test(residuals(M5))
+qqnorm(residuals(M5)); qqline(residuals(M5))
+anova(M5)
+
+##########################################################
+#do 2 way ANOVAs to interpret
+##########################################################
+#N and P
+xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
+
+#No limitation
+##########################################################
 ggplot(data=d.cr, aes(x=nutrient, y = cr.area))+geom_boxplot()
 
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by treatment
@@ -311,3 +393,44 @@ interaction.plot(xx$N, xx$Si, xx$chla_ug_cm2)
 xx = na.omit(subset(d.gpp, select = c(P,Si,chla_ug_cm2)))
 interaction.plot(xx$P, xx$Si, xx$chla_ug_cm2)
 
+
+##########################################################
+#Analyze chl-a by removing all Si treatments
+##########################################################
+d.gppNoSi = subset(d.gpp, Si==0)
+
+M1<-gls(chla_ug_cm2~N*P, data=d.gppNoSi, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals p = 0.97
+hist(E1)
+plot(M1)
+
+bartlett.test(chla_ug_cm2~nutrient, data=d.gppNoSi)
+#data look bad p=0.03
+
+#log transformation
+d.gppNoSi$l.chla = log10(d.gppNoSi$chla_ug_cm2+1)
+
+M2<-gls(l.chla~N*P, data=d.gppNoSi, na.action=na.omit) 
+E2<-residuals(M2)
+qqnorm(E2)
+qqline(E2)
+ad.test(E2)
+#residuals are normal, p=0.57
+
+hist(E2, xlab="residuals", main="")
+plot(M2)
+bartlett.test(l.chla~nutrient, data=d.gppNoSi)
+#good, p = 0.186
+
+anova(M2)
+
+#Interpret Interaction
+#N and P
+xx = na.omit(subset(d.gppNoSi, select = c(N,P,chla_ug_cm2)))
+interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
+
+#N limitation

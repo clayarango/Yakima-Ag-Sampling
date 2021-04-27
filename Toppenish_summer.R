@@ -164,9 +164,35 @@ interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 #P and Si
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
-##########################################################
-##########################################################
 
+##########################################################
+#Analyze CR by removing all Si treatments
+##########################################################
+d.crNoSi = subset(d.cr, Si==0)
+
+M1<-gls(cr.area~N*P, data=d.crNoSi, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed p = 0.58
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.crNoSi)
+#variance test 0.80
+
+anova(M1)
+
+##########################################################
+#do 2 way ANOVAs to interpret
+##########################################################
+#N and P
+xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
+
+#N limitation
+##########################################################
 ggplot(data=d.cr, aes(x=nutrient, y = cr.area))+geom_boxplot()
 
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by treatment
@@ -312,36 +338,21 @@ interaction.plot(xx$P, xx$Si, xx$chla_ug_cm2)
 ##########################################################
 d.gppNoSi = subset(d.gpp, Si==0)
 
-M1<-gls(chla~N*P, data=d.gppNoSi, na.action=na.omit)
+M1<-gls(chla_ug_cm2~N*P, data=d.gppNoSi, na.action=na.omit)
 E1<-residuals(M1)
 qqnorm(E1)
 qqline(E1)
 ad.test(E1)
-#residuals look good (p=0.1834)
+#residuals look good (p=0.80)
 hist(E1)
 plot(M1)
 
-bartlett.test(chla~nutrient, data=d.gpp)
-#data look OK p=0.04
+bartlett.test(chla_ug_cm2~nutrient, data=d.gpp)
+#data look OK p=0.98
 
-#log transformation
-d.gppNoSi$l.chla = log10(d.gppNoSi$chla+1)
-
-M2<-gls(l.chla~N*P, data=d.gppNoSi, na.action=na.omit) 
-E2<-residuals(M2)
-qqnorm(E2)
-qqline(E2)
-ad.test(E2)
-#residuals are normal, p=0.73
-
-hist(E2, xlab="residuals", main="")
-plot(M2)
-bartlett.test(l.chla~nutrient, data=d.gppNoSi)
-#good, p = 0.1732
-
-anova(M2)
+anova(M1)
 
 #Interpret Interaction
 #N and P
-xx = na.omit(subset(d.gppNoSi, select = c(N,P,chla)))
-interaction.plot(xx$N, xx$P, xx$chla)
+xx = na.omit(subset(d.gppNoSi, select = c(N,P,chla_ug_cm2)))
+interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
