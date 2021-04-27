@@ -83,6 +83,7 @@ d.nrr$gpp.es_1<-log(d.nrr$gpp.nrr_1)
 d.nrr$chla.es_1<-log(d.nrr$chla.nrr_1)
 write.table(d.nrr, "wenas_summer_nrr.csv", sep=",", quote=F, row.names =F)
 
+write.table(d.nrr, "roza_fall_nrr.csv",  sep=",", quote=F, row.names =F)
 ###############
 #plots of NRR
 ##############
