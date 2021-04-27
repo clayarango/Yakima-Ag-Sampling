@@ -320,3 +320,42 @@ interaction.plot(xx$N, xx$Si, xx$chla)
 xx = na.omit(subset(d.gpp1, select = c(P,Si,chla)))
 interaction.plot(xx$P, xx$Si, xx$chla)
 #Si and P inhibition; Si dampens P inhibition
+
+##########################################################
+#Analyze chl-a by removing all Si treatments
+##########################################################
+d.gppNoSi = subset(d.gpp, Si==0)
+
+M1<-gls(chla~N*P, data=d.gppNoSi, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals look good (p=0.1834)
+hist(E1)
+plot(M1)
+
+bartlett.test(chla~nutrient, data=d.gpp)
+#data look OK p=0.04038
+
+#log transformation
+d.gppNoSi$l.chla = log10(d.gppNoSi$chla+1)
+
+M2<-gls(l.chla~N*P, data=d.gppNoSi, na.action=na.omit) 
+E2<-residuals(M2)
+qqnorm(E2)
+qqline(E2)
+ad.test(E2)
+#residuals are normal, p=0.073
+
+hist(E2, xlab="residuals", main="")
+plot(M2)
+bartlett.test(l.chla~nutrient, data=d.gppNoSi)
+#variance looks good, p = 0.17
+
+anova(M2)
+
+#Interpret Interaction
+#N and P
+xx = na.omit(subset(d.gppNoSi, select = c(N,P,chla)))
+interaction.plot(xx$N, xx$P, xx$chla)

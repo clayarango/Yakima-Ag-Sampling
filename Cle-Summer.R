@@ -232,8 +232,93 @@ interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 #P and Si
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
+
+
 ##########################################################
+#Analyze CR by removing all Si treatments
 ##########################################################
+d.crNoSi = subset(d.cr, Si==0)
+
+M1<-gls(cr.area~N*P, data=d.crNoSi, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed p = 0.05338
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.crNoSi)
+#variance test 0.03, we'll probably need to mess with this one
+
+d.crNoSi$l.cr.area = log10(d.crNoSi$cr.area*-1)
+
+M2<-gls(l.cr.area~N*P, data=d.crNoSi, na.action=na.omit)
+E2<-residuals(M2)
+qqnorm(E2)
+qqline(E2)
+ad.test(E2)
+#residuals are not normally distributed p = 0.007
+hist(E2)  
+plot(M2)
+
+bartlett.test(l.cr.area~nutrient, data=d.crNoSi)
+#variance test 0.01279
+
+#try cube root transformation, but need to make the values positive
+
+d.crNoSi$cube.cr.area = (d.crNoSi$cr.area*-1)^(1/3)
+
+M3<-gls(cube.cr.area~N*P, data=d.crNoSi, na.action=na.omit)
+E3<-residuals(M3)
+qqnorm(E3)
+qqline(E3)
+ad.test(E3)
+#residuals are not normally distributed p = 0.019
+hist(E3)  
+plot(M3)
+
+bartlett.test(cube.cr.area~nutrient, data=d.crNoSi)
+#variance test 0.036
+
+d.crNoSi$sqr.cr.area = (d.crNoSi$cr.area*-1)^(1/2)
+
+M4<-gls(sqr.cr.area~N*P, data=d.crNoSi, na.action=na.omit)
+E4<-residuals(M3)
+qqnorm(E4)
+qqline(E4)
+ad.test(E4)
+#residuals are not normally distributed p = 0.019
+hist(E4)  
+plot(M4)
+
+bartlett.test(sqr.cr.area~nutrient, data=d.crNoSi)
+#variance test 0.043
+
+#try non-parametric Aligned Rank Test
+install.packages("ARTool")
+library(ARTool)
+
+M5 = art(cr.area ~  N*P, data=d.crNoSi)
+
+summary(M5) #supposed to be at or about 0
+
+shapiro.test(residuals(M5))
+qqnorm(residuals(M5)); qqline(residuals(M5))
+anova(M5)
+anova(M5, type = 3)#type 3 is better for interaction terms 
+
+##########################################################
+#do 2 way ANOVAs to interpret
+##########################################################
+#N and P
+xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
+
+#N limitation
+##########################################################
+
+
 
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(cr.mean = abs(mean(cube.cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
