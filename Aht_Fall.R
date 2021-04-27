@@ -182,9 +182,35 @@ interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 #looks like P limitation, but NS
-##########################################################
-##########################################################
 
+##########################################################
+#Analyze CR by removing all Si treatments
+##########################################################
+d.crNoSi = subset(d.cr, Si==0)
+
+M1<-gls(cr.area~N*P, data=d.crNoSi, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed p = 0.41
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.crNoSi)
+#variance test 0.73
+
+anova(M1)
+
+##########################################################
+#do 2 way ANOVAs to interpret
+##########################################################
+#N and P
+xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
+
+#N suppression
+##########################################################
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach
   summarize(cr.mean = abs(mean(cr.area, na.rm = TRUE)), # na.rm = TRUE to remove missing values
             cr.sd=abs(sd(cr.area, na.rm = TRUE)),  # na.rm = TRUE to remove missing values
@@ -358,4 +384,4 @@ anova(M2)
 #Interpret Interaction
 #N and P
 xx = na.omit(subset(d.gppNoSi, select = c(N,P,chla)))
-interaction.plot(xx$N, xx$P, xx$chla)
+interaction.plot(xx$P, xx$N, xx$chla)

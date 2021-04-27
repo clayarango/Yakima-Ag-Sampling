@@ -180,9 +180,35 @@ interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 #P and Si
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1) #P offsets negative effect of Si
-##########################################################
-##########################################################
 
+##########################################################
+#Analyze CR by removing all Si treatments
+##########################################################
+d.crNoSi = subset(d.cr, Si==0)
+
+M1<-gls(cr.area~N*P, data=d.crNoSi, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals are normally distributed p = 0.47
+hist(E1)  
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.crNoSi)
+#variance test 0.91
+
+anova(M1)
+
+##########################################################
+#do 2 way ANOVAs to interpret
+##########################################################
+#N and P
+xx = na.omit(subset(d.cr, select = c(N,P,cr.area)))
+interaction.plot(xx$N, xx$P, xx$cr.area*-1)
+
+#N limitation
+##########################################################
 ggplot(data=d.cr, aes(x=nutrient, y = cr.area))+geom_boxplot()
 
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by treatment
@@ -265,7 +291,7 @@ anova(M1)
 #N and P
 xx = na.omit(subset(d.gppNoSi, select = c(N,P,chla_ug_cm2)))
 interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
-
+#N limitation
 
 
 
