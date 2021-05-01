@@ -185,4 +185,56 @@ summary(M2b)
 #note: Zuur et al. recommend using gamm (not gam), but I couldn't get it to work (error said "object river_mile not found")
 #but I seem to be getting the expected type of output, so *shrug*?
 
+######
+#chla NRR
 
+nds_g<-subset(nds_chem, top=="glass")
+nds_g <- subset(nds_g, !(is.na(nds_g$chla.nrr)))
+
+#start with fixed effects and then test if adding random effects improves the model
+#M1 is all the variables and interactions (except nutrient, which we want to model as a random effect)
+op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
+M1<-lm(log10(chla.nrr+1)~river_mile*season + type*river_mile, nds_g) #needed to log nrr to account for heteroscedasticity in residuals
+plot(M1) #even with log-transformation, deviation from normal in Q-Q plot and heteroscedasticity
+E<-rstandard(M1)
+op<-par(mfrow=c(1,1))
+boxplot(E~stream, data=nds_g)
+abline(0,0)
+#none of the boxplots are completely above or below the 0 line, so don't need to include stream as random variable.but note that 
+#ahtanum and toppenshi just barely in there.
+
+#now, use gls so can compare with lme
+M1<-gls(log10(chla.nrr+1)~river_mile*season + type*river_mile, nds_g)
+M1a<-lme(log10(chla.nrr+1)~river_mile*season + type*river_mile,random = ~1+river_mile|nutrient, 
+         method="REML", nds_g)
+
+anova(M1, M1a)
+#     Model df       AIC       BIC   logLik   Test  L.Ratio p-value
+#M1      1  7 -147.3034 -114.5111 80.65169                        
+#M1a     2 10 -168.6338 -121.7876 94.31688 1 vs 2 27.33039  <.0001
+
+#much better with random effects included
+#now check random structure. try just the random slope
+
+M1b<-lme(log10(chla.nrr+1)~river_mile*season + type*river_mile,random = ~1|nutrient, 
+         method="REML", nds_g)
+
+anova(M1a, M1b)
+#     Model df       AIC       BIC   logLik   Test  L.Ratio p-value
+#M1a     1 10 -168.6338 -121.7876 94.31688                        
+#M1b     2  8 -163.7885 -126.3116 89.89425 1 vs 2 8.845259   0.012
+
+#slightly better to include random slope and intercept.
+
+#now optimize the fixed part
+summary(M1a)
+#                             Value  Std.Error  DF   t-value p-value
+#(Intercept)              0.25342414 0.03039909 793  8.336570  0.0000
+#river_mile              -0.00037070 0.00031055 793 -1.193682  0.2330
+#seasonsummer            -0.00933374 0.03980442 793 -0.234490  0.8147
+#typetrib                -0.05226620 0.04815416 793 -1.085393  0.2781
+#river_mile:seasonsummer  0.00174109 0.00033813 793  5.149217  0.0000
+#river_mile:typetrib      0.00112807 0.00041868 793  2.694329  0.0072
+
+M2a<-lme(log10(chla.nrr+1)~river_mile*season + type*river_mile,random = ~1+river_mile|nutrient, 
+         method="REML", nds_g)
