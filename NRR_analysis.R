@@ -185,8 +185,9 @@ summary(M2b)
 #note: Zuur et al. recommend using gamm (not gam), but I couldn't get it to work (error said "object river_mile not found")
 #but I seem to be getting the expected type of output, so *shrug*?
 
-######
-#chla NRR
+########################################################################################
+#chla NRR#
+########################################################################################
 
 nds_g<-subset(nds_chem, top=="glass")
 nds_g <- subset(nds_g, !(is.na(nds_g$chla.nrr)))
@@ -201,40 +202,187 @@ op<-par(mfrow=c(1,1))
 boxplot(E~stream, data=nds_g)
 abline(0,0)
 #none of the boxplots are completely above or below the 0 line, so don't need to include stream as random variable.but note that 
-#ahtanum and toppenshi just barely in there.
+#ahtanum and toppenish just barely in there.And much higher variance for Wenas and Rrecer than other sites.
+#suggests that we should try: 1) allowing variation to increase with mean (varFixed) OR 2) allow to vary with stream (varIdent). 
+#can skip the log10 tranformation to do this
 
-#now, use gls so can compare with lme
-M1<-gls(log10(chla.nrr+1)~river_mile*season + type*river_mile, nds_g)
-M1a<-lme(log10(chla.nrr+1)~river_mile*season + type*river_mile,random = ~1+river_mile|nutrient, 
-         method="REML", nds_g)
+M1<-gls(chla.nrr~river_mile*season+type*river_mile, data=nds_g)
+vf1<-varIdent(form=~1|stream)
+M1s<-gls(chla.nrr~river_mile*season+type*river_mile, data=nds_g, weights=vf1)
+vf2<-varFixed(~chla.nrr)
+M1sb<-gls(chla.nrr~river_mile*season+type*river_mile, data=nds_g, weights=vf2)
+anova(M1, M1s, M1sb)
+#     Model df      AIC      BIC    logLik   Test  L.Ratio p-value
+#M1      1  7 4374.147 4406.940 -2180.074                        
+#M1s     2 17 2576.900 2656.538 -1271.450 1 vs 2  1817.247  <.0001
+#M1sb    3  7 2372.097 2404.889 -1179.048 2 vs 3  184.8034  <.0001
 
-anova(M1, M1a)
-#     Model df       AIC       BIC   logLik   Test  L.Ratio p-value
-#M1      1  7 -147.3034 -114.5111 80.65169                        
-#M1a     2 10 -168.6338 -121.7876 94.31688 1 vs 2 27.33039  <.0001
+#MUCH better when residuals allowed to vary, and best if vary with NRR
+#but because better when allowed to vary with a continuous variable, need to check other structures, too
 
-#much better with random effects included
-#now check random structure. try just the random slope
+vf3<-varPower(form =~chla.nrr| stream)
+M1sc<-gls(chla.nrr~river_mile*season+type*river_mile, data=nds_g, weights=vf3)
+vf4<-varPower(form=~chla.nrr|season)
+M1sd<-gls(chla.nrr~river_mile*season+type*river_mile, data=nds_g, weights=vf4)
+vf5<-varPower(form=~chla.nrr|type)
+M1se<-gls(chla.nrr~river_mile*season+type*river_mile, data=nds_g, weights=vf4)
 
-M1b<-lme(log10(chla.nrr+1)~river_mile*season + type*river_mile,random = ~1|nutrient, 
-         method="REML", nds_g)
+anova(M1sb, M1sc, M1sd, M1se)
+#       Model df    AIC      BIC     logLik   Test  L.Ratio p-value
+#M1sb     1  7 2372.097 2404.889 -1179.0483                        
+#M1sc     2 18 1727.281 1811.604  -845.6405 1 vs 2 666.8155  <.0001
+#M1sd     3  9 1810.398 1852.559  -896.1987 2 vs 3 101.1164  <.0001
+#M1se     4  9 1810.398 1852.559  -896.1987 
 
-anova(M1a, M1b)
-#     Model df       AIC       BIC   logLik   Test  L.Ratio p-value
-#M1a     1 10 -168.6338 -121.7876 94.31688                        
-#M1b     2  8 -163.7885 -126.3116 89.89425 1 vs 2 8.845259   0.012
+#SO: best variance structure allows variance to increase with NRR but only in certain streams
 
-#slightly better to include random slope and intercept.
+summary(M1sc)
+#Generalized least squares fit by REML
+#Model: chla.nrr ~ river_mile * season + type * river_mile 
+#Data: nds_g 
+#AIC      BIC   logLik
+#1727.281 1811.604 -845.6405
 
-#now optimize the fixed part
-summary(M1a)
-#                             Value  Std.Error  DF   t-value p-value
-#(Intercept)              0.25342414 0.03039909 793  8.336570  0.0000
-#river_mile              -0.00037070 0.00031055 793 -1.193682  0.2330
-#seasonsummer            -0.00933374 0.03980442 793 -0.234490  0.8147
-#typetrib                -0.05226620 0.04815416 793 -1.085393  0.2781
-#river_mile:seasonsummer  0.00174109 0.00033813 793  5.149217  0.0000
-#river_mile:typetrib      0.00112807 0.00041868 793  2.694329  0.0072
+#Variance function:
+#Structure: Power of variance covariate, different strata
+#Formula: ~chla.nrr | stream 
+#Parameter estimates: (Sarah note: higher number means more variation in residuals allowed.)
+#  ahtanum   century   cleelum     kiona    mabton    reecer    ringer      roza     satus toppenish     wenas 
+#0.6832503 0.6061846 0.8524888 0.4007073 0.2211139 1.0919692 0.8137915 0.9296681 1.1071669 0.4652958 1.1601197 
 
-M2a<-lme(log10(chla.nrr+1)~river_mile*season + type*river_mile,random = ~1+river_mile|nutrient, 
-         method="REML", nds_g)
+#Coefficients:
+#                         Value     Std.Error   t-value   p-value
+#(Intercept)              0.8008404 0.06949103 11.524371  0.0000
+#river_mile              -0.0035686 0.00048162 -7.409466  0.0000
+#seasonsummer            -0.0280413 0.09560101 -0.293316  0.7694
+#typetrib                -0.3964672 0.07814168 -5.073697  0.0000
+#river_mile:seasonsummer  0.0042555 0.00081737  5.206399  0.0000
+#river_mile:typetrib      0.0011701 0.00054263  2.156354  0.0314
+
+#Correlation: 
+#  (Intr) rvr_ml ssnsmm typtrb rvr_ml:s
+#river_mile              -0.953                              
+#seasonsummer            -0.530  0.521                       
+#typetrib                -0.811  0.782  0.349                
+#river_mile:seasonsummer  0.460 -0.486 -0.940 -0.335         
+#river_mile:typetrib      0.772 -0.826 -0.347 -0.962  0.360  
+
+#Standardized residuals:
+#  Min         Q1        Med         Q3        Max 
+#-3.5155154  0.1309112  0.8442069  1.1400711  2.6016745 
+
+#Residual standard error: 0.6655261 
+#Degrees of freedom: 806 total; 800 residual
+
+#now, get random structure
+M1a<-lme(chla.nrr~river_mile*season + river_mile*type, random=~1+river_mile|nutrient,
+         weights = vf3, method="REML", data=nds_g)
+#get error: nlminb problem, convergence error code = 1, message = iteration limit reached without convergence (10)
+#guessing this is due to over-parameterization? maybe too many variables that used to model variation and/or random effects
+
+#try just random slope, instead of random slope and intercept
+M2a<-lme(chla.nrr~river_mile*season + river_mile*type, random=~1|nutrient,
+         weights = vf3, method="REML", data=nds_g)
+
+anova(M1sc, M2a)
+##    Model df      AIC      BIC    logLik   Test  L.Ratio p-value
+#M1sc     1 18 1727.281 1811.604 -845.6405                        
+#M2a      2 19 1710.177 1799.185 -836.0885 1 vs 2 19.10411  <.0001
+
+#improves when slope varies with nutrient category
+
+#now: optimize the fixed portion!
+summary(M2a)
+
+M2b<-lme(chla.nrr~river_mile+season + river_mile*type, random=~1|nutrient,
+         weights = vf3, method="REML", data=nds_g)
+
+lrtest(M2a, M2b)
+##  Df  LogLik Df  Chisq Pr(>Chisq)
+#1  19 -836.09                     
+#2  18 -836.62 -1 1.0588     0.3035
+
+summary(M2b)
+
+M2c<-lme(chla.nrr~river_mile+season + type, random=~1|nutrient,
+         weights = vf3, method="REML", data=nds_g)
+#doesn't converge
+
+M2d<-lme(chla.nrr~river_mile + river_mile*type, random=~1|nutrient,
+         weights = vf3, method="REML", data=nds_g)
+#doesn't converge
+
+M2e<-lme(chla.nrr~river_mile+type, random=~1|nutrient,
+         weights = vf3, method="REML", data=nds_g)
+
+lrtest(M2b, M2e)
+##  Df  LogLik Df  Chisq Pr(>Chisq)    
+#1  18 -836.62                         
+#2  16 -898.13 -2 123.03  < 2.2e-16 ***
+#M2b still better
+
+M2f<-lme(chla.nrr~type+season, random=~1|nutrient,
+         weights = vf3, method="REML", data=nds_g)
+
+lrtest(M2b, M2f)
+##  Df  LogLik Df  Chisq Pr(>Chisq)   
+#1  18 -836.62                        
+#2  16 -842.38 -2 11.522   0.003148 **
+
+M2g<-lme(chla.nrr~type, random=~1|nutrient,
+         weights = vf3, method="REML", data=nds_g)
+
+lrtest(M2b, M2g)
+#   Df  LogLik Df  Chisq Pr(>Chisq)    
+#1  18 -836.62                         
+#2  15 -908.79 -3 144.34  < 2.2e-16 ***
+
+M2h<-lme(chla.nrr~season, random=~1|nutrient,
+         weights = vf3, method="REML", data=nds_g)
+
+lrtest(M2b, M2h)
+#   Df  LogLik Df  Chisq Pr(>Chisq)    
+#1  18 -836.62                         
+#2  15 -883.51 -3 93.775  < 2.2e-16 ***
+
+#Best model is M2b
+summary(M2b)
+#Linear mixed-effects model fit by REML
+#Data: nds_g 
+#AIC      BIC    logLik
+#1709.236 1793.581 -836.6179
+
+#Random effects:
+#  Formula: ~1 | nutrient
+#(Intercept)  Residual
+#StdDev:  0.05421041 0.6528178
+
+#Variance function:
+#  Structure: Power of variance covariate, different strata
+#Formula: ~chla.nrr | stream 
+#Parameter estimates:
+#  ahtanum    century    cleelum      kiona     mabton     reecer     ringer       roza      satus  toppenish      wenas 
+#0.79350627 0.63204766 0.90662707 0.22282314 0.06263507 1.10684423 0.86923056 0.95291056 1.11271175 0.33659866 1.16607644 
+#Fixed effects: chla.nrr ~ river_mile + season + river_mile * type 
+#                     Value  Std.Error    DF   t-value  p-value
+#(Intercept)          0.7526378 0.06627973 794 11.355474  0.0000
+#river_mile          -0.0031057 0.00042297 794 -7.342575  0.0000
+#seasonsummer         0.4611727 0.03273352 794 14.088696  0.0000
+#typetrib            -0.4392558 0.07392803 794 -5.941668  0.0000
+#river_mile:typetrib  0.0015501 0.00050217 794  3.086829  0.0021
+#Correlation: 
+#                     (Intr) rvr_ml ssnsmm typtrb
+#river_mile          -0.909                     
+#seasonsummer        -0.288  0.204              
+#typetrib            -0.788  0.791  0.133       
+#river_mile:typetrib  0.735 -0.814 -0.061 -0.964
+
+#Standardized Within-Group Residuals:
+#  Min         Q1        Med         Q3        Max 
+#-3.6264063  0.1084158  0.7827289  1.1393529  3.0264409 
+
+#Number of Observations: 806
+#Number of Groups: 8 
+
+#SO: Chl-a NRR decreases (slightly!) with river mile. It's much higher in summer and much lower in tribs. Also, the slope
+#varies with of NRR with river mile increases when it's a trib (I think....)  
