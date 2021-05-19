@@ -6,6 +6,7 @@ library(ggplot2)
 library(tidyr)
 library(lmtest)
 library(lattice)
+library(MuMIn)
 
 #data (created in "all sites" by combining NDS files and water chem file)
 nds_chem<-read.csv("NDS_chem_all.csv")
@@ -137,6 +138,18 @@ summary(M2a)
 
 #Number of Observations: 797
 #Number of Groups: 8 
+
+r.squaredGLMM(M2a)
+#       R2m       R2c
+#[1,] 0.1136093 0.4167879
+#R2m is marginal (fixed effects only) and R2c is conditional (entire model)
+
+plot(predict(M2a),log(nds_s$cr.nrr+1), xlab="Predicted NRR",ylab="Actual NRR",abline (0,1))
+#looks great - linear with nice scatter around the line, consistent variance
+cor.test(predict(M2a),log(nds_s$cr.nrr+1))
+#0.6339973 
+0.6339973^2
+#0.4019526  
 
 E<-resid(M2a)
 F2<-fitted(M2a)
@@ -280,7 +293,7 @@ M1a<-lme(chla.nrr~river_mile*season + river_mile*type, random=~1+river_mile|nutr
 #get error: nlminb problem, convergence error code = 1, message = iteration limit reached without convergence (10)
 #guessing this is due to over-parameterization? maybe too many variables that used to model variation and/or random effects
 
-#try just random slope, instead of random slope and intercept
+#try just random intercept, instead of random slope and intercept
 M2a<-lme(chla.nrr~river_mile*season + river_mile*type, random=~1|nutrient,
          weights = vf3, method="REML", data=nds_g)
 
@@ -383,6 +396,17 @@ summary(M2b)
 
 #Number of Observations: 806
 #Number of Groups: 8 
+r.squaredGLMM(M2b)
+#       R2m       R2c
+#[1,] 0.1614768 0.1672194
+#R2m is marginal (fixed effects only) and R2c is conditional (entire model)
+
+plot(predict(M2b),nds_g$chla.nrr, xlab="Predicted NRR",ylab="Actual NRR",abline (0,1))# ick - looks like a straight line d/t
+#all the outliers. it doesn't predict the high values very well
+cor.test(predict(M2b),nds_g$chla.nrr)
+#0.0776288
+0.0776288^2
+#much lower than that estimated with pseudo-r2. possibly b/c of weird variance structure?
 
 #SO: Chl-a NRR decreases (slightly!) with river mile. It's much higher in summer and much lower in tribs. Also, the slope
 #varies with of NRR with river mile increases when it's a trib (I think....)  
