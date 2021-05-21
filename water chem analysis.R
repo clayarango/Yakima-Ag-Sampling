@@ -7,6 +7,9 @@ library(plyr)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
+library(lmtest)
+library(lattice)
+library(MuMIn)
 
 #data (created in "all sites" by combining NDS files and water chem file)
 nds_chem<-read.csv("NDS_chem_all.csv")
@@ -26,6 +29,119 @@ chem$N.P.ratio<-(chem$DIN.mgNL/14)/(chem$oP.mgPL/31)
 chem$N.Si.ratio<-(chem$DIN.mgNL/14)/(chem$Si.mgL/28)
 chem$P.Si.ratio<-(chem$oP.mgPL/31)/(chem$Si.mgL/28)
 
+chem$stream<-as.factor(chem$stream)
+chem$season<-as.factor(chem$season)
+chem$type<-as.factor(chem$type)
+
+#NRR model, based on plots
+#start with fixed effects and then test if adding random effects improves the model
+#M1 is all the variables and interactions (except nutrient, which we want to model as a random effect)
+M1<-lm(NO3.mgNL~river_mile*season + type*river_mile, chem)
+
+plot(M1)
+E<-rstandard(M1)#mostly normal and homoscedastistic
+boxplot(E~stream, data=chem)
+abline(0,0) #huge variation by stream - need to include as random effect
+
+#now, use gls so can compare with lme
+M1<-gls(NO3.mgNL~river_mile*season + type*river_mile, chem)
+M1a<-lme(NO3.mgNL~river_mile*season + type*river_mile, random = ~1+river_mile|stream, 
+         method="REML", chem) #doesn't converge
+M1b<-lme(NO3.mgNL~river_mile*season + type*river_mile, random = ~1|stream, 
+         method="REML", chem)
+anova(M1, M1b)
+#     Model df    AIC      BIC    logLik   Test  L.Ratio p-value
+#M1      1  7 66.20444 71.16079 -26.10222                        
+#M1b     2  8 66.01708 71.68149 -25.00854 1 vs 2 2.187355  0.1391
+
+#random effects really don't help (or hurt), prob b/c so little replication. will leave random effects in b/c graphs of 
+#residuals suggested they were needed.
+
+#now, fixed effects
+summary(M1b)
+
+M2b<-lme(NO3.mgNL~river_mile*season, random = ~1|stream, 
+         method="REML", chem)
+
+lrtest(M1b, M2b)
+#   Df  LogLik Df Chisq Pr(>Chisq)  
+#1   8 -25.009                      
+#2   6 -20.707 -2 8.603    0.01355 *
+
+#model 2 better, keep season out
+summary(M2b)
+
+M3b<-lme(NO3.mgNL~river_mile+season, random = ~1|stream, 
+         method="REML", chem)
+
+lrtest(M2b, M3b)
+#   Df  LogLik Df  Chisq Pr(>Chisq)   
+#1   6 -20.707                        
+#2   5 -15.752 -1 9.9104   0.001643 **
+
+#model 2 better
+
+summary(M3b)
+#AIC      BIC    logLik
+#41.50363 45.95548 -15.75181
+
+#Value          Std.Error DF            t-value p-value
+#(Intercept)   1.7868658 0.3371792  9  5.299454  0.0005
+#river_mile   -0.0107186 0.0028375  9 -3.777483  0.0044
+#seasonsummer -0.0648577 0.1169943  9 -0.554367  0.5928
+
+M4b<-lme(NO3.mgNL~river_mile, random = ~1|stream, 
+         method="REML", chem)
+
+lrtest(M3b, M4b)
+#   Df  LogLik Df  Chisq Pr(>Chisq)
+#1   5 -15.752                     
+#2   4 -14.672 -1 2.1591     0.1417
+
+#no difference but AIC was lower for M4b
+summary(M4b)
+#AIC      BIC    logLik
+#37.34457 41.12233 -14.67229
+
+#Random effects:
+#  Formula: ~1 | stream
+#(Intercept)  Residual
+#StdDev:   0.3436648 0.2592373
+
+#Fixed effects: NO3.mgNL ~ river_mile 
+#Value Std.Error DF   t-value p-value
+#(Intercept)  1.7484984 0.3235024 10  5.404900  0.0003
+#river_mile  -0.0106873 0.0027804  9 -3.843825  0.0039
+#Correlation: 
+#  (Intr)
+#river_mile -0.931
+
+#Standardized Within-Group Residuals:
+#  Min           Q1          Med           Q3          Max 
+#-1.698179941 -0.484607900  0.001849822  0.374311253  1.591452626 
+
+#Number of Observations: 21
+#Number of Groups: 11 
+
+plot(M4b)
+
+r.squaredGLMM(M4b)
+#     R2m       R2c
+#[1,] 0.54536 0.8351211
+
+plot(predict(M4b),chem$NO3.mgNL, xlab="Predicted NO3",ylab="Actual NO3",abline (0,1))
+#looks great, even scatter around line
+
+cor.test(predict(M4b),chem$NO3.mgNL)
+#0.94233
+0.94233^2
+#0.888
+
+#####SRP#####
+
+
+
+#####old stuff below - can probably delete########
 N_sum_s<-ddply(N_sponge, c("stream", "nutrient", "season", "river_mile", "top", "type"), summarise, cr=mean(cr.area, na.rm=T), 
                cr_nrr=mean(cr.nrr, na.rm=T), se_cr=(sd(cr.area, na.rm=T)/sqrt(sum(!is.na(cr.area)))),
               se_cr_nrr=(sd(cr.nrr, na.rm=T)/sqrt(sum(!is.na(cr.nrr)))))
