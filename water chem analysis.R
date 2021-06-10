@@ -44,102 +44,522 @@ boxplot(E~stream, data=chem)
 abline(0,0) #huge variation by stream - need to include as random effect
 
 #now, use gls so can compare with lme
-M1<-gls(NO3.mgNL~river_mile*season + type*river_mile, chem)
+M1<-gls(NO3.mgNL~river_mile*season + type*river_mile+season*type, chem)
 M1a<-lme(NO3.mgNL~river_mile*season + type*river_mile, random = ~1+river_mile|stream, 
          method="REML", chem) #doesn't converge
-M1b<-lme(NO3.mgNL~river_mile*season + type*river_mile, random = ~1|stream, 
+M1b<-lme(NO3.mgNL~river_mile*season + type*river_mile+season*type, random = ~1|stream, 
          method="REML", chem)
 anova(M1, M1b)
-#     Model df    AIC      BIC    logLik   Test  L.Ratio p-value
-#M1      1  7 66.20444 71.16079 -26.10222                        
-#M1b     2  8 66.01708 71.68149 -25.00854 1 vs 2 2.187355  0.1391
-
 #random effects really don't help (or hurt), prob b/c so little replication. will leave random effects in b/c graphs of 
 #residuals suggested they were needed.
 
 #now, fixed effects
 summary(M1b)
 
-M2b<-lme(NO3.mgNL~river_mile*season, random = ~1|stream, 
+M2b<-lme(NO3.mgNL~river_mile+ type*river_mile+season*type, random = ~1|stream, 
          method="REML", chem)
 
 lrtest(M1b, M2b)
-#   Df  LogLik Df Chisq Pr(>Chisq)  
-#1   8 -25.009                      
-#2   6 -20.707 -2 8.603    0.01355 *
-
-#model 2 better, keep season out
+#model 2 better
 summary(M2b)
 
-M3b<-lme(NO3.mgNL~river_mile+season, random = ~1|stream, 
+M3b<-lme(NO3.mgNL~river_mile+season*type, random = ~1|stream, 
          method="REML", chem)
 
 lrtest(M2b, M3b)
-#   Df  LogLik Df  Chisq Pr(>Chisq)   
-#1   6 -20.707                        
-#2   5 -15.752 -1 9.9104   0.001643 **
-
-#model 2 better
+#M3b better
 
 summary(M3b)
-#AIC      BIC    logLik
-#41.50363 45.95548 -15.75181
 
-#Value          Std.Error DF            t-value p-value
-#(Intercept)   1.7868658 0.3371792  9  5.299454  0.0005
-#river_mile   -0.0107186 0.0028375  9 -3.777483  0.0044
-#seasonsummer -0.0648577 0.1169943  9 -0.554367  0.5928
-
-M4b<-lme(NO3.mgNL~river_mile, random = ~1|stream, 
-         method="REML", chem)
+M4b<-lme(NO3.mgNL~river_mile+ season+type, random = ~1|stream, 
+          method="REML", chem) 
 
 lrtest(M3b, M4b)
-#   Df  LogLik Df  Chisq Pr(>Chisq)
-#1   5 -15.752                     
-#2   4 -14.672 -1 2.1591     0.1417
-
-#no difference but AIC was lower for M4b
+#  #no difference but logLik was higher for M3b
 summary(M4b)
-#AIC      BIC    logLik
-#37.34457 41.12233 -14.67229
 
-#Random effects:
-#  Formula: ~1 | stream
-#(Intercept)  Residual
-#StdDev:   0.3436648 0.2592373
+M5b<-lme(NO3.mgNL~river_mile+ season, random = ~1|stream, 
+         method="REML", chem) 
+lrtest(M3b, M5b)
+#no difference, but loglik higher for M3b
 
-#Fixed effects: NO3.mgNL ~ river_mile 
-#Value Std.Error DF   t-value p-value
-#(Intercept)  1.7484984 0.3235024 10  5.404900  0.0003
-#river_mile  -0.0106873 0.0027804  9 -3.843825  0.0039
-#Correlation: 
-#  (Intr)
-#river_mile -0.931
+summary(M5b)
+M6b<-lme(NO3.mgNL~river_mile, random = ~1|stream, 
+         method="REML", chem) 
 
-#Standardized Within-Group Residuals:
-#  Min           Q1          Med           Q3          Max 
-#-1.698179941 -0.484607900  0.001849822  0.374311253  1.591452626 
+lrtest(M6b, M1b)
+#no difference with any except better than M1b
 
-#Number of Observations: 21
-#Number of Groups: 11 
+summary(M6b)
 
-plot(M4b)
+op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
+E2<-residuals(M6b, type="normalized")
+F2<-fitted(M6b)
+myYlab<-"Residuals"
+plot(x=F2, y=E2, xlab="Fitted Values", ylab=myYlab)
+boxplot(E2~season, data=chem, main="Season", ylab=myYlab)
+abline(0,0)
+boxplot(E2~type, data=chem, main="Type", ylab=myYlab)
+abline(0,0)
+plot(x=chem$river_mile, y=E2, main="Mile", ylab=myYlab)
+#looks good! some seasonal differences in residuals, but both box plots overlap 0. a small increase in residual variability with mean 
 
-r.squaredGLMM(M4b)
+r.squaredGLMM(M6b)
 #     R2m       R2c
 #[1,] 0.54536 0.8351211
 
-plot(predict(M4b),chem$NO3.mgNL, xlab="Predicted NO3",ylab="Actual NO3",abline (0,1))
+plot(predict(M6b),chem$NO3.mgNL, xlab="Predicted NO3",ylab="Actual NO3",abline (0,1))
 #looks great, even scatter around line
 
-cor.test(predict(M4b),chem$NO3.mgNL)
+cor.test(predict(M6b),chem$NO3.mgNL)
 #0.94233
 0.94233^2
 #0.888
 
 #####SRP#####
+M1<-lm(oP.mgPL~river_mile*season + type*river_mile, chem)
 
+plot(M1)
+E<-rstandard(M1)#mostly normal and homoscedastistic
+boxplot(E~stream, data=chem)#definitely some stream-specific deviations - probably need to include as a random effect
+abline(0,0)
 
+#now use gls so can compare with lme
+M1<-gls(oP.mgPL~river_mile*season + type*river_mile, chem)
+M1a<-lme(oP.mgPL~river_mile*season + type*river_mile, random = ~1+river_mile|stream, 
+         method="REML", chem) #does not converge
+M1b<-lme(oP.mgPL~river_mile*season + type*river_mile, random = ~1|stream, 
+         method="REML", chem)
+
+anova(M1, M1b)
+#no difference; random effects really don't help (or hurt), prob b/c so little replication. will leave random effects in b/c graphs of 
+#residuals suggested they were needed.
+
+#now, fixed effects
+summary(M1b)
+
+M2b<-lme(oP.mgPL~river_mile + type*river_mile, random = ~1|stream, 
+         method="REML", chem)
+
+lrtest(M1b, M2b)
+#M2b better, keep season out
+
+summary(M2b)
+M3b<-lme(oP.mgPL~river_mile+type, random=~1|stream, 
+         method="REML", chem)
+
+lrtest(M2b, M3b)
+#M3b better
+summary(M3b)
+
+M4b<-lme(oP.mgPL~type, random=~1|stream, 
+         method="REML", chem)
+
+lrtest(M3b, M4b)
+#M4b better. Only type influences oP
+summary(M4b)
+#Data: chem 
+#AIC       BIC   logLik
+#-62.82258 -59.04483 35.41129
+
+#Random effects:
+#  Formula: ~1 | stream
+#(Intercept)   Residual
+#StdDev:  0.01886551 0.02882826
+
+#Fixed effects: oP.mgPL ~ type 
+#Value  Std.Error DF  t-value p-value
+#(Intercept) 0.03477083 0.01133903 10 3.066473  0.0119
+#typetrib    0.04093363 0.01716036  9 2.385360  0.0409
+#Correlation: 
+#  (Intr)
+#typetrib -0.661
+
+plot(M4b) #some heteroscedasticity but mainly just one point
+op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
+E2<-residuals(M4b, type="normalized")
+F2<-fitted(M4b)
+myYlab<-"Residuals"
+plot(x=F2, y=E2, xlab="Fitted Values", ylab=myYlab)
+boxplot(E2~season, data=chem, main="Season", ylab=myYlab)
+abline(0,0)
+boxplot(E2~type, data=chem, main="Type", ylab=myYlab)
+abline(0,0)
+plot(x=chem$river_mile, y=E2, main="Mile", ylab=myYlab) #ok 
+
+r.squaredGLMM(M4b)
+#     R2m       R2c
+#[1,] 0.2663182 0.4863082
+
+plot(predict(M4b),chem$oP.mgPL, xlab="Predicted SRP",ylab="Actual SRP",abline (0,1))
+#mostly good, but one point way off
+
+cor.test(predict(M4b),chem$oP.mgPL)
+#0.7911122
+0.79^2
+#0.624
+#################
+#SI
+################
+M1<-lm(log(Si.mgL)~river_mile*season + type*river_mile, chem)
+
+plot(M1)#ok after logging
+E<-rstandard(M1)
+boxplot(E~stream, data=chem)
+abline(0,0) #huge variation by stream - need to include as random effect
+
+#now, use gls so can compare with lme
+M1<-gls(log(Si.mgL)~river_mile*season + type*river_mile+type*season, chem)
+M1a<-lme(log(Si.mgL)~river_mile*season + type*river_mile, random = ~1+river_mile|stream, 
+         method="REML", chem) #doesn't converge
+M1b<-lme(log(Si.mgL)~river_mile*season + type*river_mile+type*season, random = ~1|stream, 
+         method="REML", chem)
+anova(M1, M1b)
+#M1b better model (p = 0.0117)
+
+#now for fixed effects
+summary(M1b)
+
+M2b<-lme(log(Si.mgL)~river_mile + type*river_mile+type*season, random = ~1|stream, 
+         method="REML", chem)
+
+lrtest(M1b, M2b)
+#M2b better
+summary(M2b)
+
+M3b<-lme(log(Si.mgL)~river_mile + type*season, random = ~1|stream, 
+         method="REML", chem)
+
+lrtest(M2b, M3b)
+#M3b better than M2b 
+
+M4b<-lme(log(Si.mgL)~season*type, random = ~1|stream, 
+         method="REML", chem)
+
+lrtest(M3b, M4b)
+#M4b better. 
+summary(M4b)
+#all have p<0.05 but will still remove in case model better
+
+M5b<-lme(log(Si.mgL)~season+type, random = ~1|stream, 
+         method="REML", chem)
+lrtest(M4b, M5b)
+#M4b is better, but not significantly so.  
+summary(M5b)
+#all have P<0.01, but will still remove in case model better
+
+M6b<-lme(log(Si.mgL)~season, random = ~1|stream, 
+         method="REML", chem)
+
+lrtest(M4b, M6b)
+#M4b better
+lrtest(M6b, M5b)
+#M5b better
+
+#Either M4b or M5b best. check if each meet assumptions and then check r2. 
+op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
+E2<-residuals(M4b, type="normalized")
+F2<-fitted(M4b)
+myYlab<-"Residuals"
+plot(x=F2, y=E2, xlab="Fitted Values", ylab=myYlab)
+boxplot(E2~season, data=chem, main="Season", ylab=myYlab)
+abline(0,0)
+boxplot(E2~type, data=chem, main="Type", ylab=myYlab)
+abline(0,0)
+plot(x=chem$river_mile, y=E2, main="Mile", ylab=myYlab)
+#both M4b and M6b meet assumptions
+
+r.squaredGLMM(M4b)
+#     R2m       R2c
+#[1,] 0.6066539 0.9775949
+
+r.squaredGLMM(M6b)
+#     R2m       R2c
+#[1,] 0.04663329 0.9657014
+
+#use M4b!
+summary(M4b)
+# Data: chem 
+#AIC      BIC     logLik
+#13.28368 18.28296 -0.6418398
+
+#Random effects:
+#  Formula: ~1 | stream
+#(Intercept)   Residual
+#StdDev:   0.3375313 0.08295359
+
+#Fixed effects: log(Si.mgL) ~ season * type 
+#Value  Std.Error DF   t-value p-value
+#(Intercept)            2.7788790 0.14189706  9 19.583767  0.0000
+#seasonsummer          -0.3087941 0.04789328  8 -6.447547  0.0002
+#typetrib               0.7314823 0.21204961  9  3.449581  0.0073
+#seasonsummer:typetrib  0.1783169 0.07559641  8  2.358801  0.0460
+
+exp(-0.3088) #0.734
+exp(0.7315) #2.078
+exp(0.1783)#1.1952
+
+plot(M4b) #ok
+#ok
+
+anova(M1b, M2b, M3b, M4b, M5b, M6b)
+
+r.squaredGLMM(M5b)
+#     R2m       R2c
+#[1,] 0.6147194 0.9650156
+
+plot(predict(M4b),log(chem$Si.mgL), xlab="Predicted Si",ylab="Actual Si",abline (0,1))
+#excellent!
+
+cor.test(predict(M4b),chem$Si.mgL)
+#0.961
+0.961^2
+#0.9235
+
+##################
+#N:P ratio##
+#################
+#random effects
+M1<-lm(log(N.P.ratio)~river_mile+season*river_mile+type*river_mile, chem)
+
+op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
+plot(M1)#maybe slightly better with logging
+E<-rstandard(M1)
+op<-par(mfrow=c(1,1))
+boxplot(E~stream, data=chem)
+abline(0,0) #need to include stream as a random factor
+
+M1<-gls(log(N.P.ratio)~river_mile+season*river_mile+type*river_mile, chem)
+M1a<-lme(log(N.P.ratio)~river_mile*season + type*river_mile, random = ~1+river_mile|stream, 
+         method="REML", chem)
+E2<-residuals(M1a, type="normalized")
+F2<-fitted(M1a)
+myYlab<-"Residuals"
+plot(x=F2, y=E2, xlab="Fitted Values", ylab=myYlab)
+boxplot(E2~season, data=chem, main="Season", ylab=myYlab)
+abline(0,0)
+boxplot(E2~type, data=chem, main="Type", ylab=myYlab)
+abline(0,0)
+plot(x=chem$river_mile, y=E2, main="Mile", ylab=myYlab)
+#mostly good. trib residuals almost all >0 although within range of mainstem. 
+
+anova(M1, M1a)
+#no different; M1 slightly better AIC and BIC but M1a better logLik
+
+M1b<-lme(log(N.P.ratio)~river_mile*season + type*river_mile, random = ~1|stream, 
+         method="REML", chem)
+E2<-residuals(M1b, type="normalized")
+F2<-fitted(M1b)
+myYlab<-"Residuals"
+plot(x=F2, y=E2, xlab="Fitted Values", ylab=myYlab)
+boxplot(E2~season, data=chem, main="Season", ylab=myYlab)
+abline(0,0)
+boxplot(E2~type, data=chem, main="Type", ylab=myYlab)
+abline(0,0)
+plot(x=chem$river_mile, y=E2, main="Mile", ylab=myYlab)
+
+anova(M1, M1b)
+#no difference - M1 better AIC and BIC and M1b slightly better loglik. but the residuals really show a difference by stream.
+#both M1a and M1b mostly meet assumptions of normality. 
+
+M1c<-lme(log(N.P.ratio)~river_mile*season + river_mile, random = ~1|type, 
+         method="REML", chem)
+E2<-residuals(M3b, type="normalized")
+F2<-fitted(M3b)
+myYlab<-"Residuals"
+plot(x=F2, y=E2, xlab="Fitted Values", ylab=myYlab)
+boxplot(E2~season, data=chem, main="Season", ylab=myYlab)
+abline(0,0)
+boxplot(E2~type, data=chem, main="Type", ylab=myYlab)
+abline(0,0)
+plot(x=chem$river_mile, y=E2, main="Mile", ylab=myYlab)
+#looks great! but doesn't take care of stream problem. so will stick with M1b b/c the difference by stream type is negligible
+boxplot(E2~stream, data=chem, main="Type", ylab=myYlab)
+abline(0,0)
+
+summary(M1b)
+
+M2b<-lme(log(N.P.ratio)~river_mile+season + type*river_mile, random = ~1|stream, 
+         method="REML", chem)
+
+lrtest(M1b, M2b)
+#M2b better
+
+M3b<-lme(log(N.P.ratio)~river_mile+ type*river_mile, random = ~1|stream, 
+         method="REML", chem)
+lrtest(M2b, M3b)
+#no difference
+
+M4b<-lme(log(N.P.ratio)~river_mile+ type, random = ~1|stream, 
+         method="REML", chem)
+
+lrtest(M3b, M4b)
+#M4b better
+lrtest(M2b, M4b)
+#M4b slightly better
+
+M5b<-lme(log(N.P.ratio)~river_mile, random = ~1|stream, 
+        method="REML", chem)
+
+lrtest(M5b, M1b)
+lrtest(M5b, M4b)
+#no difference
+
+op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
+E2<-residuals(M5b, type="normalized")
+F2<-fitted(M5b)
+myYlab<-"Residuals"
+plot(x=F2, y=E2, xlab="Fitted Values", ylab=myYlab)
+boxplot(E2~season, data=chem, main="Season", ylab=myYlab)
+abline(0,0)
+boxplot(E2~type, data=chem, main="Type", ylab=myYlab)
+abline(0,0)
+plot(x=chem$river_mile, y=E2, main="Mile", ylab=myYlab)
+
+#M3b, M4b, and M5b show a pattern in residuals with season, with summer generally higher. 
+#But summer both higher and lower values than in fall, so greater range of residuals maybe makes sense?
+summary(M5b)
+
+#Linear mixed-effects model fit by REML
+#Data: chem 
+#AIC      BIC    logLik
+#55.15306 58.93082 -23.57653
+
+#Random effects:
+#  Formula: ~1 | stream
+#(Intercept)  Residual
+#StdDev:   0.4815545 0.4437365
+
+#Fixed effects: log(N.P.ratio) ~ river_mile 
+#Value Std.Error DF   t-value p-value
+#(Intercept)  5.081904 0.4781519 10 10.628219  0.0000
+#river_mile  -0.018598 0.0041054  9 -4.530228  0.0014
+
+r.squaredGLMM(M5b) 
+#     R2m       R2c
+#[1,] 0.6108783 0.8213166
+
+plot(predict(M5b),log(chem$N.P.ratio), xlab="Predicted N:P",ylab="Actual N:P",abline (0,1))
+#excellent!
+
+cor.test(predict(M5b),chem$N.P.ratio)
+#0.9046
+0.9046^2
+#0.818
+
+#######
+#N:Si ratio
+######
+M1<-lm(log(N.Si.ratio)~river_mile+season*river_mile+type*river_mile, chem)
+
+op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
+plot(M1)#much better with logging, maybe a few outliers, but in pretty good shape
+E<-rstandard(M1)
+op<-par(mfrow=c(1,1))
+boxplot(E~stream, data=chem)
+abline(0,0) #may need to include stream as a random factor
+
+M1a<-lme(log(N.Si.ratio)~river_mile*season + type*river_mile, random = ~1+river_mile|stream, 
+         method="REML", chem)
+E2<-residuals(M1a, type="normalized")
+F2<-fitted(M1a)
+myYlab<-"Residuals"
+plot(x=F2, y=E2, xlab="Fitted Values", ylab=myYlab)
+boxplot(E2~season, data=chem, main="Season", ylab=myYlab)
+abline(0,0)
+boxplot(E2~type, data=chem, main="Type", ylab=myYlab)
+abline(0,0)
+plot(x=chem$river_mile, y=E2, main="Mile", ylab=myYlab)
+#looks great!
+
+M1b<-lme(log(N.Si.ratio)~river_mile*season + type*river_mile, random = ~1|stream, 
+         method="REML", chem)
+E2<-residuals(M1b, type="normalized")
+F2<-fitted(M1b)
+myYlab<-"Residuals"
+plot(x=F2, y=E2, xlab="Fitted Values", ylab=myYlab)
+boxplot(E2~season, data=chem, main="Season", ylab=myYlab)
+abline(0,0)
+boxplot(E2~type, data=chem, main="Type", ylab=myYlab)
+abline(0,0)
+plot(x=chem$river_mile, y=E2, main="Mile", ylab=myYlab)
+#looks great!
+
+anova(M1a, M1b)
+#no difference. will go with M1b - simpler
+summary(M1b)
+#M2b better
+
+M2b<-lme(log(N.Si.ratio)~river_mile*season + type, random = ~1|stream, 
+         method="REML", chem)
+lrtest(M1b, M2b)
+
+M3b<-lme(log(N.Si.ratio)~river_mile*season, random = ~1|stream, 
+         method="REML", chem)
+
+lrtest(M2b, M3b)
+lrtest(M1b, M3b)
+#M3b not better than either 
+
+M4b<-lme(log(N.Si.ratio)~river_mile+season, random = ~1|stream, 
+         method="REML", chem)
+
+lrtest(M1b, M4b)
+lrtest(M2b, M4b)
+lrtest(M3b, M4b)
+
+#M4b better than M1b and M3b but not different than M2b. loglik slightly higher but p=0.089 
+#will go with M4b
+
+summary(M4b)
+M5b<-lme(log(N.Si.ratio)~river_mile, random = ~1|stream, 
+         method="REML", chem)
+
+lrtest(M1b, M5b)
+lrtest(M2b, M5b)
+lrtest(M3b, M5b)
+lrtest(M4b, M5b)
+
+#M5b better than M1b and M3b, but not M2b and M4b
+
+op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
+E2<-residuals(M4b, type="normalized")
+F2<-fitted(M4b)
+myYlab<-"Residuals"
+plot(x=F2, y=E2, xlab="Fitted Values", ylab=myYlab)
+boxplot(E2~season, data=chem, main="Season", ylab=myYlab)
+abline(0,0)
+boxplot(E2~type, data=chem, main="Type", ylab=myYlab)
+abline(0,0)
+plot(x=chem$river_mile, y=E2, main="Mile", ylab=myYlab)
+
+#M4b meets assumptions best so will use M4b!
+summary(M4b)
+#Linear mixed-effects model fit by REML
+#Data: chem 
+#AIC      BIC   logLik
+#64.73281 69.18466 -27.3664
+
+#Random effects:
+#  Formula: ~1 | stream
+#(Intercept)  Residual
+#StdDev:    0.812682 0.4397019
+
+#Fixed effects: log(N.Si.ratio) ~ river_mile + season 
+#Value Std.Error DF   t-value p-value
+#(Intercept)  -0.6389693 0.7303827  9 -0.874842  0.4044
+#river_mile   -0.0232400 0.0062068  9 -3.744282  0.0046
+#seasonsummer -0.1633939 0.1956503  9 -0.835132  0.4253
+
+r.squaredGLMM(M4b) 
+#     R2m       R2c
+#[1,] 0.5524108 0.898645
+
+plot(predict(M4b),log(chem$N.Si.ratio), xlab="Predicted N:P",ylab="Actual N:Si",abline (0,1))
+#excellent!
+
+cor.test(predict(M4b),chem$N.P.ratio)
+#0.883
 
 #####old stuff below - can probably delete########
 N_sum_s<-ddply(N_sponge, c("stream", "nutrient", "season", "river_mile", "top", "type"), summarise, cr=mean(cr.area, na.rm=T), 
