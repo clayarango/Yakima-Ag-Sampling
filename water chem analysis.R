@@ -16,10 +16,6 @@ nds_chem<-read.csv("NDS_chem_all.csv")
 
 nds_chem$river_mile<-ifelse(nds_chem$stream=="ahtanum", 106, nds_chem$river_mile)
 
-N<-subset(nds_chem, N==1)
-N_sponge<-subset(N, top=="sponge")
-N_glass<-subset(N, top =="glass")
-
 chem<-read.csv("chem_summary.csv")
 chem$river_mile<-ifelse(chem$stream=="ahtanum", 106, chem$river_mile)
 
@@ -880,11 +876,83 @@ summary(M6b)
 #(Intercept)   0.0023822706 0.0003233003 10  7.368599  0.0000
 #seasonsummer -0.0005817866 0.0003282426  9 -1.772429  0.1101
 
+######NH4#######
 
+M1<-lm(NH4.mgNL~river_mile+season*river_mile+type*river_mile+season*type, chem)
 
+op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
+plot(M1)#ok
+E<-rstandard(M1)
+op<-par(mfrow=c(1,1))
+boxplot(E~stream, data=chem)#def need to account for stream
+abline(0,0)
 
+M1<-gls(NH4.mgNL~season*river_mile+type*river_mile+season*type, chem)
+M1a<-lme(NH4.mgNL~season*river_mile+type*river_mile+season*type, random= ~1+river_mile|stream, chem)#doesn't converge
+M1b<-lme(NH4.mgNL~season*river_mile+type*river_mile+season*type, random= ~1|stream, chem)
 
+anova(M1, M1b)# M1b slightly better but p = 0.755
 
+op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
+E2<-residuals(M1b, type="normalized")
+F2<-fitted(M1b)
+myYlab<-"Residuals"
+plot(x=F2, y=E2, xlab="Fitted Values", ylab=myYlab)
+boxplot(E2~season, data=chem, main="Season", ylab=myYlab)
+abline(0,0)
+boxplot(E2~type, data=chem, main="Type", ylab=myYlab)
+abline(0,0)
+plot(x=chem$river_mile, y=E2, main="Mile", ylab=myYlab)
+#M1b meets assumptions so will use it.
+
+#fixed effects
+M2b<-lme(NH4.mgNL~type*river_mile+season*type, random= ~1|stream, chem)
+lrtest(M1b, M2b)
+#M2b WAY better
+summary(M2b)
+
+M3b<-lme(NH4.mgNL~type*river_mile, random= ~1|stream, chem)
+lrtest(M2b, M3b)
+#no difference, but M3b slightly higher loglik
+summary(M3b)
+
+M4b<-lme(NH4.mgNL~type+river_mile, random= ~1|stream, chem)
+lrtest(M3b, M4b)
+lrtest(M2b, M4b)
+#M4b better, in both cases
+summary(M4b)
+M5b<-lme(NH4.mgNL~river_mile, random= ~1|stream, chem)
+lrtest(M4b, M5b)
+#no difference, but M5b slightly higher loglik. Choosing this one b/c all parameters significant and meets assumptions
+E2<-residuals(M5b, type="normalized")
+F2<-fitted(M5b)
+myYlab<-"Residuals"
+plot(x=F2, y=E2, xlab="Fitted Values", ylab=myYlab)
+boxplot(E2~season, data=chem, main="Season", ylab=myYlab)
+abline(0,0)
+boxplot(E2~type, data=chem, main="Type", ylab=myYlab)
+abline(0,0)
+plot(x=chem$river_mile, y=E2, main="Mile", ylab=myYlab)
+
+summary(M5b)
+#Linear mixed-effects model fit by REML
+#Data: chem 
+#AIC     BIC    logLik
+#6.470947 10.2487 0.7645266
+
+#Random effects:
+#  Formula: ~1 | stream
+#(Intercept)  Residual
+#StdDev:   0.1436444 0.1188758
+
+#Fixed effects: NH4.mgNL ~ river_mile 
+#Value  Std.Error DF   t-value p-value
+#(Intercept)  0.5142282 0.13833437 10  3.717285  0.0040
+#river_mile  -0.0028977 0.00118839  9 -2.438365  0.0375
+
+r.squaredGLMM(M5b)
+#  R2m       R2c
+#[1,] 0.3197512 0.7234905
 
 #####old stuff below - can probably delete########
 N_sum_s<-ddply(N_sponge, c("stream", "nutrient", "season", "river_mile", "top", "type"), summarise, cr=mean(cr.area, na.rm=T), 
@@ -1573,6 +1641,11 @@ summary(NS2)
 #Multiple R-squared:  0.5652,	Adjusted R-squared:  0.5423 
 #F-statistic:  24.7 on 1 and 19 DF,  p-value: 8.51e-05
 
+###NH4#####
+
+
+
+
 ###########################
 #univariate relationships
 ###########################
@@ -1711,4 +1784,7 @@ ggplot(P, aes(x=P.Si.ratio, y=chla.nrr))+ geom_point(aes(color=factor(season), s
 ggplot(Si, aes(x=P.Si.ratio, y=chla.nrr))+ geom_point(aes(color=factor(season), shape=factor(nutrient)))+
   scale_color_manual(values=c("goldenrod2", "plum3"))+theme_classic()
 #no clear patterns
+
+
+
 
