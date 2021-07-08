@@ -40,8 +40,8 @@ summary(Mf)
 
 #Fixed effects: log(cr.nrr + 1) ~ season + river_mile * type 
 #                       Value  Std.Error  DF   t-value  p-value
-#(Intercept)          0.4304319 0.03463469 785 12.427769  0.0000
-#seasonsummer         0.1097521 0.01345564 785  8.156582  0.0000
+#(Intercept)          0.5401840 0.03465829 785 15.585997  0.0000
+#seasonfall          -0.1097521 0.01345564 785  8.156582  0.0000
 #river_mile           0.0016288 0.00059886 785  2.719846  0.0067
 #typetrib             0.2673480 0.04474965 785  5.974304  0.0000
 #river_mile:typetrib -0.0024225 0.00038652 785 -6.267546  0.0000
