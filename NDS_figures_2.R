@@ -64,6 +64,7 @@ sum_g<-ddply(nds_g, c("stream", "nutrient", "season", "river_mile", "top","type"
              se_gpp=(sd(gpp.area, na.rm=T)/sqrt(sum(!is.na(gpp.area)))), 
              se_chla=(sd(chla, na.rm=T)/sqrt(sum(!is.na(chla)))), 
              se_chla_nrr=(sd(chla.nrr, na.rm=T)/sqrt(sum(!is.na(chla.nrr)))))
+sum_g$nutrient<-as.factor(sum_g$nutrient)
 
 #Figures with all nutrient treatments
 sum_s$nutrient<-factor(sum_s$nutrient, levels=c("control", "N", "P", "NP","NSi","PSi", "Si","NPSi"))
@@ -85,34 +86,34 @@ ggplot(subset(sum_g, !(nutrient=="control")),aes(x=river_mile, y=log(chl_a.nrr+1
 N.mains<-function (x){(0.5401840-0.06665818+ (0.0016244156*1.0024225*x))*1.1097521}
 NP.mains<-function (x){(0.5401840-0.05226612+(0.0012694891*1.0024225*x))*1.1097521}
 NPSi.mains<-function (x){(0.5401840-0.10001441+(0.0023269448*1.0024225*x))*1.1097521}
-NSi.mains<-function (x){(0.5401840 +0.02581716 -(0.0015291970*1.0024225*x))*1.1097521}
-P.mains<-function (x){(0.5401840 +0.02678770 -(0.0006280988*1.0024225*x))*1.1097521}
-PSi.mains<-function (x){(0.5401840 +0.04495817 -(0.0005058603*1.0024225*x))*1.1097521}
-Si.mains<-function (x){(0.5401840 +0.07073013 -(0.0021453599*1.0024225*x))*1.1097521}
+NSi.mains<-function (x){(0.5401840+0.02581716 -(0.0015291970*1.0024225*x))*1.1097521}
+P.mains<-function (x){(0.5401840+0.02678770 -(0.0006280988*1.0024225*x))*1.1097521}
+PSi.mains<-function (x){(0.5401840+0.04495817 -(0.0005058603*1.0024225*x))*1.1097521}
+Si.mains<-function (x){(0.5401840+0.07073013 -(0.0021453599*1.0024225*x))*1.1097521}
 
 N.mainf<-function (x){(0.5401840-0.06665818+ (0.0016244156*1.0024225*x))}
 NP.mainf<-function (x){(0.5401840-0.05226612+(0.0012694891*1.0024225*x))}
 NPSi.mainf<-function (x){(0.5401840-0.10001441+(0.0023269448*1.0024225*x))}
-NSi.mainf<-function (x){(0.5401840 +0.02581716 -(0.0015291970*1.0024225*x))}
-P.mainf<-function (x){(0.5401840 +0.02678770 -(0.0006280988*1.0024225*x))}
-PSi.mainf<-function (x){(0.5401840 +0.04495817 -(0.0005058603*1.0024225*x))}
-Si.mainf<-function (x){(0.5401840 +0.07073013 -(0.0021453599*1.0024225*x))}
+NSi.mainf<-function (x){(0.5401840+0.02581716 -(0.0015291970*1.0024225*x))}
+P.mainf<-function (x){(0.5401840+0.02678770 -(0.0006280988*1.0024225*x))}
+PSi.mainf<-function (x){(0.5401840+0.04495817 -(0.0005058603*1.0024225*x))}
+Si.mainf<-function (x){(0.5401840+0.07073013 -(0.0021453599*1.0024225*x))}
 
-N.tribs<-function (x){(0.5401840-0.06665818+ 0.0016244156*x)*1.1097521*1.2673480}
-NP.tribs<-function (x){(0.5401840-0.05226612+0.0012694891*x)*1.1097521*1.2673480}
-NPSi.tribs<-function (x){(0.5401840-0.10001441+0.0023269448*x)*1.1097521*1.2673480}
-NSi.tribs<-function (x){(0.5401840 +0.02581716 -0.0015291970*x)*1.1097521*1.2673480}
-P.tribs<-function (x){(0.5401840 +0.02678770 -0.0006280988*x)*1.1097521*1.2673480}
-PSi.tribs<-function (x){(0.5401840 +0.04495817 -0.0005058603*x)*1.1097521*1.2673480}
-Si.tribs<-function (x){(0.5401840 +0.07073013 -0.0021453599*x)*1.1097521*1.2673480}
+N.tribs<-function (x){(0.5401840+0.06665818+ 0.0016244156*x)*1.1097521*1.2673480}
+NP.tribs<-function (x){(0.5401840+0.05226612+0.0012694891*x)*1.1097521*1.2673480}
+NPSi.tribs<-function (x){(0.5401840+0.10001441+0.0023269448*x)*1.1097521*1.2673480}
+NSi.tribs<-function (x){(0.5401840+0.02581716 -0.0015291970*x)*1.1097521*1.2673480}
+P.tribs<-function (x){(0.5401840+0.02678770 -0.0006280988*x)*1.1097521*1.2673480}
+PSi.tribs<-function (x){(0.5401840+0.04495817 -0.0005058603*x)*1.1097521*1.2673480}
+Si.tribs<-function (x){(0.5401840+0.07073013 -0.0021453599*x)*1.1097521*1.2673480}
 
-N.tribf<-function (x){(0.5401840-0.06665818+ 0.0016244156*x)*1.2673480}
+N.tribf<-function (x){(0.5401840+0.06665818+ 0.0016244156*x)*1.2673480}
 NP.tribf<-function (x){(0.5401840-0.05226612+0.0012694891*x)*1.2673480}
 NPSi.tribf<-function (x){(0.5401840-0.10001441+0.0023269448*x)*1.2673480}
-NSi.tribf<-function (x){(0.5401840 +0.02581716 -0.0015291970*x)*1.2673480}
-P.tribf<-function (x){(0.5401840 +0.02678770 -0.0006280988*x)*1.2673480}
-PSi.tribf<-function (x){(0.5401840 +0.04495817 -0.0005058603*x)*1.2673480}
-Si.tribf<-function (x){(0.5401840 +0.07073013 -0.0021453599*x)*1.2673480}
+NSi.tribf<-function (x){(0.5401840+0.02581716 -0.0015291970*x)*1.2673480}
+P.tribf<-function (x){(0.5401840+0.02678770 -0.0006280988*x)*1.2673480}
+PSi.tribf<-function (x){(0.5401840+0.04495817 -0.0005058603*x)*1.2673480}
+Si.tribf<-function (x){(0.5401840+0.07073013 -0.0021453599*x)*1.2673480}
 
 #                       Value  Std.Error  DF   t-value  p-value
 #(Intercept)          0.5401840 0.03465829 785 15.585997  0.0000
@@ -204,6 +205,131 @@ D<-ggplot(subset(sum_s_trib_s, !(nutrient=="control")), aes(x=river_mile, y=log(
 library(gridExtra)
 grid.arrange(A, B, C, D, ncol=2)
 
+#chla NRR, model with river mile, season, and type only
+sum_g$nutrient<-factor(sum_g$nutrient, levels=c("control", "N", "P", "NP","NSi","PSi", "Si","NPSi"))
+
+#equations
+#Fixed effects: chla.nrr ~ river_mile + season + river_mile * type 
+#                     Value  Std.Error    DF   t-value  p-value
+#(Intercept)          0.7526378 0.06627973 794 11.355474  0.0000
+#river_mile          -0.0031057 0.00042297 794 -7.342575  0.0000
+#seasonsummer         0.4611727 0.03273352 794 14.088696  0.0000
+#typetrib            -0.4392558 0.07392803 794 -5.941668  0.0000
+#river_mile:typetrib  0.0015501 0.00050217 794  3.086829  0.0021
+
+#       (Intercept)
+#control  0.06433244
+#N        0.07263615
+#NP      -0.05449180
+#NPSi     0.01110275
+#NSi     -0.04395794
+#P        0.02348266
+#PSi     -0.04629925
+#Si      -0.02680503
+
+N.tribf<-function (x){(0.7526378+0.07263615-(0.0031057*0.0015501)*x)}
+NP.tribf<-function(x){0.7526378-0.05449180-(0.0031057*0.0015501)*x}
+NPSi.tribf<-function(x){0.7526378+0.01110275-(0.0031057*0.0015501)*x}
+NSi.tribf<-function(x){0.7526378-0.04395794-(0.0031057*0.0015501)*x}
+P.tribf<-function(x){0.7526378+0.02348266-(0.0031057*0.0015501)*x}
+PSi.tribf<-function(x){0.7526378-0.04629925-(0.0031057*0.0015501)*x}
+Si.tribf<-function(x){0.7526378-0.02680503-(0.0031057*0.0015501)*x}
+
+N.mains<-function (x){(0.7526378+0.07263615-0.0031057*x)*1.4611727*1.4392558}
+NP.mains<-function(x){(0.7526378-0.05449180-0.0031057*x)*1.4611727*1.4392558}
+NPSi.mains<-function(x){(0.7526378+0.01110275-0.0031057*x)*1.4611727*1.4392558}
+NSi.mains<-function(x){(0.7526378-0.04395794-0.0031057*x)*1.4611727*1.4392558}
+P.mains<-function(x){(0.7526378+0.02348266-0.0031057*x)*1.4611727*1.4392558}
+PSi.mains<-function(x){(0.7526378-0.04629925-0.0031057*x)*1.4611727*1.4392558}
+Si.mains<-function(x){(0.7526378-0.02680503-0.0031057*x)*1.4611727*1.4392558}
+
+N.tribs<-function (x){(0.7526378+0.07263615-(0.0031057*0.0015501)*x)*1.4611727}
+NP.tribs<-function(x){(0.7526378-0.05449180-(0.0031057*0.0015501)*x)*1.4611727}
+NPSi.tribs<-function(x){(0.7526378+0.01110275-(0.0031057*0.0015501)*x)*1.4611727}
+NSi.tribs<-function(x){(0.7526378-0.04395794-(0.0031057*0.0015501)*x)*1.4611727}
+P.tribs<-function(x){(0.7526378+0.02348266-(0.0031057*0.0015501)*x)*1.4611727}
+PSi.tribs<-function(x){(0.7526378-0.04629925-(0.0031057*0.0015501)*x)*1.4611727}
+Si.tribs<-function(x){(0.7526378-0.02680503-(0.0031057*0.0015501)*x)*1.4611727}
+
+N.mainf<-function (x){(0.7526378+0.07263615-0.0031057*x)*1.4392558}
+NP.mainf<-function(x){(0.7526378-0.05449180-0.0031057*x)*1.4392558}
+NPSi.mainf<-function(x){(0.7526378+0.01110275-0.0031057*x)*1.4392558}
+NSi.mainf<-function(x){(0.7526378-0.04395794-0.0031057*x)*1.4392558}
+P.mainf<-function(x){(0.7526378+0.02348266-0.0031057*x)*1.4392558}
+PSi.mainf<-function(x){(0.7526378-0.04629925-0.0031057*x)*1.4392558}
+Si.mainf<-function(x){(0.7526378-0.02680503-0.0031057*x)*1.4392558}
+
+sum_g_main_s<-subset(sum_g,type=="mainstem"&season=="summer")
+sum_g_main_f<-subset(sum_g, type=="mainstem" & season =="fall")
+sum_g_trib_s<-subset(sum_g,type=="trib"&season=="summer")
+sum_g_trib_f<-subset(sum_g,type=="trib"&season=="fall")
+
+sum_g_main_s$nutrient<-factor(sum_g_main_s$nutrient, levels=c("control", "N", "P", "Si", "NP","NSi","PSi", "NPSi"))
+sum_g_main_f$nutrient<-factor(sum_g_main_f$nutrient, levels=c("control", "N", "P", "Si", "NP","NSi","PSi","NPSi"))
+sum_g_trib_s$nutrient<-factor(sum_g_trib_s$nutrient, levels=c("control", "N", "P", "Si", "NP","NSi","PSi","NPSi"))
+sum_g_trib_f$nutrient<-factor(sum_g_trib_f$nutrient, levels=c("control", "N", "P", "Si", "NP","NSi","PSi","NPSi"))
+
+A<-ggplot(subset(sum_g_main_s, !(nutrient=="control")), aes(x=river_mile, y=chl_a.nrr))+
+  geom_point(aes(color=factor(nutrient)), size=3)+
+  geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr, width=2.5))+
+  scale_color_manual(values=c("red","goldenrod2", "deepskyblue3", "orange", "orchid", "turquoise4", "slategray4"))+
+  theme_bw(base_size = 14)+ylab(expression(paste('NRR'[chla],')'))) +xlab("River Mile")+
+  ggtitle("A. Mainstem, Summer")+theme(plot.title = element_text(hjust = 0.02, vjust=-8))+
+  theme(legend.title=element_blank(),legend.position="none")+
+  stat_function(fun=N.mains, color="red")+
+  stat_function(fun=NP.mains, color="orange")+
+  stat_function(fun=NPSi.mains, color="slategray4")+
+  stat_function(fun=P.mains, color="goldenrod2")+
+  stat_function(fun=PSi.mains, color="turquoise4")+
+  stat_function(fun=NSi.mains, color="orchid")+
+  stat_function(fun=Si.mains, color="deepskyblue3")
+
+B<-ggplot(subset(sum_g_main_f, !(nutrient=="control")), aes(x=river_mile, y=chl_a.nrr))+
+  geom_point(aes(color=factor(nutrient)), size=3)+
+  geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr, width=2.5))+
+  scale_color_manual(values=c("red","goldenrod2", "deepskyblue3", "orange", "orchid", "turquoise4", "slategray4"))+
+  theme_bw(base_size = 14)+ylab(expression(paste('NRR'[chla],')')))+xlab("River Mile") +
+  ggtitle("B. Mainstem, Fall")+theme(plot.title = element_text(hjust = 0.02, vjust=-8))+
+  theme(legend.title=element_blank(),legend.position="none")+
+  stat_function(fun=N.mainf, color="red")+
+  stat_function(fun=NP.mainf, color="orange")+
+  stat_function(fun=NPSi.mainf, color="slategray4")+
+  stat_function(fun=P.mainf, color="goldenrod2")+
+  stat_function(fun=PSi.mainf, color="turquoise4")+
+  stat_function(fun=NSi.mainf, color="orchid")+
+  stat_function(fun=Si.mainf, color="deepskyblue3")
+
+C<-ggplot(subset(sum_g_trib_s, !(nutrient=="control")), aes(x=river_mile, y=chl_a.nrr))+
+  geom_point(aes(color=factor(nutrient)), size=3)+
+  geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr), width=2.5)+
+  scale_color_manual(values=c("red","goldenrod2", "deepskyblue3", "orange", "orchid", "turquoise4", "slategray4"))+
+  theme_bw(base_size=14)+ylab(expression(paste('Ln (NRR'[chla],')'))) +xlab("River Mile")+
+  ggtitle("C. Tributaries, Summer")+theme(plot.title = element_text(hjust = 0.02, vjust=-8))+
+  theme(legend.title=element_blank(),legend.position="none")+
+  stat_function(fun=N.tribs, color="red")+
+  stat_function(fun=NP.tribs, color="orange")+
+  stat_function(fun=NPSi.tribs, color="slategray4")+
+  stat_function(fun=P.tribs, color="goldenrod2")+
+  stat_function(fun=PSi.tribs, color="turquoise4")+
+  stat_function(fun=NSi.tribs, color="orchid")+
+  stat_function(fun=Si.tribs, color="deepskyblue3")
+
+D<-ggplot(subset(sum_g_trib_s, !(nutrient=="control")), aes(x=river_mile, y=chl_a.nrr))+
+  geom_point(aes(color=factor(nutrient)), size=3)+
+  geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr), width=2.5)+
+  scale_color_manual(values=c("red","goldenrod2", "deepskyblue3", "orange", "orchid", "turquoise4", "slategray4"))+
+  theme_bw(base_size = 14)+ ylab(expression(paste('NRR'[chla],')'))) +xlab("River Mile")+
+  ggtitle("D. Tributaries, Fall")+theme(plot.title = element_text(hjust = 0.02, vjust=-8))+
+  theme(legend.title=element_blank(),legend.position="none")+
+  stat_function(fun=N.tribf, color="red")+
+  stat_function(fun=NP.tribf, color="orange")+
+  stat_function(fun=NPSi.tribf, color="slategray4")+
+  stat_function(fun=P.tribf, color="goldenrod2")+
+  stat_function(fun=PSi.tribf, color="turquoise4")+
+  stat_function(fun=NSi.tribf, color="orchid")+
+  stat_function(fun=Si.tribf, color="deepskyblue3")
+
+grid.arrange(A, B, C, D, ncol=2)
 
 nds_ssummer<-subset(nds_s, season=="summer")
 nds_sfall<-subset(nds_s, season=="fall")

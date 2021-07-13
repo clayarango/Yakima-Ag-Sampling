@@ -102,6 +102,18 @@ summary(M1)
 #Multiple R-squared:  0.3317,	Adjusted R-squared:  0.3223 
 #F-statistic: 35.42 on 11 and 785 DF,  p-value: < 2.2e-16
 
+#post-hoc tests
+model.matrix.gls <- function(object, ...) {
+        model.matrix(terms(object), data = getData(object), ...)
+}
+model.frame.gls <- function(object, ...) {
+        model.frame(formula(object), data = getData(object), ...)
+}
+terms.gls <- function(object, ...) {
+        terms(model.frame(object), ...)
+}
+multcomp<-glht(M1, linfct=mcp(nutrient="Tukey"))
+
 #NRR model, based on plots. starting variables include season, type, and the 4 combinations above
 #start with fixed effects and then test if adding random effects improves the model
 M1<-lme(log(cr.nrr+1)~river_mile+season + type*river_mile, random = ~1+river_mile|nutrient, nds_s)
@@ -752,6 +764,17 @@ r.squaredGLMM(M2b)
 #       R2m       R2c
 #[1,] 0.1614768 0.1672194
 #R2m is marginal (fixed effects only) and R2c is conditional (entire model)
+
+ranef(M2b)
+#       (Intercept)
+#control  0.06433244
+#N        0.07263615
+#NP      -0.05449180
+#NPSi     0.01110275
+#NSi     -0.04395794
+#P        0.02348266
+#PSi     -0.04629925
+#Si      -0.02680503
 
 plot(predict(M2b),nds_g$chla.nrr, xlab="Predicted NRR",ylab="Actual NRR",abline (0,1))# ick - looks like a straight line d/t
 #all the outliers. it doesn't predict the high values very well
