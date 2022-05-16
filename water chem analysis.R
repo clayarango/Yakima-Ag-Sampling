@@ -29,7 +29,7 @@ chem$stream<-as.factor(chem$stream)
 chem$season<-as.factor(chem$season)
 chem$type<-as.factor(chem$type)
 
-#NRR model, based on plots
+#ME model, based on plots
 #start with fixed effects and then test if adding random effects improves the model
 #M1 is all the variables and interactions (except nutrient, which we want to model as a random effect)
 M1<-lm(NO3.mgNL~river_mile*season + type*river_mile, chem)
@@ -106,6 +106,8 @@ r.squaredGLMM(M6b)
 
 plot(predict(M6b),chem$NO3.mgNL, xlab="Predicted NO3",ylab="Actual NO3",abline (0,1))
 #looks great, even scatter around line
+
+ranef(M6b)
 
 cor.test(predict(M6b),chem$NO3.mgNL)
 #0.94233
@@ -186,6 +188,8 @@ plot(x=chem$river_mile, y=E2, main="Mile", ylab=myYlab) #ok
 r.squaredGLMM(M4b)
 #     R2m       R2c
 #[1,] 0.2663182 0.4863082
+
+ranef(M4b)
 
 plot(predict(M4b),chem$oP.mgPL, xlab="Predicted SRP",ylab="Actual SRP",abline (0,1))
 #mostly good, but one point way off

@@ -6,6 +6,7 @@ library(gridExtra)
 #data (created in "all sites" by combining NDS files and water chem file)
 nds_chem<-read.csv("NDS_chem_all.csv")
 nds_chem$river_mile<-ifelse(nds_chem$stream=="ahtanum", 106, nds_chem$river_mile)
+nds_chem$river_km<-nds_chem$river_mile*1.609
 nds_chem$stream<-as.factor(nds_chem$stream)
 nds_chem$season<-as.factor(nds_chem$season)
 nds_chem$type<-as.factor(nds_chem$type)
@@ -29,108 +30,77 @@ nds_g$season<-factor(nds_g$season, levels=c("summer", "fall"))
 
 nds_s$season<-factor(nds_s$season, levels=c("summer", "fall"))
 
-CR_C<-ggplot(subset(nds_s,nutrient=="control"), aes(x=Stream, y=abs(cr.area)))+geom_boxplot(aes(fill=factor(season)))+
-  theme_bw(base_size = 12)+ theme(axis.title.x = element_blank(), axis.text.x.bottom = element_blank(), axis.ticks.x.bottom = element_blank())+
-  scale_fill_manual(values=c("plum3","goldenrod2"))+labs(y="Respiration (ug O2/cm2/h)")+
-  theme(legend.position = "none")+theme( axis.text.x = element_text(angle = 35, vjust=0.65))
-
-Chla_C<-ggplot(subset(nds_g,nutrient=="control"), aes(x=Stream, y=chla))+geom_boxplot(aes(fill=factor(season)))+
-  theme_bw(base_size=12)+theme(legend.position = "none")+theme( axis.text.x = element_text(angle = 30, vjust=0.75), axis.title.x = element_blank())+
-  scale_fill_manual(values=c("plum3","goldenrod2"))+labs(y="Chlorophyll-a (ug/cm2)")
-
-grid.arrange(CR_C, Chla_C, ncol=1, heights=unit(c(2.5,3.2), c("in","in")))
-
-ddply(subset(nds_s,nutrient=="control"& season=="fall"), "Stream", summarise, cr = abs(mean(cr.area)), 
-      se = (sd(abs(cr.area))/sqrt(sum(!is.na(cr.area)))))
-
-ddply(subset(nds_s,nutrient=="control"&season=="summer"), "Stream", summarise, cr = abs(mean(cr.area)), 
-      se = (sd(abs(cr.area))/sqrt(sum(!is.na(cr.area)))))
-
-  nds_g$Stream <- factor(nds_g$Stream, levels = c("Cle Elum", "Reecer", "Ringer", "Roza", "Wenas", "Century Landing",
-                                                "Ahtanum", "Toppenish", "Satus", "Mabton", "Kiona"))
-
-ddply(subset(nds_g,nutrient=="control"), c("Stream","season"), summarise, chlor = mean(chla), 
-      se = (sd(chla))/sqrt(sum(!is.na(chla))))
-
 #NRR figures
 #summaries
-sum_s<-ddply(nds_s, c("stream", "nutrient", "season", "river_mile", "top", "type", "Si.mgL", "DOC.mgL", "DIN.mgNL", "oP.mgPL"), summarise, cr=mean(cr.area, na.rm=T), 
+sum_s<-ddply(nds_s, c("stream", "nutrient", "season", "river_km", "top", "type", "Si.mgL", "DOC.mgL", "DIN.mgNL", "oP.mgPL"), summarise, cr=mean(cr.area, na.rm=T), 
              cr_nrr=mean(cr.nrr, na.rm=T), se_cr=(sd(cr.area, na.rm=T)/sqrt(sum(!is.na(cr.area)))),
              se_cr_nrr=(sd(cr.nrr, na.rm=T)/sqrt(sum(!is.na(cr.nrr)))))
 sum_s$nutrient<-as.factor(sum_s$nutrient)
 
-sum_g<-ddply(nds_g, c("stream", "nutrient", "season", "river_mile", "top","type", "Si.mgL", "DOC.mgL", "DIN.mgNL", "oP.mgPL"), summarise, gpp=mean(gpp.area, na.rm=T),
+sum_g<-ddply(nds_g, c("stream", "nutrient", "season", "river_km", "top","type", "Si.mgL", "DOC.mgL", "DIN.mgNL", "oP.mgPL"), summarise, gpp=mean(gpp.area, na.rm=T),
              chl_a=mean(chla, na.rm=T), chl_a.nrr=mean(chla.nrr, na.rm=T), gpp.nrr=mean(gpp.nrr, na.rm=T), 
              se_gpp=(sd(gpp.area, na.rm=T)/sqrt(sum(!is.na(gpp.area)))), 
              se_chla=(sd(chla, na.rm=T)/sqrt(sum(!is.na(chla)))), 
              se_chla_nrr=(sd(chla.nrr, na.rm=T)/sqrt(sum(!is.na(chla.nrr)))))
 sum_g$nutrient<-as.factor(sum_g$nutrient)
 
-#Figures with all nutrient treatments
-sum_s$nutrient<-factor(sum_s$nutrient, levels=c("control", "N", "P", "NP","NSi","PSi", "Si","NPSi"))
-
-ggplot(subset(sum_s, !(nutrient=="control")),aes(x=Si.mgL, y=cr_nrr))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
-  theme_bw()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=cr_nrr-se_cr_nrr, ymax=cr_nrr+se_cr_nrr), width=4)+
-  scale_color_manual(values=c("orchid3","goldenrod2"))+geom_hline(yintercept = 1)+theme(legend.position = "none")+
-  labs(x="Silica (mg/L)", y="NRR, Respiration")+theme(strip.background =element_rect(fill="white"), strip.text=element_text(hjust=0))
-
-sum_g$nutrient<-factor(sum_g$nutrient, levels=c("control", "N", "P", "NP","NSi","PSi", "Si","NPSi"))
-
-ggplot(subset(sum_g, !(nutrient=="control")),aes(x=river_mile, y=log(chl_a.nrr+1)))+geom_point(aes(color=factor(season), shape=factor(type)), size=3)+
-  theme_bw()+  facet_wrap(~nutrient)+geom_errorbar(aes(ymin=log(chl_a.nrr+1)-log(se_chla_nrr+1), ymax=log(chl_a.nrr+1)+log(se_chla_nrr+1)), width=6)+
-  scale_color_manual(values=c("orchid3","goldenrod2"))+geom_hline(yintercept = log(2))+theme(legend.position = "none")+
-  labs(x="River Mile", y="Ln (NRR, Chlorophyll-a)")+theme(strip.background =element_rect(fill="white"), strip.text=element_text(hjust=0))
-
-#attempts to make figures showing ME models
+#figures showing ME models
 #CR NRR - separate by type to show different relationship between river mile and type
-N.mains<-function (x){(0.5401840-0.06665818+ (0.0016244156*1.0024225*x))*1.1097521}
-NP.mains<-function (x){(0.5401840-0.05226612+(0.0012694891*1.0024225*x))*1.1097521}
-NPSi.mains<-function (x){(0.5401840-0.10001441+(0.0023269448*1.0024225*x))*1.1097521}
-NSi.mains<-function (x){(0.5401840+0.02581716 -(0.0015291970*1.0024225*x))*1.1097521}
-P.mains<-function (x){(0.5401840+0.02678770 -(0.0006280988*1.0024225*x))*1.1097521}
-PSi.mains<-function (x){(0.5401840+0.04495817 -(0.0005058603*1.0024225*x))*1.1097521}
-Si.mains<-function (x){(0.5401840+0.07073013 -(0.0021453599*1.0024225*x))*1.1097521}
+N.mains<-function (x){(0.5401840-0.06665833+ (0.0010123+0.0010095816)*x)}
+NP.mains<-function (x){(0.5401840-0.05226625+(0.0010123+0.0007889932)*x)}
+NPSi.mains<-function (x){(0.5401840-0.10001467+(0.0010123+0.0014462067)*x)}
+NSi.mains<-function (x){(0.5401840+0.02581708 +(0.0010123-0.0009504016)*x)}
+P.mains<-function (x){(0.5401840+0.02678777 +(0.0010123-0.0003903662)*x)}
+PSi.mains<-function (x){(0.5401840+0.04495836 +(0.0010123-0.0003143952)*x)}
+Si.mains<-function (x){(0.5401840+0.07073023 +(0.0010123-0.00133335)*x)}
+mains<-function (x){0.5401840+0.0010123*x}
 
-N.mainf<-function (x){(0.5401840-0.06665818+ (0.0016244156*1.0024225*x))}
-NP.mainf<-function (x){(0.5401840-0.05226612+(0.0012694891*1.0024225*x))}
-NPSi.mainf<-function (x){(0.5401840-0.10001441+(0.0023269448*1.0024225*x))}
-NSi.mainf<-function (x){(0.5401840+0.02581716 -(0.0015291970*1.0024225*x))}
-P.mainf<-function (x){(0.5401840+0.02678770 -(0.0006280988*1.0024225*x))}
-PSi.mainf<-function (x){(0.5401840+0.04495817 -(0.0005058603*1.0024225*x))}
-Si.mainf<-function (x){(0.5401840+0.07073013 -(0.0021453599*1.0024225*x))}
+N.mainf<-function (x){(0.5401840-0.06665833+ (0.0010123+0.0010095816)*x)-0.1097521}
+NP.mainf<-function (x){(0.5401840-0.05226625+(0.0010123+0.0007889932)*x)-0.1097521}
+NPSi.mainf<-function (x){(0.5401840-0.10001467+(0.0010123+0.0014462067)*x)-0.1097521}
+NSi.mainf<-function (x){(0.5401840+0.02581708 +(0.0010123-0.0009504016)*x)-0.1097521}
+P.mainf<-function (x){(0.5401840+0.02678777 +(0.0010123-0.0003903662)*x)-0.1097521}
+PSi.mainf<-function (x){(0.5401840+0.04495836 +(0.0010123-0.0003143952)*x)-0.1097521}
+Si.mainf<-function (x){(0.5401840+0.07073023 +(0.0010123-0.00133335)*x)-0.1097521}
+mainf<-function(x){(0.5401840+0.0010123*x)-0.1097521}
 
-N.tribs<-function (x){(0.5401840+0.06665818+ 0.0016244156*x)*1.1097521*1.2673480}
-NP.tribs<-function (x){(0.5401840+0.05226612+0.0012694891*x)*1.1097521*1.2673480}
-NPSi.tribs<-function (x){(0.5401840+0.10001441+0.0023269448*x)*1.1097521*1.2673480}
-NSi.tribs<-function (x){(0.5401840+0.02581716 -0.0015291970*x)*1.1097521*1.2673480}
-P.tribs<-function (x){(0.5401840+0.02678770 -0.0006280988*x)*1.1097521*1.2673480}
-PSi.tribs<-function (x){(0.5401840+0.04495817 -0.0005058603*x)*1.1097521*1.2673480}
-Si.tribs<-function (x){(0.5401840+0.07073013 -0.0021453599*x)*1.1097521*1.2673480}
+N.tribs<-function (x){(0.5401840-0.06665833+ (0.0010123+0.0010095816-0.0015056)*x)+0.2673480}
+NP.tribs<-function (x){(0.5401840-0.05226625+(0.0010123+0.0007889932-0.0015056)*x)+0.2673480}
+NPSi.tribs<-function (x){(0.5401840-0.10001467+(0.0010123+0.0014462067-0.0015056)*x)+0.2673480}
+NSi.tribs<-function (x){(0.5401840+0.02581708 +(0.0010123-0.0009504016-0.0015056)*x)+0.2673480}
+P.tribs<-function (x){(0.5401840+0.02678777 +(0.0010123-0.0003903662-0.0015056)*x)+0.2673480}
+PSi.tribs<-function (x){(0.5401840+0.04495836 +(0.0010123-0.0003143952-0.0015056)*x)+0.2673480}
+Si.tribs<-function (x){(0.5401840+0.07073023 +(0.0010123-0.00133335-0.0015056)*x)+0.2673480}
+tribs<-function(x){(0.5401840+((0.0010123-0.0015056)*x))+0.2673480}
 
-N.tribf<-function (x){(0.5401840+0.06665818+ 0.0016244156*x)*1.2673480}
-NP.tribf<-function (x){(0.5401840-0.05226612+0.0012694891*x)*1.2673480}
-NPSi.tribf<-function (x){(0.5401840-0.10001441+0.0023269448*x)*1.2673480}
-NSi.tribf<-function (x){(0.5401840+0.02581716 -0.0015291970*x)*1.2673480}
-P.tribf<-function (x){(0.5401840+0.02678770 -0.0006280988*x)*1.2673480}
-PSi.tribf<-function (x){(0.5401840+0.04495817 -0.0005058603*x)*1.2673480}
-Si.tribf<-function (x){(0.5401840+0.07073013 -0.0021453599*x)*1.2673480}
+N.tribf<-function (x){(0.5401840-0.06665833+ (0.0010123+0.0010095816-0.0015056)*x)+0.2673480-0.1097521}
+NP.tribf<-function (x){(0.5401840-0.05226625+(0.0010123+0.0007889932-0.0015056)*x)+0.2673480-0.1097521}
+NPSi.tribf<-function (x){(0.5401840-0.10001467+(0.0010123+0.0014462067-0.0015056)*x)+0.2673480-0.1097521}
+NSi.tribf<-function (x){(0.5401840+0.02581708 +(0.0010123-0.0009504016-0.0015056)*x)+0.2673480-0.1097521}
+P.tribf<-function (x){(0.5401840+0.02678777 +(0.0010123-0.0003903662-0.0015056)*x)+0.2673480-0.1097521}
+PSi.tribf<-function (x){(0.5401840+0.04495836 +(0.0010123-0.0003143952-0.0015056)*x)+0.2673480-0.1097521}
+Si.tribf<-function (x){(0.5401840+0.07073023 +(0.0010123-0.00133335-0.0015056)*x)+0.2673480-0.1097521}
+tribf<-function (x){(0.5401840+((0.0010123-0.0015056)*x))+0.2673480-0.1097521}
 
+ave_all<-function(x){(0.5401840+0.0010123*x)}
+
+#Fixed effects: log(cr.nrr + 1) ~ season + river_mile * type
 #                       Value  Std.Error  DF   t-value  p-value
-#(Intercept)          0.5401840 0.03465829 785 15.585997  0.0000
-#seasonfall          -0.1097521 0.01345564 785  8.156582  0.0000
-#river_mile           0.0016288 0.00059886 785  2.719846  0.0067
+#(Intercept)          0.5401840 0.03465824 785 15.586019  0.0000
+#seasonfall          -0.1097521 0.01345564 785 -8.156582  0.0000
+#river_km             0.0010123 0.00037220 785  2.719848  0.0067
 #typetrib             0.2673480 0.04474965 785  5.974304  0.0000
-#river_mile:typetrib -0.0024225 0.00038652 785 -6.267546  0.0000
+#river_km:typetrib   -0.0015056 0.00024023 785 -6.267546  0.0000
 
-#  (Intercept)    river_mile
-#control  0.05064554 -0.0004123336
-#N       -0.06665818  0.0016244156
-#NP      -0.05226612  0.0012694891
-#NPSi    -0.10001441  0.0023269448
-#NSi      0.02581716 -0.0015291970
-#P        0.02678770 -0.0006280988
-#PSi      0.04495817 -0.0005058603
-#Si       0.07073013 -0.0021453599
+#         (Intercept)      river_km
+#control  0.05064563 -0.0002562674
+#N       -0.06665823  0.0010095811
+#NP      -0.05226617  0.0007889928
+#NPSi    -0.10001450  0.0014462060
+#NSi      0.02581713 -0.0009504019
+#P        0.02678773 -0.0003903661
+#PSi      0.04495824 -0.0003143946
+#Si       0.07073017 -0.0013333500
 
 sum_s_main_s<-subset(sum_s,type=="mainstem"&season=="summer")
 sum_s_main_f<-subset(sum_s, type=="mainstem" & season =="fall")
@@ -142,74 +112,82 @@ sum_s_main_f$nutrient<-factor(sum_s_main_f$nutrient, levels=c("control", "N", "P
 sum_s_trib_s$nutrient<-factor(sum_s_trib_s$nutrient, levels=c("control", "N", "P", "Si", "NP","NSi","PSi","NPSi"))
 sum_s_trib_f$nutrient<-factor(sum_s_trib_f$nutrient, levels=c("control", "N", "P", "Si", "NP","NSi","PSi","NPSi"))
 
-A<-ggplot(subset(sum_s_main_s, !(nutrient=="control")), aes(x=river_mile, y=log(cr_nrr+1)))+
+A<-ggplot(subset(sum_s_main_s, !(nutrient=="control")), aes(x=river_km, y=log(cr_nrr+1)))+
   geom_point(aes(color=factor(nutrient)), size=3)+
   geom_errorbar(aes(ymin=log(cr_nrr+1)-log(se_cr_nrr+1), ymax=log(cr_nrr+1)+log(se_cr_nrr+1), width=2.5))+
   scale_color_manual(values=c("red","gold", "steelblue3", "darkorange2", "darkorchid", "green3", "slategray4"))+
-  theme_bw(base_size = 12)+ylab(expression(paste('Ln (NRR' [CR],' +1)'))) +xlab("River Mile")+
+  theme_bw(base_size = 12)+ylab(expression(paste('Ln (NRR ' [ CR],' +1)'))) +xlab("River Kilometer")+
   ggtitle("A. Mainstem, Summer")+theme(plot.title = element_text(hjust = 0.02, vjust=-8))+
-  scale_x_continuous(limits=c(0,180))+
+  scale_x_continuous(limits=c(0,290))+
   theme(legend.title=element_blank(),legend.position="none")+
-  stat_function(fun=N.mains, color="red", lty="dotted", lwd=1)+
+   stat_function(fun=N.mains, color="red", lty="dotted", lwd=1)+
   stat_function(fun=NP.mains, color="darkorange2", lty="dashed",lwd=1)+
   stat_function(fun=NPSi.mains, color="slategray4", lty="solid",lwd=1)+
   stat_function(fun=P.mains, color="gold", lty="dotted",lwd=1)+
   stat_function(fun=PSi.mains, color="green3", lty="dashed",lwd=1)+
   stat_function(fun=NSi.mains, color="darkorchid", lty="dashed",lwd=1)+
-  stat_function(fun=Si.mains, color="steelblue3", lty="dotted",lwd=1)
+  stat_function(fun=Si.mains, color="steelblue3", lty="dotted",lwd=1)+
+  geom_hline(yintercept=log(2), lwd=1)
+stat_function(fun=mains, lwd=1)
 
-B<-ggplot(subset(sum_s_main_f, !(nutrient=="control")), aes(x=river_mile, y=log(cr_nrr+1)))+
+B<-ggplot(subset(sum_s_main_f, !(nutrient=="control")), aes(x=river_km, y=log(cr_nrr+1)))+
   geom_point(aes(color=factor(nutrient)), size=3)+
   geom_errorbar(aes(ymin=log(cr_nrr+1)-log(se_cr_nrr+1), ymax=log(cr_nrr+1)+log(se_cr_nrr+1), width=2.5))+
   scale_color_manual(values=c("red","gold", "steelblue3", "darkorange2", "darkorchid", "green3", "slategray4"))+
-  theme_bw(base_size = 12)+ylab(expression(paste('Ln (NRR' [CR],' +1)')))+xlab("River Mile") +
+  theme_bw(base_size = 12)+ylab(expression(paste('Ln (NRR ' [CR],' +1)')))+xlab("River Kilometer") +
    ggtitle("B. Mainstem, Fall")+theme(plot.title = element_text(hjust = 0.02, vjust=-8))+
-  scale_x_continuous(limits=c(0,180))+
+  scale_x_continuous(limits=c(0,290))+
   theme(legend.title=element_blank(),legend.position="none")+
-  stat_function(fun=N.mainf, color="red", lty="dotted", lwd=1)+
+    stat_function(fun=N.mainf, color="red", lty="dotted", lwd=1)+
   stat_function(fun=NP.mainf, color="darkorange2", lty="dashed",lwd=1)+
   stat_function(fun=NPSi.mainf, color="slategray4", lty="solid",lwd=1)+
   stat_function(fun=P.mainf, color="gold", lty="dotted",lwd=1)+
   stat_function(fun=PSi.mainf, color="green3", lty="dashed",lwd=1)+
   stat_function(fun=NSi.mainf, color="darkorchid", lty="dashed",lwd=1)+
-  stat_function(fun=Si.mainf, color="steelblue3", lty="dotted",lwd=1)
+  stat_function(fun=Si.mainf, color="steelblue3", lty="dotted",lwd=1)+
+  geom_hline(yintercept=log(2), lwd=1)
+stat_function(fun=mainf, lwd=1)
 
-C<-ggplot(subset(sum_s_trib_s, !(nutrient=="control")), aes(x=river_mile, y=log(cr_nrr+1)))+
+C<-ggplot(subset(sum_s_trib_s, !(nutrient=="control")), aes(x=river_km, y=log(cr_nrr+1)))+
   geom_point(aes(color=factor(nutrient)), size=3)+
   geom_errorbar(aes(ymin=log(cr_nrr+1)-log(se_cr_nrr+1), ymax=log(cr_nrr+1)+log(se_cr_nrr+1), width=2.5))+
   scale_color_manual(values=c("red","gold", "steelblue3", "darkorange2", "darkorchid", "green3", "slategray4"))+
-  theme_bw(base_size=12)+ylab(expression(paste('Ln (NRR' [CR],' +1)'))) +xlab("River Mile")+
+  theme_bw(base_size=12)+ylab(expression(paste('Ln (NRR ' [CR],' +1)'))) +xlab("River Kilometer")+
   ggtitle("C. Tributaries, Summer")+theme(plot.title = element_text(hjust = 0.02, vjust=-8))+
   theme(legend.title=element_blank(),legend.position="none")+
-  scale_x_continuous(limits=c(0,180))+
-  stat_function(fun=N.tribs, color="red", lty="dotted", lwd=1)+
+  scale_x_continuous(limits=c(0,290))+
+    stat_function(fun=N.tribs, color="red", lty="dotted", lwd=1)+
   stat_function(fun=NP.tribs, color="darkorange2", lty="dashed", lwd=1)+
   stat_function(fun=NPSi.tribs, color="slategray4", lty="solid", lwd=1)+
   stat_function(fun=P.tribs, color="gold", lty="dotted", lwd=1)+
   stat_function(fun=PSi.tribs, color="green3", lty="dashed", lwd=1)+
   stat_function(fun=NSi.tribs, color="darkorchid", lty="dashed", lwd=1)+
-  stat_function(fun=Si.tribs, color="steelblue3", lty="dotted", lwd=1)
+  stat_function(fun=Si.tribs, color="steelblue3", lty="dotted", lwd=1)+
+  geom_hline(yintercept=log(2), lwd=1)
+stat_function(fun=tribs, lwd=1)
 
-D<-ggplot(subset(sum_s_trib_s, !(nutrient=="control")), aes(x=river_mile, y=log(cr_nrr+1)))+
+D<-ggplot(subset(sum_s_trib_f, !(nutrient=="control")), aes(x=river_km, y=log(cr_nrr+1)))+
   geom_point(aes(color=factor(nutrient)), size=3)+
   geom_errorbar(aes(ymin=log(cr_nrr+1)-log(se_cr_nrr+1), ymax=log(cr_nrr+1)+log(se_cr_nrr+1), width=2.5))+
   scale_color_manual(values=c("red","gold", "steelblue3", "darkorange2", "darkorchid", "green3", "slategray4"))+
-  theme_bw(base_size = 12)+ ylab(expression(paste('Ln (NRR' [CR],') +1'))) +xlab("River Mile")+
+  theme_bw(base_size = 12)+ ylab(expression(paste('Ln (NRR ' [CR],') +1'))) +xlab("River Kilometer")+
   ggtitle("D. Tributaries, Fall")+theme(plot.title = element_text(hjust = 0.02, vjust=-8))+
-  scale_x_continuous(limits=c(0,180))+
+  scale_x_continuous(limits=c(0,290))+
   theme(legend.title=element_blank(),legend.position="none")+
-  stat_function(fun=N.tribf, color="red", lty="dotted", lwd=1)+
+    stat_function(fun=N.tribf, color="red", lty="dotted", lwd=1)+
   stat_function(fun=NP.tribf, color="darkorange2", lty="dashed",lwd=1)+
   stat_function(fun=NPSi.tribf, color="slategray4", lty="solid",lwd=1)+
   stat_function(fun=P.tribf, color="gold", lty="dotted",lwd=1)+
   stat_function(fun=PSi.tribf, color="green3", lty="dashed",lwd=1)+
   stat_function(fun=NSi.tribf, color="darkorchid", lty="dashed",lwd=1)+
-  stat_function(fun=Si.tribf, color="steelblue3", lty="dotted",lwd=1)
+  stat_function(fun=Si.tribf, color="steelblue3", lty="dotted",lwd=1)+
+  geom_hline(yintercept=log(2), lwd=1)
+stat_function(fun=tribf, lwd=1)
                
 library(gridExtra)
 grid.arrange(A, B, C, D, ncol=2)
 
-#chla NRR, model with river mile, season, and type only
+#chla NRR, model with river km, season, and type only
 sum_g$nutrient<-factor(sum_g$nutrient, levels=c("control", "N", "P", "NP","NSi","PSi", "Si","NPSi"))
 
 #equations
@@ -273,13 +251,13 @@ sum_g_main_f$nutrient<-factor(sum_g_main_f$nutrient, levels=c("control", "N", "P
 sum_g_trib_s$nutrient<-factor(sum_g_trib_s$nutrient, levels=c("control", "N", "P", "Si", "NP","NSi","PSi","NPSi"))
 sum_g_trib_f$nutrient<-factor(sum_g_trib_f$nutrient, levels=c("control", "N", "P", "Si", "NP","NSi","PSi","NPSi"))
 
-A<-ggplot(subset(sum_g_main_s, !(nutrient=="control")), aes(x=river_mile, y=chl_a.nrr))+
+A<-ggplot(subset(sum_g_main_s, !(nutrient=="control")), aes(x=river_km, y=chl_a.nrr))+
   geom_point(aes(color=factor(nutrient)), size=3)+
   geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr, width=2.5))+
   scale_color_manual(values=c("red","gold", "steelblue3", "darkorange2", "darkorchid", "green3", "slategray4"))+
-  theme_bw(base_size = 13)+ylab(expression(paste('NRR'[chla],''))) +xlab("River Mile")+
+  theme_bw(base_size = 13)+ylab(expression(paste('NRR '[chla],''))) +xlab("River Kilometer")+
   ggtitle("A. Mainstem, Summer")+theme(plot.title = element_text(hjust = 0.02, vjust=-8))+
-  theme(legend.title=element_blank(),legend.position="none")+scale_x_continuous(limits=c(0,180))
+  theme(legend.title=element_blank(),legend.position="none")+scale_x_continuous(limits=c(0,290))
 
   +stat_function(fun=N.mains, color="red")+
   stat_function(fun=NP.mains, color="orange")+
@@ -289,14 +267,14 @@ A<-ggplot(subset(sum_g_main_s, !(nutrient=="control")), aes(x=river_mile, y=chl_
   stat_function(fun=NSi.mains, color="orchid")+
   stat_function(fun=Si.mains, color="deepskyblue3")
 
-B<-ggplot(subset(sum_g_main_f, !(nutrient=="control")), aes(x=river_mile, y=chl_a.nrr))+
+B<-ggplot(subset(sum_g_main_f, !(nutrient=="control")), aes(x=river_km, y=chl_a.nrr))+
   geom_point(aes(color=factor(nutrient)), size=3)+
   geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr, width=2.5))+
   scale_color_manual(values=c("red","gold", "steelblue3", "darkorange2", "darkorchid", "green3", "slategray4"))+
-  theme_bw(base_size = 13)+ylab(expression(paste('NRR'[chla],'')))+xlab("River Mile") +
+  theme_bw(base_size = 13)+ylab(expression(paste('NRR '[chla],'')))+xlab("River Kilometer") +
   ggtitle("B. Mainstem, Fall")+theme(plot.title = element_text(hjust = 0.02, vjust=-8))+
   theme(legend.title=element_blank(),legend.position="none")+
-  scale_y_continuous(limits=c(0,7.5))+scale_x_continuous(limits=c(0,180))
+  scale_y_continuous(limits=c(0,7.5))+scale_x_continuous(limits=c(0,290))
 
   +stat_function(fun=(N.mainf), color="red")+
   stat_function(fun=(NP.mainf), color="orange")+
@@ -306,14 +284,14 @@ B<-ggplot(subset(sum_g_main_f, !(nutrient=="control")), aes(x=river_mile, y=chl_
   stat_function(fun=(NSi.mainf), color="orchid")+
   stat_function(fun=(Si.mainf), color="deepskyblue3")
 
-C<-ggplot(subset(sum_g_trib_s, !(nutrient=="control")), aes(x=river_mile, y=log10(chl_a.nrr+1)))+
+C<-ggplot(subset(sum_g_trib_s, !(nutrient=="control")), aes(x=river_km, y=log10(chl_a.nrr+1)))+
   geom_point(aes(color=factor(nutrient)), size=3)+
   geom_errorbar(aes(ymin=log10(chl_a.nrr+1)-log10(se_chla_nrr+1), ymax=log10(chl_a.nrr+1)+log10(se_chla_nrr+1), width=2.5))+
   scale_color_manual(values=c("red","gold", "steelblue3", "darkorange2", "darkorchid", "green3", "slategray4"))+
-  theme_bw(base_size=13)+ylab(expression(paste('log (NRR'[chla],'+1)'))) +xlab("River Mile")+
+  theme_bw(base_size=13)+ylab(expression(paste('log (NRR '[chla],'+1)'))) +xlab("River Kilometer")+
   ggtitle("C. Tributaries, Summer")+theme(plot.title = element_text(hjust = 0.02, vjust=-8))+
   theme(legend.title=element_blank(),legend.position="none")+
-  scale_x_continuous(limits=c(0,180))
+  scale_x_continuous(limits=c(0,290))
 
   +stat_function(fun=N.tribsL, color="red")+
   stat_function(fun=NP.tribsL, color="orange")+
@@ -323,14 +301,14 @@ C<-ggplot(subset(sum_g_trib_s, !(nutrient=="control")), aes(x=river_mile, y=log1
   stat_function(fun=NSi.tribsL, color="orchid")+
   stat_function(fun=Si.tribsL, color="deepskyblue3")
 
-D<-ggplot(subset(sum_g_trib_f, !(nutrient=="control")), aes(x=river_mile, y=chl_a.nrr))+
+D<-ggplot(subset(sum_g_trib_f, !(nutrient=="control")), aes(x=river_km, y=chl_a.nrr))+
   geom_point(aes(color=factor(nutrient)), size=3)+
   geom_errorbar(aes(ymin=chl_a.nrr-se_chla_nrr, ymax=chl_a.nrr+se_chla_nrr), width=2.5)+
   scale_color_manual(values=c("red","gold", "steelblue3", "darkorange2", "darkorchid", "green3", "slategray4"))+
-  theme_bw(base_size = 13)+ ylab(expression(paste('NRR'[chla],''))) +xlab("River Mile")+
+  theme_bw(base_size = 13)+ ylab(expression(paste('NRR '[chla],''))) +xlab("River Kilometer")+
   ggtitle("D. Tributaries, Fall")+theme(plot.title = element_text(hjust = 0.02, vjust=-8))+
   theme(legend.title=element_blank(),legend.position="none")+
-  scale_x_continuous(limits=c(0,180))+scale_y_continuous(limits=c(0,2.5))
+  scale_x_continuous(limits=c(0,290))+scale_y_continuous(limits=c(0,2.5))
 
   +stat_function(fun=N.tribf, color="red")+
   stat_function(fun=NP.tribf, color="orange")+

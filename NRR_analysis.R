@@ -12,10 +12,38 @@ library(multcomp)
 #data (created in "all sites" by combining NDS files and water chem file)
 nds_chem<-read.csv("NDS_chem_all.csv")
 nds_chem$river_mile<-ifelse(nds_chem$stream=="ahtanum", 106, nds_chem$river_mile)
+nds_chem$river_km<-nds_chem$river_mile*1.609
+
+nds_chem$top<-as.factor(nds_chem$top)
 
 nds_s<-subset(nds_chem, top=="sponge")
 nds_s <- subset(nds_s, !(is.na(nds_s$cr.nrr)))
 
+nds_g<-subset(nds_chem, top =="glass")
+nds_g <- subset(nds_g, !(is.na(nds_g$chla.nrr)))
+
+###some code to determine magnitude of difference between groups (for results section)###
+nrr_noctl<-subset(nds_g, !nutrient=="control")
+
+ddply(nrr_noctl, c("type","season"), summarise, NRR=mean(chla.nrr, na.rm=T), 
+      SE = sd(chla.nrr, na.rm=T)/sqrt(sum(!is.na(chla.nrr))))
+#type     season      NRR   SE
+# mainstem  fall  0.8549689 0.03102539
+# mainstem summer 1.4860251 0.10126562
+#     trib   fall 0.7044082 0.05164334
+#     trib summer 4.4942645 0.57067259
+
+#type      NRR
+#mainstem 1.165764
+#     trib 2.807167
+
+ddply(nrr_noctl, "season", summarise, NRR=mean(chla.nrr, na.rm=T))
+#season       NRR
+#   fall 0.7940382
+# summer 2.8882397
+
+
+######code for determining collinearity########
 Z<-cbind(nds_s$river_mile, nds_s$Si.mgL, nds_s$oP.mgPL, nds_s$NO3.mgNL, nds_s$DOC.mgL, nds_s$DIN.mgNL, nds_s$N.P.ratio,
          nds_s$N.Si.ratio, nds_s$P.Si.ratio, nds_s$cr.nrr)
 colnames(Z)<-c("mile", "silica", "SRP", "NO3", "DOC", "DIN", "N:P", "N:Si", "P:Si", "NRR")
@@ -26,43 +54,44 @@ cor(Z, use="pairwise.complete.obs", method="spearman")
 #combinations that are ok: mile + silica, mile + SRP, DOC + DIN, silica + DIN. First, do river mile alone. River mile will 
 #directly address our question on watershed location and NRR.
 
+#####mixed effect models#########
 #River mile, season, and type to test question of watershed position. NOTE: this model was selected based on the usual
 #procedures, but the code must have been deleted. Instead of re-doing model selection, will start with final model.
-Mf<-lme(log(cr.nrr+1)~season+ river_mile*type, random = ~1+river_mile| nutrient, method="REML", data=nds_s)
+Mf<-lme(log(cr.nrr+1)~season+ river_km*type, random = ~1+river_km| nutrient, method="REML", data=nds_s)
 summary(Mf)
 #Random effects:
-#Formula: ~1 + river_mile | nutrient
+#Formula: ~1 + river_km | nutrient
 #Structure: General positive-definite, Log-Cholesky parametrization
 #StdDev      Corr  
 #(Intercept) 0.072670380 (Intr)
-#river_mile  0.001613627 -0.894
-#Residual    0.189145516       
+#river_km    0.001002875 -0.894
+#Residual    0.189145516         
 
-#Fixed effects: log(cr.nrr + 1) ~ season + river_mile * type 
+#Fixed effects: log(cr.nrr + 1) ~ season + river_km * type 
 #                       Value  Std.Error  DF   t-value  p-value
-#(Intercept)          0.5401840 0.03465829 785 15.585997  0.0000
-#seasonfall          -0.1097521 0.01345564 785  8.156582  0.0000
-#river_mile           0.0016288 0.00059886 785  2.719846  0.0067
+#(Intercept)          0.5401840 0.03465824 785 15.586019  0.0000
+#seasonfall         -0.1097521 0.01345564 785 -8.156582  0.0000
+#river_km             0.0010123 0.00037220 785  2.719848  0.0067
 #typetrib             0.2673480 0.04474965 785  5.974304  0.0000
-#river_mile:typetrib -0.0024225 0.00038652 785 -6.267546  0.0000
+#river_km:typetrib   -0.0015056 0.00024023 785 -6.267546  0.0000
 
 ranef(Mf)
-#       (Intercept)    river_mile
-#control  0.05064554 -0.0004123336
-#N       -0.06665818  0.0016244156
-#NP      -0.05226612  0.0012694891
-#NPSi    -0.10001441  0.0023269448
-#NSi      0.02581716 -0.0015291970
-#P        0.02678770 -0.0006280988
-#PSi      0.04495817 -0.0005058603
-#Si       0.07073013 -0.0021453599
+#       (Intercept)      river_km
+#control  0.05064563 -0.0002562674
+#N       -0.06665823  0.0010095811
+#NP      -0.05226617  0.0007889928
+#NPSi    -0.10001450  0.0014462060
+#NSi      0.02581713 -0.0009504019
+#P        0.02678773 -0.0003903661
+#PSi      0.04495824 -0.0003143946
+#Si       0.07073017 -0.0013333500
 
 r.squaredGLMM(Mf)
         #R2m       R2c
 #[1,] 0.113609 0.4167893
 
 #try a model with nutrient as fixed effect so can do post-hoc tests on it.
-M1<-lm(log(cr.nrr+1)~nutrient +river_mile*type +season, nds_s)
+M1<-lm(log(cr.nrr+1)~nutrient +river_km*type +season, nds_s)
 op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
 plot(M1) #ok
 E<-rstandard(M1)
@@ -70,14 +99,14 @@ op<-par(mfrow=c(1,1))
 boxplot(E~stream, data=nds_s)#ok - looks like no need to include stream as a random
 abline(0,0)
 
-M1<-gls(log(cr.nrr+1)~nutrient +river_mile*type +season, nds_s)
-M1b<-lme(log(cr.nrr+1)~nutrient +river_mile*type +season, 
-         random = ~1+river_mile|stream , nds_s)
+M1<-gls(log(cr.nrr+1)~nutrient +river_km*type +season, nds_s)
+M1b<-lme(log(cr.nrr+1)~nutrient +river_km*type +season, 
+         random = ~1+river_km|stream , nds_s)
 
 anova(M1, M1b)
 #no difference - no value in adding the random effects
 
-M2<-gls(log(cr.nrr+1)~nutrient +river_mile+type +season, nds_s)
+M2<-gls(log(cr.nrr+1)~nutrient +river_km+type +season, nds_s)
 lrtest(M1, M2)
 #M1 much better (interaction significant)
 step(M1)
@@ -93,30 +122,71 @@ summary(M1)
 #nutrientP           -0.0582314  0.0282968  -2.058 0.039932 *  
 #nutrientPSi         -0.0178228  0.0282294  -0.631 0.527991    
 #nutrientSi          -0.1856265  0.0283040  -6.558 9.87e-11 ***
-#river_mile           0.0016061  0.0001921   8.362 2.80e-16 ***
+#river_km             0.0009982  0.0001194   8.362 2.80e-16 ***
 #typetrib             0.2653397  0.0471977   5.622 2.63e-08 ***
 #seasonsummer         0.1084612  0.0141945   7.641 6.28e-14 ***
-#river_mile:typetrib -0.0024083  0.0004076  -5.908 5.16e-09 ***
+#river_km:typetrib   -0.0014968  0.0002534  -5.908 5.16e-09 ***
 
 #Residual standard error: 0.1996 on 785 degrees of freedom
 #Multiple R-squared:  0.3317,	Adjusted R-squared:  0.3223 
 #F-statistic: 35.42 on 11 and 785 DF,  p-value: < 2.2e-16
 
 #post-hoc tests
-model.matrix.gls <- function(object, ...) {
-        model.matrix(terms(object), data = getData(object), ...)
+model.matrix.gls <- function(M1, ...){
+        model.matrix(terms(M1), data = getData(M1), ...)  
 }
-model.frame.gls <- function(object, ...) {
-        model.frame(formula(object), data = getData(object), ...)
+model.frame.gls <- function(M1, ...){
+        model.frame(formula(M1), data = getData(M1), ...)  
 }
-terms.gls <- function(object, ...) {
-        terms(model.frame(object), ...)
+terms.gls <- function(M1, ...){
+        terms(model.frame(M1),...)  
 }
-multcomp<-glht(M1, linfct=mcp(nutrient="Tukey"))
+
+multCompTukey <- glht(M1, linfct = mcp(nutrient = "Tukey")) 
+summary(multCompTukey)
+
+#create table x to interpret post hoc test
+x <- group_by(nds_s, nutrient) %>%  # dataframe name, grouping variable. Grouping function causes subsequent functions to aggregate by season and reach
+        summarize(cr.nrr.mean = mean(cr.nrr, na.rm = TRUE))#, # na.rm = TRUE to remove missing values
+                  #net.din.flux.sd=sd(net.din.flux, na.rm = TRUE),  # na.rm = TRUE to remove missing values
+                  #n = sum(!is.na(net.din.flux)), # of observations, excluding NAs. 
+                  #net.din.flux.se=net.din.flux.sd/sqrt(n))
+
+sort(x$cr.nrr.mean, index.return=T) #sorts table so can show from low to high (or v.v.)
+
+#####################################################
+#Estimated Marginal Means code example
+#####################################################
+
+M.full<-lme(l.net.din.flux ~ budworm*f.sample.event,
+            random = ~1|nest, na.action=na.omit, data=tf, weights=vf8)
+
+anova(M.full)
+
+#r.squaredGLMM(M.full)
+
+M.full.em = emmeans(M.full, ~ budworm | f.sample.event)
+
+pairs(M.full.em)
+
+xx = as.data.frame(summary(M.full.em))[c('emmean', 'SE')]
+
+budworm = rep((letters[seq(from = 1, to = 2)]), 10)
+budworm<-recode(budworm, "a" ="High")
+budworm<-recode(budworm, "b" ="Low")
+event = c(1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10)
+
+NTF.DIN.flux.emm = data.frame(cbind(xx,budworm,event))
+NTF.DIN.flux.emm$emmean.raw = 10^(NTF.DIN.flux.emm$emmean)-1 #log-transformed, going back to non-transformed
+NTF.DIN.flux.emm$SE.raw = 10^(NTF.DIN.flux.emm$SE)-1 #going back to non-transformed
+
+
+NTF.DIN.flux.emm
+
 
 #NRR model, based on plots. starting variables include season, type, and the 4 combinations above
 #start with fixed effects and then test if adding random effects improves the model
-M1<-lme(log(cr.nrr+1)~river_mile+season + type*river_mile, random = ~1+river_mile|nutrient, nds_s)
+M1<-lme(log(cr.nrr+1)~river_km+season + type*river_mile, random = ~1+river_km|nutrient, nds_s)
 summary(M1)
 #Random effects:
 #Formula: ~1 + river_mile | nutrient
@@ -173,7 +243,7 @@ M3a<-lme(log(cr.nrr+1)~river_mile + Si.mgL*type + Si.mgL*season, random = ~1+riv
 lrtest(M2a, M3a)
 #M3a better so conclude intxn wasn't sig
 summary(M3a) #river mile p = 0.92
-M4a<-lme(log(cr.nrr+1)~Si.mgL*type + Si.mgL*season, random = ~1+river_mile|nutrient, 
+M4a<-lme(log(cr.nrr+1)~Si.mgL*type + Si.mgL*season, random = ~1+river_km|nutrient, 
          method="REML", nds_s)
 lrtest(M3a, M4a)
 #M4a better
@@ -182,7 +252,7 @@ M5a<-lme(log(cr.nrr+1)~Si.mgL*type + Si.mgL+season, random = ~1+river_mile|nutri
          method="REML", nds_s)
 lrtest(M4a, M5a)
 #M4a better
-M6a<-lme(log(cr.nrr+1)~type + Si.mgL+season, random = ~1+river_mile|nutrient, 
+M6a<-lme(log(cr.nrr+1)~type + Si.mgL+season, random = ~1+river_km|nutrient, 
          method="REML", nds_s)
 lrtest(M4a, M6a)
 #M4a better
@@ -192,7 +262,7 @@ summary(M4a)
 #Structure: General positive-definite, Log-Cholesky parametrization
 #StdDev      Corr  
 #(Intercept) 0.070437940 (Intr)
-#river_mile  0.001521477 -0.866
+#riverkm    0.0009456035 -0.866
 #Residual    0.188189541       
 
 #Fixed effects: log(cr.nrr + 1) ~ Si.mgL * type + Si.mgL * season 
@@ -682,7 +752,7 @@ anova(M1sc, M2a)
 #now: optimize the fixed portion!
 summary(M2a)
 
-M2b<-lme(chla.nrr~season + river_mile*type, random=~1|nutrient,
+M2b<-lme(chla.nrr~season + river_km*type, random=~1|nutrient,
          weights = vf3, method="REML", data=nds_g)
 
 lrtest(M2a, M2b)
@@ -740,19 +810,20 @@ summary(M2b)
 #Parameter estimates:
 #  ahtanum    century    cleelum      kiona     mabton     reecer     ringer       roza      satus  toppenish      wenas 
 #0.79350627 0.63204766 0.90662707 0.22282314 0.06263507 1.10684423 0.86923056 0.95291056 1.11271175 0.33659866 1.16607644 
-#Fixed effects: chla.nrr ~ river_mile + season + river_mile * type 
-#                     Value  Std.Error    DF   t-value  p-value
-#(Intercept)          0.7526378 0.06627973 794 11.355474  0.0000
-#river_mile          -0.0031057 0.00042297 794 -7.342575  0.0000
-#seasonsummer         0.4611727 0.03273352 794 14.088696  0.0000
-#typetrib            -0.4392558 0.07392803 794 -5.941668  0.0000
-#river_mile:typetrib  0.0015501 0.00050217 794  3.086829  0.0021
+#Fixed effects: chla.nrr ~ season + river_km * type 
+#                   Value  Std.Error  DF    t-value p-value
+#(Intercept)        1.2138105 0.06492604 794  18.695279  0.0000
+#seasonfall        -0.4611727 0.03273352 794 -14.088696  0.0000
+#river_km          -0.0019302 0.00026288 794  -7.342576  0.0000
+#typetrib          -0.4392558 0.07392802 794  -5.941669  0.0000
+#river_km:typetrib  0.0009634 0.00031210 794   3.086829  0.0021
+
 #Correlation: 
 #                     (Intr) rvr_ml ssnsmm typtrb
-#river_mile          -0.909                     
-#seasonsummer        -0.288  0.204              
-#typetrib            -0.788  0.791  0.133       
-#river_mile:typetrib  0.735 -0.814 -0.061 -0.964
+#seasonfall        -0.210                     
+#river_km          -0.825 -0.204              
+#typetrib          -0.737 -0.133  0.791       
+#river_km:typetrib  0.719  0.061 -0.814 -0.964
 
 #Standardized Within-Group Residuals:
 #  Min         Q1        Med         Q3        Max 
@@ -1085,3 +1156,78 @@ cor.test(predict(M2b),nds_g$chla.nrr)
 0.09122635^2
 #0.008
 #conclusion: nutrient does not predict chla nrr very well at all.
+
+#CHLA: remove Wenas from consideration to meet assumptions
+nds_gw<-subset(nds_g, !(stream=='wenas'))
+
+op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
+M1<-lm(log(chla.nrr)~river_mile*season + type*river_mile, nds_gw) 
+plot(M1) #ok with log-transformation!
+E<-rstandard(M1)
+op<-par(mfrow=c(1,1))
+boxplot(E~stream, data=nds_gw)
+abline(0,0)#streams ok
+
+#now add random effects
+M1<-gls(log(chla.nrr)~river_mile*season + type*river_mile, nds_gw)
+M1a<-lme(log(chla.nrr)~river_mile*season + type*river_mile, nds_gw, 
+         random=~1+river_mile| nutrient)
+M1b<-lme(log(chla.nrr)~river_mile*season + type*river_mile, nds_gw, 
+         random=~1| nutrient)
+
+anova(M1, M1a, M1b)
+#M1a best AIC, BIC, and logLik, but not SD from M1b
+
+#now fixed effects
+
+summary(M1a)
+
+M2a<-lme(log(chla.nrr)~river_mile*season + type, nds_gw, 
+         random=~1+river_mile| nutrient)
+
+lrtest(M1a, M2a)
+#M2a better, so leave type*mile intxn out
+
+M3a<-lme(log(chla.nrr)~season + type*river_mile, nds_gw, 
+         random=~1+river_mile| nutrient)
+
+lrtest(M1a, M3a)
+lrtest(M2a, M3a)
+#M1a better, so leave season *mile intxn in
+summary(M2a)
+
+M4a<-lme(log(chla.nrr)~river_km*season, nds_gw, 
+         random=~1+river_mile| nutrient)
+
+lrtest(M2a, M4a) #no difference
+
+summary(M4a)
+#Random effects:
+#Formula: ~1 + river_mile | nutrient
+#Structure: General positive-definite, Log-Cholesky parametrization
+#StdDev      Corr  
+#(Intercept) 0.035222879 (Intr)
+#river_mile  0.001496676 -0.745
+#Residual    0.859901257       
+
+#Fixed effects: log(chla.nrr) ~ river_mile * season 
+#                       Value  Std.Error  DF   t-value p-value
+#(Intercept)            -0.3379904 0.11646515 716 -2.902074  0.0038
+#river_km               0.0033090 0.00070327 716  4.705179  0.0000
+#seasonfall             0.0848563 0.16588367 716  0.511541  0.6091
+#river_km:seasonfall    -0.0049649 0.00088119 716 -5.634295  0.0000
+
+ranef(M4a)
+#       (Intercept)    river_mile
+#control  0.0001417365  0.0001481625
+#N       -0.0285294132  0.0018817072
+#NP       0.0148751965 -0.0010105739
+#NPSi    -0.0257849645  0.0015902815
+#NSi      0.0281159682 -0.0018150838
+#P        0.0105744550 -0.0006058083
+#PSi      0.0100358109 -0.0006453788
+#Si      -0.0094287894  0.0004566935
+
+r.squaredGLMM(M4a)
+#       R2m       R2c
+#[1,] 0.196193 0.2208489
