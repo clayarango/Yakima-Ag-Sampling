@@ -66,7 +66,7 @@ mainf<-function(x){(0.5401840+0.0010123*x)-0.1097521}
 
 N.tribs<-function (x){(0.5401840-0.06665833+ (0.0010123+0.0010095816-0.0015056)*x)+0.2673480}
 NP.tribs<-function (x){(0.5401840-0.05226625+(0.0010123+0.0007889932-0.0015056)*x)+0.2673480}
-NPSi.tribs<-function (x){(0.5401840-0.10001467+(0.0010123+0.0014462067-0.0015056)*x)+0.2673480}
+NPSi.tribs<-function (x){(0.5401840-0.10001450+(0.0010123+0.0014462060-0.0015056)*x)+0.2673480}
 NSi.tribs<-function (x){(0.5401840+0.02581708 +(0.0010123-0.0009504016-0.0015056)*x)+0.2673480}
 P.tribs<-function (x){(0.5401840+0.02678777 +(0.0010123-0.0003903662-0.0015056)*x)+0.2673480}
 PSi.tribs<-function (x){(0.5401840+0.04495836 +(0.0010123-0.0003143952-0.0015056)*x)+0.2673480}
@@ -75,7 +75,7 @@ tribs<-function(x){(0.5401840+((0.0010123-0.0015056)*x))+0.2673480}
 
 N.tribf<-function (x){(0.5401840-0.06665833+ (0.0010123+0.0010095816-0.0015056)*x)+0.2673480-0.1097521}
 NP.tribf<-function (x){(0.5401840-0.05226625+(0.0010123+0.0007889932-0.0015056)*x)+0.2673480-0.1097521}
-NPSi.tribf<-function (x){(0.5401840-0.10001467+(0.0010123+0.0014462067-0.0015056)*x)+0.2673480-0.1097521}
+NPSi.tribf<-function (x){(0.5401840-0.10001450+(0.0010123+0.0014462060-0.0015056)*x)+0.2673480-0.1097521}
 NSi.tribf<-function (x){(0.5401840+0.02581708 +(0.0010123-0.0009504016-0.0015056)*x)+0.2673480-0.1097521}
 P.tribf<-function (x){(0.5401840+0.02678777 +(0.0010123-0.0003903662-0.0015056)*x)+0.2673480-0.1097521}
 PSi.tribf<-function (x){(0.5401840+0.04495836 +(0.0010123-0.0003143952-0.0015056)*x)+0.2673480-0.1097521}
@@ -170,7 +170,7 @@ D<-ggplot(subset(sum_s_trib_f, !(nutrient=="control")), aes(x=river_km, y=log(cr
   geom_point(aes(color=factor(nutrient)), size=3)+
   geom_errorbar(aes(ymin=log(cr_nrr+1)-log(se_cr_nrr+1), ymax=log(cr_nrr+1)+log(se_cr_nrr+1), width=2.5))+
   scale_color_manual(values=c("red","gold", "steelblue3", "darkorange2", "darkorchid", "green3", "slategray4"))+
-  theme_bw(base_size = 12)+ ylab(expression(paste('Ln (NRR ' [CR],') +1'))) +xlab("River Kilometer")+
+  theme_bw(base_size = 12)+ ylab(expression(paste('Ln (NRR ' [CR],' +1)'))) +xlab("River Kilometer")+
   ggtitle("D. Tributaries, Fall")+theme(plot.title = element_text(hjust = 0.02, vjust=-8))+
   scale_x_continuous(limits=c(0,290))+
   theme(legend.title=element_blank(),legend.position="none")+
