@@ -10,6 +10,9 @@ install.packages("dplyr")
 install.packages("multcomp")
 install.packages("MASS")
 install.packages("ggplot2")
+install.packages("gridExtra")
+install.packages("ggpubr")
+install.packages("scales")
 library(nlme)
 library(nortest)
 library(plyr)
@@ -17,6 +20,9 @@ library(dplyr)
 library(multcomp)
 library(MASS)
 library(ggplot2)
+library(gridExtra)
+library(ggpubr)
+library(scales)
 
 #################################################################
 #AHTANUM FALL
@@ -1353,7 +1359,8 @@ x.summer <- subset(x, season=="Summer", data=x)
 x.fall <- subset(x, season=="Fall", data=x)
 
 #make plot of CR Summer
-ggplot(subset(x.summer, !(nutrient=="control")), aes(x=stream, y=mNut, fill=nutrient)) +
+cr.summer = 
+  ggplot(subset(x.summer, !(nutrient=="control")), aes(x=stream, y=mNut, fill=nutrient)) +
   scale_color_manual(values=c("red", "darkorange2", "slategray4", "darkorchid", "gold", "green3", "steelblue3")) +
   geom_pointrange(aes(color=nutrient, ymin=(mNut-eNut), ymax=(mNut+eNut)), 
                                                position = position_jitter(width=0.15),
@@ -1365,14 +1372,17 @@ ggplot(subset(x.summer, !(nutrient=="control")), aes(x=stream, y=mNut, fill=nutr
   geom_hline(yintercept = 1, lty = 2) +
   geom_vline(aes(xintercept = 6.5)) +
   theme(axis.title.x=element_blank(),
-        legend.title = element_blank(),
-        legend.position = "top") +
+        legend.position = "top", #change to top for individual plot
+        axis.text.x=element_blank(),
+        legend.title = element_blank()) +
   guides(colour = guide_legend(nrow = 1)) +
-  annotate("text", x=3.5, y=3.25, label="Mainstem", size=4) +
-  annotate("text", x=9, y=3.25, label="Tributary", size=4)
+  annotate("text", x=1, y=3.4, label="A", size=4) +
+  annotate("text", x=3.5, y=3.4, label="Mainstem", size=4) +
+  annotate("text", x=9, y=3.4, label="Tributary", size=4)
   
 #make plot of CR Fall
-ggplot(subset(x.fall, !(nutrient=="control")), aes(x=stream, y=mNut, fill=nutrient)) +
+cr.fall = 
+  ggplot(subset(x.fall, !(nutrient=="control")), aes(x=stream, y=mNut, fill=nutrient)) +
   scale_color_manual(values=c("red", "darkorange2", "slategray4", "darkorchid", "gold", "green3", "steelblue3")) +
   geom_pointrange(aes(color=nutrient, ymin=(mNut-eNut), ymax=(mNut+eNut)), 
                   position = position_jitter(width=0.15),
@@ -1385,10 +1395,12 @@ ggplot(subset(x.fall, !(nutrient=="control")), aes(x=stream, y=mNut, fill=nutrie
   geom_vline(aes(xintercept = 6.5)) +
   theme(axis.title.x=element_blank(),
         legend.title = element_blank(),
-        legend.position = "top") +
+        legend.position = "top", #change to top for individual plot
+        axis.text.x=element_blank()) +
   guides(colour = guide_legend(nrow = 1)) +
-  annotate("text", x=3.5, y=3.25, label="Mainstem", size=4) +
-  annotate("text", x=9, y=3.25, label="Tributary", size=4)  
+  annotate("text", x=1, y=3.4, label="B", size=4) +
+  annotate("text", x=3.5, y=3.4, label="Mainstem", size=4) +
+  annotate("text", x=9, y=3.4, label="Tributary", size=4)  
 
 #################################################################
 #make graphics for chla.nrr for all streams
@@ -1409,7 +1421,8 @@ x.summer <- subset(x, season=="Summer", data=x)
 x.fall <- subset(x, season=="Fall", data=x)
 
 #make plot of CHLA Summer
-ggplot(subset(x.summer, !(nutrient=="control")), aes(x=stream, y=mNut, fill=nutrient)) +
+chla.summer = 
+  ggplot(subset(x.summer, !(nutrient=="control")), aes(x=stream, y=mNut, fill=nutrient)) +
   scale_color_manual(values=c("red", "darkorange2", "slategray4", "darkorchid", "gold", "green3", "steelblue3")) +
   geom_pointrange(aes(color=nutrient, ymin=(mNut-eNut), ymax=(mNut+eNut)), 
                   position = position_jitter(width=0.15),
@@ -1423,12 +1436,16 @@ ggplot(subset(x.summer, !(nutrient=="control")), aes(x=stream, y=mNut, fill=nutr
   theme(axis.title.x=element_blank(),
         legend.title = element_blank(),
         legend.position = "top") +
+  scale_x_discrete(labels=c("Cl", "Ri", "Ro", "Ce", "Ki", "Ma",
+                                  "Re", "We", "Ah", "To", "Sa")) +  #change to top for individual plot
   guides(colour = guide_legend(nrow = 1)) +
+  annotate("text", x=1, y=40, label="C", size=4) +
   annotate("text", x=3.5, y=40, label="Mainstem", size=4) +
   annotate("text", x=9, y=40, label="Tributary", size=4)
 
 #make plot of CHLA Fall
-ggplot(subset(x.fall, !(nutrient=="control")), aes(x=stream, y=mNut, fill=nutrient)) +
+chla.fall = 
+  ggplot(subset(x.fall, !(nutrient=="control")), aes(x=stream, y=mNut, fill=nutrient)) +
   scale_color_manual(values=c("red", "darkorange2", "slategray4", "darkorchid", "gold", "green3", "steelblue3")) +
   geom_pointrange(aes(color=nutrient, ymin=(mNut-eNut), ymax=(mNut+eNut)), 
                   position = position_jitter(width=0.15),
@@ -1441,7 +1458,31 @@ ggplot(subset(x.fall, !(nutrient=="control")), aes(x=stream, y=mNut, fill=nutrie
   geom_vline(aes(xintercept = 6.5)) +
   theme(axis.title.x=element_blank(),
         legend.title = element_blank(),
-        legend.position = "top") +
+        legend.position = "top") +  #change to top for individual plot
+  scale_x_discrete(labels=c("Cl", "Ri", "Ro", "Ce", "Ki", "Ma",
+                            "Re", "We", "Ah", "To", "Sa")) + 
   guides(colour = guide_legend(nrow = 1)) +
+  annotate("text", x=1, y=2.2, label="D", size=4) +
   annotate("text", x=3.5, y=2.2, label="Mainstem", size=4) +
   annotate("text", x=9, y=2.2, label="Tributary", size=4)  
+
+#################################################################
+#compile figure
+
+#gA <- ggplotGrob(cr.summer)  # set up figure
+#gB <- ggplotGrob(cr.fall)  # set up figure
+#gC <- ggplotGrob(chla.summer)  # set up figure
+#D <- ggplotGrob(chla.fall)  # set up figure
+
+#maxWidth = grid::unit.pmax(gA$widths[2:5], gB$widths[2:5], gC$widths[2:5], gD$widths[2:5])  # set up figure
+
+#gA$widths[2:5] <- as.list(maxWidth)  # set up figure
+#gB$widths[2:5] <- as.list(maxWidth)  # set up figure
+#gC$widths[2:5] <- as.list(maxWidth)
+#gD$widths[2:5] <- as.list(maxWidth)
+
+ggarrange(cr.summer, cr.fall, chla.summer, chla.fall, ncol=2, nrow=2,
+             common.legend = T, #They use the same legend
+             legend = "top", align = "h")
+
+
