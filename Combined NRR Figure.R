@@ -1300,8 +1300,8 @@ str(d.gpp.wen.s)
 cr.nrr.all = rbind(d.cr.aht.f, d.cr.aht.s,
                    d.cr.cen.f, d.cr.cen.s,
                    d.cr.cle.f, d.cr.cle.s,
-                   d.cr.kio.f, d.cr.kio.s,
                    d.cr.mab.f, d.cr.mab.s,
+                   d.cr.kio.f, d.cr.kio.s,
                    d.cr.rec.f, d.cr.rec.s,
                    d.cr.rin.f, d.cr.rin.s,
                    d.cr.roz.f, d.cr.roz.s,
@@ -1312,8 +1312,8 @@ cr.nrr.all = rbind(d.cr.aht.f, d.cr.aht.s,
 chla.nrr.all = rbind(d.gpp.aht.f, d.gpp.aht.s,
                      d.gpp.cen.f, d.gpp.cen.s,
                      d.gpp.cle.f, d.gpp.cle.s,
-                     d.gpp.kio.f, d.gpp.kio.s,
                      d.gpp.mab.f, d.gpp.mab.s,
+                     d.gpp.kio.f, d.gpp.kio.s,
                      d.gpp.rec.f, d.gpp.rec.s,
                      d.gpp.rin.f, d.gpp.rin.s,
                      d.gpp.roz.f, d.gpp.roz.s,
@@ -1390,7 +1390,7 @@ cr.fall =
   #geom_point(aes(color=factor(nutrient)), size=3, position = "jitter") +
   #geom_errorbar(aes(ymin=(mNut-eNut), ymax=(mNut+eNut), width=2.5)) +
   theme_classic() +
-  ylab(expression(CR~NRR)) +
+  #ylab(expression(CR~NRR)) +
   geom_hline(yintercept = 1, lty = 2) +
   geom_vline(aes(xintercept = 6.5)) +
   theme(axis.title.x=element_blank(),
@@ -1430,13 +1430,13 @@ chla.summer =
   #geom_point(aes(color=factor(nutrient)), size=3, position = "jitter") +
   #geom_errorbar(aes(ymin=(mNut-eNut), ymax=(mNut+eNut), width=2.5)) +
   theme_classic() +
-  ylab(expression(Chla~NRR)) +
+  ylab(expression(Chl-a~NRR)) +
   geom_hline(yintercept = 1, lty = 2) +
   geom_vline(aes(xintercept = 6.5)) +
   theme(axis.title.x=element_blank(),
         legend.title = element_blank(),
         legend.position = "top") +
-  scale_x_discrete(labels=c("Cl", "Ri", "Ro", "Ce", "Ki", "Ma",
+  scale_x_discrete(labels=c("Cl", "Ri", "Ro", "Ce", "Ma", "Ki",
                                   "Re", "We", "Ah", "To", "Sa")) +  #change to top for individual plot
   guides(colour = guide_legend(nrow = 1)) +
   annotate("text", x=1, y=40, label="C", size=4) +
@@ -1453,18 +1453,19 @@ chla.fall =
   #geom_point(aes(color=factor(nutrient)), size=3, position = "jitter") +
   #geom_errorbar(aes(ymin=(mNut-eNut), ymax=(mNut+eNut), width=2.5)) +
   theme_classic() +
-  ylab(expression(Chla~NRR)) +
+  #ylab(expression(Chl-italic(a)~NRR)) +
   geom_hline(yintercept = 1, lty = 2) +
   geom_vline(aes(xintercept = 6.5)) +
   theme(axis.title.x=element_blank(),
         legend.title = element_blank(),
         legend.position = "top") +  #change to top for individual plot
-  scale_x_discrete(labels=c("Cl", "Ri", "Ro", "Ce", "Ki", "Ma",
+  scale_x_discrete(labels=c("Cl", "Ri", "Ro", "Ce", "Ma", "Ki", 
                             "Re", "We", "Ah", "To", "Sa")) + 
+  scale_y_continuous(expand = c(0, 0), limits = c(0, 2.5)) +
   guides(colour = guide_legend(nrow = 1)) +
-  annotate("text", x=1, y=2.2, label="D", size=4) +
-  annotate("text", x=3.5, y=2.2, label="Mainstem", size=4) +
-  annotate("text", x=9, y=2.2, label="Tributary", size=4)  
+  annotate("text", x=1, y=2.4, label="D", size=4) +
+  annotate("text", x=3.5, y=2.4, label="Mainstem", size=4) +
+  annotate("text", x=9, y=2.4, label="Tributary", size=4)  
 
 #################################################################
 #compile figure
