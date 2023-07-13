@@ -18,16 +18,19 @@ nds_chem$river_mile<-ifelse(nds_chem$stream=="ahtanum", 106, nds_chem$river_mile
 
 chem<-read.csv("chem_summary.csv")
 chem$river_mile<-ifelse(chem$stream=="ahtanum", 106, chem$river_mile)
+chem$Si.mgL_Si<-chem$Si.mgL*28.0855/60.08 #needed because data from Seal are expressed as mg SiO2, not as mg Si
 
 #ratios
 chem$DIN.mgNL<-chem$NH4.mgNL+chem$NO3.mgNL
 chem$N.P.ratio<-(chem$DIN.mgNL/14)/(chem$oP.mgPL/31)
-chem$N.Si.ratio<-(chem$DIN.mgNL/14)/(chem$Si.mgL/28)
-chem$P.Si.ratio<-(chem$oP.mgPL/31)/(chem$Si.mgL/28)
+chem$N.Si.ratio<-(chem$DIN.mgNL/14)/(chem$Si.mgL_Si/28)
+chem$P.Si.ratio<-(chem$oP.mgPL/31)/(chem$Si.mgL_Si/28)
 
 chem$stream<-as.factor(chem$stream)
 chem$season<-as.factor(chem$season)
 chem$type<-as.factor(chem$type)
+
+chem$river_km<-chem$river_mile*1.609
 
 #ME model, based on plots
 #start with fixed effects and then test if adding random effects improves the model
@@ -80,13 +83,24 @@ lrtest(M3b, M5b)
 #no difference, but loglik higher for M3b
 
 summary(M5b)
-M6b<-lme(NO3.mgNL~river_mile, random = ~1|stream, 
+M6b<-lme(NO3.mgNL~river_km, random = ~1|stream, 
          method="REML", chem) 
 
 lrtest(M6b, M1b)
 #no difference with any except better than M1b
 
 summary(M6b)
+#Random effects:
+#Formula: ~1 | stream
+#(Intercept)  Residual
+#StdDev:   0.3436648 0.2592373
+
+#Fixed effects:  NO3.mgNL ~ river_km 
+#             Value Std.Error DF   t-value p-value
+#(Intercept)  1.7484984 0.3235024 10  5.404900  0.0003
+#river_km    -0.0066422 0.0017280  9 -3.843825  0.0039
+
+
 
 op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
 E2<-residuals(M6b, type="normalized")
@@ -398,7 +412,7 @@ lrtest(M3b, M4b)
 lrtest(M2b, M4b)
 #M4b slightly better
 
-M5b<-lme(log(N.P.ratio)~river_mile, random = ~1|stream, 
+M5b<-lme(log(N.P.ratio)~river_km, random = ~1|stream, 
         method="REML", chem)
 
 lrtest(M5b, M1b)
@@ -423,17 +437,17 @@ summary(M5b)
 #Linear mixed-effects model fit by REML
 #Data: chem 
 #AIC      BIC    logLik
-#55.15306 58.93082 -23.57653
+# 56.10429 59.88204 -24.05214
 
 #Random effects:
 #  Formula: ~1 | stream
 #(Intercept)  Residual
 #StdDev:   0.4815545 0.4437365
 
-#Fixed effects: log(N.P.ratio) ~ river_mile 
+#Fixed effects:  log(N.P.ratio) ~ river_km 
 #Value Std.Error DF   t-value p-value
-#(Intercept)  5.081904 0.4781519 10 10.628219  0.0000
-#river_mile  -0.018598 0.0041054  9 -4.530228  0.0014
+#(Intercept)  5.081904 0.4781519 10 10.628220  0.0000
+#river_km    -0.011559 0.0025515  9 -4.530228  0.0014
 
 r.squaredGLMM(M5b) 
 #     R2m       R2c
@@ -501,7 +515,7 @@ lrtest(M2b, M3b)
 lrtest(M1b, M3b)
 #M3b not better than either 
 
-M4b<-lme(log(N.Si.ratio)~river_mile+season, random = ~1|stream, 
+M4b<-lme(log(N.Si.ratio)~river_km+season, random = ~1|stream, 
          method="REML", chem)
 
 lrtest(M1b, M4b)
@@ -512,7 +526,7 @@ lrtest(M3b, M4b)
 #will go with M4b
 
 summary(M4b)
-M5b<-lme(log(N.Si.ratio)~river_mile, random = ~1|stream, 
+M5b<-lme(log(N.Si.ratio)~river_km, random = ~1|stream, 
          method="REML", chem)
 
 lrtest(M1b, M5b)
@@ -538,7 +552,7 @@ summary(M4b)
 #Linear mixed-effects model fit by REML
 #Data: chem 
 #AIC      BIC   logLik
-#64.73281 69.18466 -27.3664
+#65.68403 70.13589 -27.84202
 
 #Random effects:
 #  Formula: ~1 | stream
@@ -548,7 +562,7 @@ summary(M4b)
 #Fixed effects: log(N.Si.ratio) ~ river_mile + season 
 #Value Std.Error DF   t-value p-value
 #(Intercept)  -0.6389693 0.7303827  9 -0.874842  0.4044
-#river_mile   -0.0232400 0.0062068  9 -3.744282  0.0046
+#river_km     -0.0144437 0.0038575  9 -3.744282  0.0046
 #seasonsummer -0.1633939 0.1956503  9 -0.835132  0.4253
 
 r.squaredGLMM(M4b) 
