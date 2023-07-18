@@ -13,6 +13,11 @@ library(multcomp)
 nds_chem<-read.csv("NDS_chem_all.csv")
 nds_chem$river_mile<-ifelse(nds_chem$stream=="ahtanum", 106, nds_chem$river_mile)
 nds_chem$river_km<-nds_chem$river_mile*1.609
+nds_chem$Si.mgL_Si<-nds_chem$Si.mgL*28.0855/60.08 #needed because data from Seal are expressed as mg SiO2, not as mg Si
+
+#ratios
+nds_chem$N.Si.ratio<-(nds_chem$DIN.mgNL/14)/(nds_chem$Si.mgL_Si/28)
+nds_chem$P.Si.ratio<-(nds_chem$oP.mgPL/31)/(nds_chem$Si.mgL_Si/28)
 
 nds_chem$top<-as.factor(nds_chem$top)
 
@@ -69,8 +74,8 @@ summary(Mf)
 
 #Fixed effects: log(cr.nrr + 1) ~ season + river_km * type 
 #                       Value  Std.Error  DF   t-value  p-value
-#(Intercept)          0.5401840 0.03465824 785 15.586019  0.0000
-#seasonfall         -0.1097521 0.01345564 785 -8.156582  0.0000
+#(Intercept)           0.4304319 0.03463473 785 12.427753  0.0000
+#seasonsummer         0.1097521 0.01345564 785  8.156582  0.0000
 #river_km             0.0010123 0.00037220 785  2.719848  0.0067
 #typetrib             0.2673480 0.04474965 785  5.974304  0.0000
 #river_km:typetrib   -0.0015056 0.00024023 785 -6.267546  0.0000
@@ -243,7 +248,7 @@ M3a<-lme(log(cr.nrr+1)~river_mile + Si.mgL*type + Si.mgL*season, random = ~1+riv
 lrtest(M2a, M3a)
 #M3a better so conclude intxn wasn't sig
 summary(M3a) #river mile p = 0.92
-M4a<-lme(log(cr.nrr+1)~Si.mgL*type + Si.mgL*season, random = ~1+river_km|nutrient, 
+M4a<-lme(log(cr.nrr+1)~Si.mgL_Si*type + Si.mgL_Si*season, random = ~1+river_km|nutrient, 
          method="REML", nds_s)
 lrtest(M3a, M4a)
 #M4a better
@@ -268,11 +273,11 @@ summary(M4a)
 #Fixed effects: log(cr.nrr + 1) ~ Si.mgL * type + Si.mgL * season 
 #                       Value  Std.Error  DF   t-value p-value
 #(Intercept)          0.9724807 0.07129803 784 13.639657  0.0000
-#Si.mgL              -0.0203280 0.00328211 784 -6.193570  0.0000
+#Si.mgL              -0.0434853 0.00702103 784 -6.193570  0.0000
 #typetrib            -0.2102705 0.06256215 784 -3.360985  0.0008
 #seasonsummer        -0.1048075 0.03435448 784 -3.050765  0.0024
-#Si.mgL:typetrib      0.0156919 0.00329061 784  4.768699  0.0000
-#Si.mgL:seasonsummer  0.0074717 0.00121631 784  6.142902  0.0000
+#Si.mgL:typetrib      0.0335679 0.00703921 784  4.768699  0.0000
+#Si.mgL:seasonsummer  0.0159833 0.00260191 784  6.142902  0.0000
 
 #CONCLUSION: best model: log(cr.nrr+1)~Si.mgL*type + Si.mgL*season, random = ~1+river_mile|nutrient
 #IOW: NRR for CR is predicted by [Si], season, and stream type, with a different relationship
@@ -345,7 +350,7 @@ M2a<-lme(log(cr.nrr+1)~river_mile*type +river_mile*season + oP.mgPL*type, random
          method="REML", nds_s)
 lrtest(M1a, M2a)
 #no difference
-M3a<-lme(log(cr.nrr+1)~river_mile*type + oP.mgPL+season, random = ~1+river_mile|nutrient, 
+M3a<-lme(log(cr.nrr+1)~river_km*type + oP.mgPL+season, random = ~1+river_km|nutrient, 
          method="REML", nds_s)
 lrtest(M1a, M3a)
 #M3a better
@@ -370,17 +375,17 @@ plot(x=nds_s$oP.mgPL, y=E, xlab="River Mile", ylab="Residuals")
 
 summary(M3a)
 #Random effects:
-#Formula: ~1 + river_mile | nutrient
+#Formula: ~1 + river_km | nutrient
 #Structure: General positive-definite, Log-Cholesky parametrization
 #           StdDev      Corr  
 #(Intercept) 0.072616743 (Intr)
 #river_mile  0.001613409 -0.894
 #Residual    0.189266416       
 
-#Fixed effects: log(cr.nrr + 1) ~ river_mile * type + oP.mgPL + season 
+#Fixed effects: log(cr.nrr + 1) ~ river_km * type + oP.mgPL + season 
 #                       Value  Std.Error  DF   t-value p-value
 #(Intercept)          0.4282076 0.04036040 784 10.609597  0.0000
-#river_mile           0.0016382 0.00060511 784  2.707197  0.0069
+#river_km             0.0010181 0.00037608 784  2.707197  0.0069
 #typetrib             0.2689036 0.04706304 784  5.713691  0.0000
 #oP.mgPL              0.0272022 0.25376852 784  0.107193  0.9147
 #seasonsummer         0.1102535 0.01425527 784  7.734223  0.0000
@@ -812,8 +817,8 @@ summary(M2b)
 #0.79350627 0.63204766 0.90662707 0.22282314 0.06263507 1.10684423 0.86923056 0.95291056 1.11271175 0.33659866 1.16607644 
 #Fixed effects: chla.nrr ~ season + river_km * type 
 #                   Value  Std.Error  DF    t-value p-value
-#(Intercept)        1.2138105 0.06492604 794  18.695279  0.0000
-#seasonfall        -0.4611727 0.03273352 794 -14.088696  0.0000
+#(Intercept)        0.7526378 0.06627973 794 11.355474  0.0000
+#seasonsummer       0.4611727 0.03273352 794 -14.088696  0.0000
 #river_km          -0.0019302 0.00026288 794  -7.342576  0.0000
 #typetrib          -0.4392558 0.07392802 794  -5.941669  0.0000
 #river_km:typetrib  0.0009634 0.00031210 794   3.086829  0.0021
@@ -934,7 +939,7 @@ M5sc_2<-lme(chla.nrr~type*NO3.mgNL + season*Si.mgL + type, random = ~1|nutrient,
 lrtest(M1sc_2, M5sc_2)
 #M1sc_2 better, so type *Si.mgL sign
 
-M6sc_2<-lme(chla.nrr~Si.mgL*season + Si.mgL*type, random = ~1|nutrient,
+M6sc_2<-lme(chla.nrr~Si.mgL_Si*season + Si.mgL_Si*type, random = ~1|nutrient,
            method="REML", data=nds_g, weights=vf3)
 lrtest(M3sc_2, M6sc_2)
 lrtest(M1sc_2, M6sc_2)
@@ -960,15 +965,15 @@ summary(M6sc_2)
 #Fixed effects: chla.nrr ~ Si.mgL * season + Si.mgL * type 
 #Value  Std.Error  DF   t-value p-value
 #(Intercept)        -0.2003948 0.05532218 793 -3.622324  0.0003
-#Si.mgL               0.0377739 0.00400975 793  9.420502  0.0000
+#Si.mgL_Si            0.0808050 0.00857758 793  9.420502  0.0000
 #seasonsummer         0.6441555 0.06418636 793 10.035707  0.0000
 #typetrib             0.2579099 0.08727505 793  2.955139  0.0032
-#Si.mgL:seasonsummer -0.0040503 0.00239977 793 -1.687802  0.0918
-#Si.mgL:typetrib     -0.0368538 0.00448394 793 -8.219069  0.0000
+#Si.mgL_Si:seasonsummer -0.0086643 0.00513355 793 -1.687802  0.0918
+#Si.mgL_Si:typetrib     -0.0788369 0.00959197 793 -8.219069  0.0000
 
 r.squaredGLMM(M6sc_2)
         #R2m       R2c
-#[1,] 0.1549568 0.1614803
+#[1,] 0.1670005 0.1736108
 
 op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
 E2<-residuals(M6sc_2, type="normalized")
@@ -1005,7 +1010,7 @@ lrtest(M1a, M4a)
 lrtest(M1a, M5a)
 #M1a better. interpretation: leave in Si x type
 
-M6a<-lme(chla.nrr~river_mile*type + season + Si.mgL*type, random = ~1|nutrient,
+M6a<-lme(chla.nrr~river_km*type + season + Si.mgL_Si*type, random = ~1|nutrient,
          method="REML", data=nds_g, weights=vf3)
 M7a<-lme(chla.nrr~river_mile + Si.mgL*type, random = ~1|nutrient,
          method="REML", data=nds_g, weights=vf3)#doesn't converge
@@ -1042,11 +1047,11 @@ summary(M6a)
 #                       Value  Std.Error  DF   t-value p-value
 #(Intercept)         -2.966308 0.16773578 792 -17.68441       0
 #typetrib             3.470837 0.18240994 792  19.02767       0
-#river_mile           0.011197 0.00057189 792  19.57929       0
+#river_km             0.006959 0.00035543 792  19.57929       0
 #seasonsummer         0.664582 0.03962804 792  16.77051       0
-#Si.mgL               0.131770 0.00706182 792  18.65944       0
-#typetrib:river_mile -0.012625 0.00059069 792 -21.37344       0
-#typetrib:Si.mgL     -0.137690 0.00716419 792 -19.21925       0
+#Si.mgL_Si           0.281879 0.01510651 792  18.65944       0
+#river_km:typetrib  -0.007846 0.00036711 792 -21.37344       0
+#typetrib:Si.mgL_Si -0.294545 0.01532550 792 -19.21925       0
 
 r.squaredGLMM(M6a)
 #       R2m       R2c
@@ -1197,13 +1202,13 @@ lrtest(M2a, M3a)
 summary(M2a)
 
 M4a<-lme(log(chla.nrr)~river_km*season, nds_gw, 
-         random=~1+river_mile| nutrient)
+         random=~1+river_km| nutrient)
 
 lrtest(M2a, M4a) #no difference
 
 summary(M4a)
 #Random effects:
-#Formula: ~1 + river_mile | nutrient
+#Formula: ~1 + river_km | nutrient
 #Structure: General positive-definite, Log-Cholesky parametrization
 #StdDev      Corr  
 #(Intercept) 0.035222879 (Intr)
@@ -1212,10 +1217,10 @@ summary(M4a)
 
 #Fixed effects: log(chla.nrr) ~ river_mile * season 
 #                       Value  Std.Error  DF   t-value p-value
-#(Intercept)            -0.3379904 0.11646515 716 -2.902074  0.0038
-#river_km               0.0033090 0.00070327 716  4.705179  0.0000
-#seasonfall             0.0848563 0.16588367 716  0.511541  0.6091
-#river_km:seasonfall    -0.0049649 0.00088119 716 -5.634295  0.0000
+#(Intercept)           -0.25313414 0.11942554 716 -2.119598  0.0344
+#river_km              -0.00165589 0.00070587 716 -2.345873  0.0193
+#seasonsummer          -0.08485629 0.16588367 716  0.511541  0.6091
+#river_km:seasonsummer  0.00496490 0.00088119 716 -5.634295  0.0000
 
 ranef(M4a)
 #       (Intercept)    river_mile

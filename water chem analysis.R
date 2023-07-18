@@ -25,6 +25,9 @@ chem$DIN.mgNL<-chem$NH4.mgNL+chem$NO3.mgNL
 chem$N.P.ratio<-(chem$DIN.mgNL/14)/(chem$oP.mgPL/31)
 chem$N.Si.ratio<-(chem$DIN.mgNL/14)/(chem$Si.mgL_Si/28)
 chem$P.Si.ratio<-(chem$oP.mgPL/31)/(chem$Si.mgL_Si/28)
+16/40 #N:Si ratio = 0.4 #all sites < 0.4, except toppenish in summer
+1/40 #P:Si ratio = 0.025 #all sites < 0.025
+
 
 chem$stream<-as.factor(chem$stream)
 chem$season<-as.factor(chem$season)
