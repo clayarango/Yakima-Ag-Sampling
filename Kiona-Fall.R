@@ -331,8 +331,8 @@ anova(M1)
 #do multiple 2 way ANOVAs to improve our ability to interpret
 ##########################################################
 #N and P
-xx = na.omit(subset(d.gpp, select = c(N,P,chla_ug_cm2)))
-interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
+xx = na.omit(subset(d.gpp, select = c(N,P,chla)))
+interaction.plot(xx$N, xx$P, xx$chla)
 
 #N and Si
 xx = na.omit(subset(d.gpp, select = c(N,Si,chla)))

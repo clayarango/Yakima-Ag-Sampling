@@ -265,7 +265,6 @@ interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 
-
 ##########################################################
 #Analyze CR by removing all Si treatments
 ##########################################################

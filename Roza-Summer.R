@@ -179,6 +179,31 @@ interaction.plot(xx$N, xx$Si, xx$cr.area*-1)
 xx = na.omit(subset(d.cr, select = c(P,Si,cr.area)))
 interaction.plot(xx$P, xx$Si, xx$cr.area*-1)
 ##########################################################
+#Analyze CR by removing all Si treatments
+##########################################################
+d.crNoSi = subset(d.cr, Si==0)
+
+M1<-gls(cr.area~N*P, data=d.crNoSi, na.action=na.omit)
+E1<-residuals(M1)
+qqnorm(E1)
+qqline(E1)
+ad.test(E1)
+#residuals look good (p=0.45)
+hist(E1)
+plot(M1)
+
+bartlett.test(cr.area~nutrient, data=d.crNoSi)
+#data look good p=0.5241
+
+anova(M1)
+
+#Interpret Interaction
+#N and P
+xx = na.omit(subset(d.crNoSi, select = c(N,P,cr.area)))
+interaction.plot(xx$N, xx$P, xx$cr.area)
+
+
+
 ##########################################################
 
 x <- group_by(d.cr, nutrient) %>%  # Grouping function causes subsequent functions to aggregate by season and reach

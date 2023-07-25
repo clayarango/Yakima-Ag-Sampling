@@ -80,7 +80,7 @@ columbia_cr <- ggplot(data = subset(comb_cr, location == "columbia"), aes(x = nu
   scale_fill_manual(name="Incubation", values=c("black", "white")) +
 #  ggtitle("Columbia") + #delete title for final figure
   ylim(10,30) +
-  ylab(expression(CR~(mu*g~O[2]~cm^{2}~h^{-1}))) +
+  ylab(expression(CR~(mu*g~O[2]~cm^{-2}~h^{-1}))) +
   theme(legend.position = "none",
         axis.title.x=element_blank()) +
   annotate("text", x=0.75, y=30, label="A", size=4)
@@ -264,12 +264,12 @@ M6 <- aov(cr.area ~ N*P, data = subset(ditch, incubation == "lab"))
 summary(M6)
 #N limitation
 
-M7 <- aov(cr.nrr ~ N*P, data = subset(ditch, incubation == "GH"))
+M7 <- aov(cr.nrr ~ nutrient, data = subset(ditch, incubation == "GH"))
 summary(M7)
 TukeyHSD(M7)
 #N limitation
 
-M8 <- aov(cr.nrr ~ N*P, data = subset(ditch, incubation == "lab"))
+M8 <- aov(cr.nrr ~ nutrient, data = subset(ditch, incubation == "lab"))
 summary(M8)
 TukeyHSD(M8)
 #N limitation

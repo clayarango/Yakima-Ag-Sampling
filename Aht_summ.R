@@ -260,7 +260,7 @@ interaction.plot(xx$N, xx$P, xx$chla_ug_cm2)
 #N increases chla, w or w/o P
 
 #N and Si
-xx = na.omit(subset(d.gpp1, select = c(N,Si,chla_ug_cm2)))
+xx = na.omit(subset(d.gpp, select = c(N,Si,chla_ug_cm2)))
 interaction.plot(xx$N, xx$Si, xx$chla_ug_cm2)
 
 #P and Si

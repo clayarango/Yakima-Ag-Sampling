@@ -203,7 +203,7 @@ anova(M3)
 d.cr$sqr.cr.area = (d.cr$cr.area*-1)^(1/2)
 
 M4<-gls(sqr.cr.area~N*P*Si, data=d.cr, na.action=na.omit)
-E4<-residuals(M3)
+E4<-residuals(M4)
 qqnorm(E4)
 qqline(E4)
 ad.test(E4)

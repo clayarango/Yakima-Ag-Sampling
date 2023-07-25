@@ -485,15 +485,17 @@ anova(M5, type = 3)#type 3 is better for interaction terms
 #N and P  
 xx = na.omit(subset(d.gpp, select = c(N,P,chla)))
 interaction.plot(xx$N, xx$P, xx$chla)
+#P inhibits N
 
-#N and Si Si inhibited in presence of N (but NS)
+#N and Si 
 xx = na.omit(subset(d.gpp, select = c(N,Si,chla)))
 interaction.plot(xx$N, xx$Si, xx$chla)
+#Si stimulates, but not with N
 
 #P and Si P reduces resposne to Si
 xx = na.omit(subset(d.gpp, select = c(P,Si,chla)))
 interaction.plot(xx$P, xx$Si, xx$chla)
-
+#Si stimulates, but not with P
 
 ##########################################################
 #Analyze chl-a by removing all Si treatments

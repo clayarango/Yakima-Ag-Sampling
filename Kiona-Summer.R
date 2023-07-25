@@ -335,8 +335,8 @@ xx = na.omit(subset(d.gpp, select = c(N,P,chla)))
 interaction.plot(xx$N, xx$P, xx$chla)
 
 #N and Si
-xx = na.omit(subset(d.gpp, select = c(N,Si,chla_ug_cm2)))
-interaction.plot(xx$N, xx$Si, xx$chla_ug_cm2)
+xx = na.omit(subset(d.gpp, select = c(N,Si,chla)))
+interaction.plot(xx$N, xx$Si, xx$chla)
 
 #P and Si
 xx = na.omit(subset(d.gpp, select = c(P,Si,chla)))
