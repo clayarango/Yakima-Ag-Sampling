@@ -27,6 +27,10 @@ nds_s <- subset(nds_s, !(is.na(nds_s$cr.nrr)))
 nds_g<-subset(nds_chem, top =="glass")
 nds_g <- subset(nds_g, !(is.na(nds_g$chla.nrr)))
 
+####remove fully-consumed sponges from analysis
+nds_s$consumed<-ifelse(abs(nds_s$cr.area)> 40|abs(nds_s$cr.area)==30.8, "C", "N")
+nds_s_intact<-filter(nds_s, nds_s$consumed=="N")
+
 ###some code to determine magnitude of difference between groups (for results section)###
 nrr_noctl<-subset(nds_g, !nutrient=="control")
 
@@ -95,6 +99,33 @@ r.squaredGLMM(Mf)
         #R2m       R2c
 #[1,] 0.113609 0.4167893
 
+###model results with fully-consumed sponges removed
+Mfc<-lme(log(cr.nrr+1)~season+ river_km*type, random = ~1+river_km| nutrient, method="REML", data=nds_s_intact)
+summary(Mfc)
+
+#Fixed effects:  log(cr.nrr + 1) ~ season + river_km * type 
+                    #Value  Std.Error  DF     t-value   p-value
+#(Intercept)        0.4325900 0.03438173 777 12.581974  0.0000
+#seasonsummer       0.1054167 0.01343854 777  7.844359  0.0000
+#river_km           0.0010124 0.00037043 777  2.733034  0.0064
+#typetrib           0.2506021 0.04481453 777  5.591983  0.0000
+#river_km:typetrib -0.0014416 0.00024007 777 -6.004872  0.0000
+
+ranef(Mfc)
+#         (Intercept)   river_km
+#control  0.05162015 -0.0002554226
+#N       -0.06456052  0.0009997123
+#NP      -0.04968847  0.0007860618
+#NPSi    -0.10065903  0.0014467681
+#NSi      0.02302776 -0.0009438669
+#P        0.02848189 -0.0003895606
+#PSi      0.04754591 -0.0003258299
+#Si       0.06423231 -0.0013178622
+
+r.squredGLMM(Mfc)
+#     R2m       R2c 
+#[1,] 0.1096754 0.4197029
+
 #try a model with nutrient as fixed effect so can do post-hoc tests on it.
 M1<-lm(log(cr.nrr+1)~nutrient +river_km*type +season, nds_s)
 op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
@@ -135,6 +166,23 @@ summary(M1)
 #Residual standard error: 0.1996 on 785 degrees of freedom
 #Multiple R-squared:  0.3317,	Adjusted R-squared:  0.3223 
 #F-statistic: 35.42 on 11 and 785 DF,  p-value: < 2.2e-16
+
+#with fully-consumed sponges removed
+M1<-gls(log(cr.nrr+1)~nutrient +river_km*type +season, nds_s_intact)
+summary(M1)
+#                     Value  Std.Error   t-value    p-value
+#(Intercept)        0.4519908 0.03102997 14.566266  0.0000
+#nutrientN          0.0958632 0.02831457  3.385647  0.0007
+#nutrientNP         0.0727464 0.02831033  2.569605  0.0104
+#nutrientNPSi       0.1435200 0.02844935  5.044754  0.0000
+#nutrientNSi       -0.1730305 0.02795658 -6.189259  0.0000
+#nutrientP         -0.0561045 0.02823099 -1.987337  0.0472
+#nutrientPSi       -0.0176635 0.02823596 -0.625569  0.5318
+#nutrientSi        -0.1914897 0.02838515 -6.746125  0.0000
+#river_km           0.0009985 0.00011880  8.404349  0.0000
+#typetrib           0.2475777 0.04728358  5.236018  0.0000
+#seasonsummer       0.1039967 0.01418177  7.333127  0.0000
+#river_km:typetrib -0.0014280 0.00025328 -5.638214  0.0000
 
 #post-hoc tests
 model.matrix.gls <- function(M1, ...){
@@ -187,7 +235,6 @@ NTF.DIN.flux.emm$SE.raw = 10^(NTF.DIN.flux.emm$SE)-1 #going back to non-transfor
 
 
 NTF.DIN.flux.emm
-
 
 #NRR model, based on plots. starting variables include season, type, and the 4 combinations above
 #start with fixed effects and then test if adding random effects improves the model
@@ -325,6 +372,21 @@ library(mgcv)
 M4a<-gam(log(cr.nrr+1)~s(Si.mgL)*(season) + s(Si.mgL)*(type),
           random = list(~1|nutrient,1+river_mile), data=nds_s)
 
+#with missing sponges removed
+M4a_i<-lme(log(cr.nrr+1)~Si.mgL_Si*type + Si.mgL_Si*season, random = ~1+river_km|nutrient, 
+         method="REML", nds_s_intact)
+
+summary(M4a_i)#for missing sponges removed
+#                         Value     Std.Error  DF   t-value p-value
+#(Intercept)             0.9608377 0.07132860 776 13.470582  0.0000
+#Si.mgL_Si              -0.0423240 0.00699965 776 -6.046588  0.0000
+#typetrib               -0.2111912 0.06254464 776 -3.376647  0.0008
+#seasonsummer           -0.0982935 0.03429572 776 -2.866057  0.0043
+#Si.mgL_Si:typetrib      0.0329052 0.00702099 776  4.686689  0.0000
+#Si.mgL_Si:seasonsummer  0.0150811 0.00261493 776  5.767328  0.0000
+
+r.squaredGLMM(M4_ia)
+
 #now, CR NRR with river mile + SRP
 M1<-lm(log(cr.nrr+1)~river_mile*season + type*river_mile + oP.mgPL*type + oP.mgPL*season, nds_s)#need to log to meet assumptions
 op<-par(mfrow=c(2,2), mar=c(4,4,3,2))
@@ -411,6 +473,11 @@ xyplot(E~oP.mgPL|type*season, data=nds_s, ylab="Residuals", xlab="SRP (mg/L)",
          panel.points(x,y,col=1)
          panel.loess(x,y,span=0.5, col=1, lwd=2)})
 #looks linear
+
+M3ai<-lme(log(cr.nrr+1)~river_km*type + oP.mgPL+season, random = ~1+river_km|nutrient, 
+         method="REML", nds_s_intact)
+summary(M3ai)
+r.squaredGLMM()
 
 #respiration with DOC and DIN
 M1<-lm(log(cr.nrr+1)~DOC.mgL*season + type*DOC.mgL + DIN.mgNL*type + DIN.mgNL*season, nds_s)#need to log to meet assumptions
@@ -500,6 +567,11 @@ ranef(M3c)
 #P       -0.074042790  0.03603886
 #PSi     -0.022515720  0.01573467
 #Si      -0.236432749  0.10010135
+
+M3ci<-lme(log(cr.nrr+1)~type*DOC.mgL + DIN.mgNL*type + DIN.mgNL+season, random = ~1+DIN.mgNL|nutrient, 
+         method="REML", nds_s_intact)
+summary(M3ci)
+r.squaredGLMM(M3ci)
 
 xyplot(E~DOC.mgL|type*season, data=nds_s, ylab="Residuals", xlab="DOC (mg/L)", 
        panel=function(x,y){panel.grid(h=-1, v=2)
@@ -593,6 +665,11 @@ ranef(M4c)
 #PSi     -0.06287778  0.03423132
 #Si      -0.27736848  0.11785053
 
+M4ci<-lme(log(cr.nrr+1)~Si.mgL*season + type*Si.mgL, random = ~1+DIN.mgNL|nutrient, 
+         method="REML", nds_s_intact)
+summary(M4ci)
+r.squaredGLMM(M4ci)
+
 xyplot(E~Si.mgL|type*season, data=nds_s, ylab="Residuals", xlab="Si (mg/L)", 
        panel=function(x,y){panel.grid(h=-1, v=2)
          panel.points(x,y,col=1)
@@ -679,6 +756,10 @@ ranef (M2a)
 #Si      -0.269121818  3.478522e-03
 
 #slightly less predictive power than with river mile
+M2ai<-lme(log(cr.nrr+1)~season + type*N.P.ratio,random = ~1+N.P.ratio|nutrient, 
+         method="REML", nds_s_intact)
+summary(M2ai)
+r.squaredGLMM(M2ai)
 
 ########################################################################################
 #chla NRR#
