@@ -184,57 +184,6 @@ summary(M1)
 #seasonsummer       0.1039967 0.01418177  7.333127  0.0000
 #river_km:typetrib -0.0014280 0.00025328 -5.638214  0.0000
 
-#post-hoc tests
-model.matrix.gls <- function(M1, ...){
-        model.matrix(terms(M1), data = getData(M1), ...)  
-}
-model.frame.gls <- function(M1, ...){
-        model.frame(formula(M1), data = getData(M1), ...)  
-}
-terms.gls <- function(M1, ...){
-        terms(model.frame(M1),...)  
-}
-
-multCompTukey <- glht(M1, linfct = mcp(nutrient = "Tukey")) 
-summary(multCompTukey)
-
-#create table x to interpret post hoc test
-x <- group_by(nds_s, nutrient) %>%  # dataframe name, grouping variable. Grouping function causes subsequent functions to aggregate by season and reach
-        summarize(cr.nrr.mean = mean(cr.nrr, na.rm = TRUE))#, # na.rm = TRUE to remove missing values
-                  #net.din.flux.sd=sd(net.din.flux, na.rm = TRUE),  # na.rm = TRUE to remove missing values
-                  #n = sum(!is.na(net.din.flux)), # of observations, excluding NAs. 
-                  #net.din.flux.se=net.din.flux.sd/sqrt(n))
-
-sort(x$cr.nrr.mean, index.return=T) #sorts table so can show from low to high (or v.v.)
-
-#####################################################
-#Estimated Marginal Means code example
-#####################################################
-
-M.full<-lme(l.net.din.flux ~ budworm*f.sample.event,
-            random = ~1|nest, na.action=na.omit, data=tf, weights=vf8)
-
-anova(M.full)
-
-#r.squaredGLMM(M.full)
-
-M.full.em = emmeans(M.full, ~ budworm | f.sample.event)
-
-pairs(M.full.em)
-
-xx = as.data.frame(summary(M.full.em))[c('emmean', 'SE')]
-
-budworm = rep((letters[seq(from = 1, to = 2)]), 10)
-budworm<-recode(budworm, "a" ="High")
-budworm<-recode(budworm, "b" ="Low")
-event = c(1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10)
-
-NTF.DIN.flux.emm = data.frame(cbind(xx,budworm,event))
-NTF.DIN.flux.emm$emmean.raw = 10^(NTF.DIN.flux.emm$emmean)-1 #log-transformed, going back to non-transformed
-NTF.DIN.flux.emm$SE.raw = 10^(NTF.DIN.flux.emm$SE)-1 #going back to non-transformed
-
-
-NTF.DIN.flux.emm
 
 #NRR model, based on plots. starting variables include season, type, and the 4 combinations above
 #start with fixed effects and then test if adding random effects improves the model
@@ -1317,3 +1266,56 @@ ranef(M4a)
 r.squaredGLMM(M4a)
 #       R2m       R2c
 #[1,] 0.196193 0.2208489
+
+####old code and example code
+#post-hoc tests
+model.matrix.gls <- function(M1, ...){
+  model.matrix(terms(M1), data = getData(M1), ...)  
+}
+model.frame.gls <- function(M1, ...){
+  model.frame(formula(M1), data = getData(M1), ...)  
+}
+terms.gls <- function(M1, ...){
+  terms(model.frame(M1),...)  
+}
+
+multCompTukey <- glht(M1, linfct = mcp(nutrient = "Tukey")) 
+summary(multCompTukey)
+
+#create table x to interpret post hoc test
+x <- group_by(nds_s, nutrient) %>%  # dataframe name, grouping variable. Grouping function causes subsequent functions to aggregate by season and reach
+  summarize(cr.nrr.mean = mean(cr.nrr, na.rm = TRUE))#, # na.rm = TRUE to remove missing values
+#net.din.flux.sd=sd(net.din.flux, na.rm = TRUE),  # na.rm = TRUE to remove missing values
+#n = sum(!is.na(net.din.flux)), # of observations, excluding NAs. 
+#net.din.flux.se=net.din.flux.sd/sqrt(n))
+
+sort(x$cr.nrr.mean, index.return=T) #sorts table so can show from low to high (or v.v.)
+
+#####################################################
+#Estimated Marginal Means code example
+#####################################################
+
+M.full<-lme(l.net.din.flux ~ budworm*f.sample.event,
+            random = ~1|nest, na.action=na.omit, data=tf, weights=vf8)
+
+anova(M.full)
+
+#r.squaredGLMM(M.full)
+
+M.full.em = emmeans(M.full, ~ budworm | f.sample.event)
+
+pairs(M.full.em)
+
+xx = as.data.frame(summary(M.full.em))[c('emmean', 'SE')]
+
+budworm = rep((letters[seq(from = 1, to = 2)]), 10)
+budworm<-recode(budworm, "a" ="High")
+budworm<-recode(budworm, "b" ="Low")
+event = c(1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10)
+
+NTF.DIN.flux.emm = data.frame(cbind(xx,budworm,event))
+NTF.DIN.flux.emm$emmean.raw = 10^(NTF.DIN.flux.emm$emmean)-1 #log-transformed, going back to non-transformed
+NTF.DIN.flux.emm$SE.raw = 10^(NTF.DIN.flux.emm$SE)-1 #going back to non-transformed
+
+
+NTF.DIN.flux.emm
