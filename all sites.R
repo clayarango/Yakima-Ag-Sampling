@@ -125,6 +125,14 @@ nds_all$stream<-recode(nds_all$stream, "mab"="mabton", "aht"="ahtanum", "cen"="c
 str(nds_all)
 str(chem)
 
+#number of BD
+count(chem, Si_mgL==0) #0
+count(chem, oP_mgL==0)#0
+count(chem, NH4_mgNL==0)#14 (32%)
+count(chem, NO3_mgNL==0)#0
+count(chem, doc.mg.l==0)
+count(chem, tdn.mg.l==0)#7 (16%)
+
 #remove extraneous columns prior to merge
 chem$Site<-NULL
 chem$no_DOC_TDN<-NULL

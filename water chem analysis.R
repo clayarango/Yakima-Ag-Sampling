@@ -218,7 +218,7 @@ cor.test(predict(M4b),chem$oP.mgPL)
 #################
 #SI
 ################
-M1<-lm(log(Si.mgL)~river_mile*season + type*river_mile, chem)
+M1<-lm(log(Si.mgL_Si)~river_mile*season + type*river_mile, chem)
 
 plot(M1)#ok after logging
 E<-rstandard(M1)
@@ -250,7 +250,7 @@ M3b<-lme(log(Si.mgL)~river_mile + type*season, random = ~1|stream,
 lrtest(M2b, M3b)
 #M3b better than M2b 
 
-M4b<-lme(log(Si.mgL)~season*type, random = ~1|stream, 
+M4b<-lme(log(Si.mgL_Si)~season*type, random = ~1|stream, 
          method="REML", chem)
 
 lrtest(M3b, M4b)
@@ -305,9 +305,9 @@ summary(M4b)
 #(Intercept)   Residual
 #StdDev:   0.3375313 0.08295359
 
-#Fixed effects: log(Si.mgL) ~ season * type 
+#Fixed effects: log(Si.mgL_Si) ~ season * type 
 #                         Value  Std.Error DF   t-value p-value
-#(Intercept)            2.7788790 0.14189706  9 19.583767  0.0000
+#(Intercept)            2.0184554 0.14189706  9 14.224787  0.0000
 #seasonsummer          -0.3087941 0.04789328  8 -6.447547  0.0002
 #typetrib               0.7314823 0.21204961  9  3.449581  0.0073
 #seasonsummer:typetrib  0.1783169 0.07559641  8  2.358801  0.0460
@@ -564,7 +564,7 @@ summary(M4b)
 
 #Fixed effects: log(N.Si.ratio) ~ river_mile + season 
 #Value Std.Error DF   t-value p-value
-#(Intercept)  -0.6389693 0.7303827  9 -0.874842  0.4044
+#(Intercept)  0.12145429 0.7303827  9  0.166289  0.8716
 #river_km     -0.0144437 0.0038575  9 -3.744282  0.0046
 #seasonsummer -0.1633939 0.1956503  9 -0.835132  0.4253
 
@@ -894,8 +894,8 @@ summary(M6b)
 
 #Fixed effects: P.Si.ratio ~ season 
 #Value    Std.Error DF   t-value p-value
-#(Intercept)   0.0023822706 0.0003233003 10  7.368599  0.0000
-#seasonsummer -0.0005817866 0.0003282426  9 -1.772429  0.1101
+#(Intercept)   0.005096111 0.0006915983 10  7.368599  0.0000
+#seasonsummer -0.001244548 0.0007021705  9 -1.772429  0.1101
 
 ######NH4#######
 
