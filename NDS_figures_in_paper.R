@@ -45,49 +45,49 @@ sum_g<-ddply(nds_g, c("stream", "nutrient", "season", "river_km", "top","type", 
              se_chla_nrr=(sd(chla.nrr, na.rm=T)/sqrt(sum(!is.na(chla.nrr)))))
 sum_g$nutrient<-as.factor(sum_g$nutrient)
 
-#figures showing ME models
+#figures showing ME models - updated 2/20/2024 because did not match output - unsure why
 #CR NRR - separate by type to show different relationship between river mile and type
-N.mains<-function (x){(0.5401840-0.06665833+ (0.0010123+0.0010095816)*x)}
-NP.mains<-function (x){(0.5401840-0.05226625+(0.0010123+0.0007889932)*x)}
-NPSi.mains<-function (x){(0.5401840-0.10001467+(0.0010123+0.0014462067)*x)}
-NSi.mains<-function (x){(0.5401840+0.02581708 +(0.0010123-0.0009504016)*x)}
-P.mains<-function (x){(0.5401840+0.02678777 +(0.0010123-0.0003903662)*x)}
-PSi.mains<-function (x){(0.5401840+0.04495836 +(0.0010123-0.0003143952)*x)}
-Si.mains<-function (x){(0.5401840+0.07073023 +(0.0010123-0.00133335)*x)}
-mains<-function (x){0.5401840+0.0010123*x}
+N.mains<-function (x){(0.4304319-0.06665833+ (0.0010123+0.0010095816)*x)}
+NP.mains<-function (x){(0.4304319-0.05226625+(0.0010123+0.0007889932)*x)}
+NPSi.mains<-function (x){(0.4304319-0.10001467+(0.0010123+0.0014462067)*x)}
+NSi.mains<-function (x){(0.4304319+0.02581708 +(0.0010123-0.0009504016)*x)}
+P.mains<-function (x){(0.4304319+0.02678777 +(0.0010123-0.0003903662)*x)}
+PSi.mains<-function (x){(0.4304319+0.04495836 +(0.0010123-0.0003143952)*x)}
+Si.mains<-function (x){(0.4304319+0.07073023 +(0.0010123-0.00133335)*x)}
+mains<-function (x){0.4304319+0.0010123*x}
 
-N.mainf<-function (x){(0.5401840-0.06665833+ (0.0010123+0.0010095816)*x)-0.1097521}
-NP.mainf<-function (x){(0.5401840-0.05226625+(0.0010123+0.0007889932)*x)-0.1097521}
-NPSi.mainf<-function (x){(0.5401840-0.10001467+(0.0010123+0.0014462067)*x)-0.1097521}
-NSi.mainf<-function (x){(0.5401840+0.02581708 +(0.0010123-0.0009504016)*x)-0.1097521}
-P.mainf<-function (x){(0.5401840+0.02678777 +(0.0010123-0.0003903662)*x)-0.1097521}
-PSi.mainf<-function (x){(0.5401840+0.04495836 +(0.0010123-0.0003143952)*x)-0.1097521}
-Si.mainf<-function (x){(0.5401840+0.07073023 +(0.0010123-0.00133335)*x)-0.1097521}
-mainf<-function(x){(0.5401840+0.0010123*x)-0.1097521}
+N.mainf<-function (x){(0.4304319-0.06665833+ (0.0010123+0.0010095816)*x)-0.1097521}
+NP.mainf<-function (x){(0.4304319-0.05226625+(0.0010123+0.0007889932)*x)-0.1097521}
+NPSi.mainf<-function (x){(0.4304319-0.10001467+(0.0010123+0.0014462067)*x)-0.1097521}
+NSi.mainf<-function (x){(0.4304319+0.02581708 +(0.0010123-0.0009504016)*x)-0.1097521}
+P.mainf<-function (x){(0.4304319+0.02678777 +(0.0010123-0.0003903662)*x)-0.1097521}
+PSi.mainf<-function (x){(0.4304319+0.04495836 +(0.0010123-0.0003143952)*x)-0.1097521}
+Si.mainf<-function (x){(0.4304319+0.07073023 +(0.0010123-0.00133335)*x)-0.1097521}
+mainf<-function(x){(0.4304319+0.0010123*x)-0.1097521}
 
-N.tribs<-function (x){(0.5401840-0.06665833+ (0.0010123+0.0010095816-0.0015056)*x)+0.2673480}
-NP.tribs<-function (x){(0.5401840-0.05226625+(0.0010123+0.0007889932-0.0015056)*x)+0.2673480}
-NPSi.tribs<-function (x){(0.5401840-0.10001450+(0.0010123+0.0014462060-0.0015056)*x)+0.2673480}
-NSi.tribs<-function (x){(0.5401840+0.02581708 +(0.0010123-0.0009504016-0.0015056)*x)+0.2673480}
-P.tribs<-function (x){(0.5401840+0.02678777 +(0.0010123-0.0003903662-0.0015056)*x)+0.2673480}
-PSi.tribs<-function (x){(0.5401840+0.04495836 +(0.0010123-0.0003143952-0.0015056)*x)+0.2673480}
-Si.tribs<-function (x){(0.5401840+0.07073023 +(0.0010123-0.00133335-0.0015056)*x)+0.2673480}
-tribs<-function(x){(0.5401840+((0.0010123-0.0015056)*x))+0.2673480}
+N.tribs<-function (x){(0.4304319-0.06665833+ (0.0010123+0.0010095816-0.0015056)*x)+0.2673480}
+NP.tribs<-function (x){(0.4304319-0.05226625+(0.0010123+0.0007889932-0.0015056)*x)+0.2673480}
+NPSi.tribs<-function (x){(0.4304319-0.10001450+(0.0010123+0.0014462060-0.0015056)*x)+0.2673480}
+NSi.tribs<-function (x){(0.4304319+0.02581708 +(0.0010123-0.0009504016-0.0015056)*x)+0.2673480}
+P.tribs<-function (x){(0.4304319+0.02678777 +(0.0010123-0.0003903662-0.0015056)*x)+0.2673480}
+PSi.tribs<-function (x){(0.4304319+0.04495836 +(0.0010123-0.0003143952-0.0015056)*x)+0.2673480}
+Si.tribs<-function (x){(0.4304319+0.07073023 +(0.0010123-0.00133335-0.0015056)*x)+0.2673480}
+tribs<-function(x){(0.4304319+((0.0010123-0.0015056)*x))+0.2673480}
 
-N.tribf<-function (x){(0.5401840-0.06665833+ (0.0010123+0.0010095816-0.0015056)*x)+0.2673480-0.1097521}
-NP.tribf<-function (x){(0.5401840-0.05226625+(0.0010123+0.0007889932-0.0015056)*x)+0.2673480-0.1097521}
-NPSi.tribf<-function (x){(0.5401840-0.10001450+(0.0010123+0.0014462060-0.0015056)*x)+0.2673480-0.1097521}
-NSi.tribf<-function (x){(0.5401840+0.02581708 +(0.0010123-0.0009504016-0.0015056)*x)+0.2673480-0.1097521}
-P.tribf<-function (x){(0.5401840+0.02678777 +(0.0010123-0.0003903662-0.0015056)*x)+0.2673480-0.1097521}
-PSi.tribf<-function (x){(0.5401840+0.04495836 +(0.0010123-0.0003143952-0.0015056)*x)+0.2673480-0.1097521}
-Si.tribf<-function (x){(0.5401840+0.07073023 +(0.0010123-0.00133335-0.0015056)*x)+0.2673480-0.1097521}
-tribf<-function (x){(0.5401840+((0.0010123-0.0015056)*x))+0.2673480-0.1097521}
+N.tribf<-function (x){(0.4304319-0.06665833+ (0.0010123+0.0010095816-0.0015056)*x)+0.2673480-0.1097521}
+NP.tribf<-function (x){(0.4304319-0.05226625+(0.0010123+0.0007889932-0.0015056)*x)+0.2673480-0.1097521}
+NPSi.tribf<-function (x){(0.4304319-0.10001450+(0.0010123+0.0014462060-0.0015056)*x)+0.2673480-0.1097521}
+NSi.tribf<-function (x){(0.4304319+0.02581708 +(0.0010123-0.0009504016-0.0015056)*x)+0.2673480-0.1097521}
+P.tribf<-function (x){(0.4304319+0.02678777 +(0.0010123-0.0003903662-0.0015056)*x)+0.2673480-0.1097521}
+PSi.tribf<-function (x){(0.4304319+0.04495836 +(0.0010123-0.0003143952-0.0015056)*x)+0.2673480-0.1097521}
+Si.tribf<-function (x){(0.4304319+0.07073023 +(0.0010123-0.00133335-0.0015056)*x)+0.2673480-0.1097521}
+tribf<-function (x){(0.4304319+((0.0010123-0.0015056)*x))+0.2673480-0.1097521}
 
-ave_all<-function(x){(0.5401840+0.0010123*x)}
+ave_all<-function(x){(0.4304319+0.0010123*x)}
 
 #Fixed effects: log(cr.nrr + 1) ~ season + river_mile * type
 #                       Value  Std.Error  DF   t-value  p-value
-#(Intercept)          0.5401840 0.03465824 785 15.586019  0.0000
+#(Intercept)          0.4304319 0.03463473 785 	12.427753  	0.0000
 #seasonfall          -0.1097521 0.01345564 785 -8.156582  0.0000
 #river_km             0.0010123 0.00037220 785  2.719848  0.0067
 #typetrib             0.2673480 0.04474965 785  5.974304  0.0000
@@ -119,7 +119,7 @@ A<-ggplot(subset(sum_s_main_s, !(nutrient=="control")), aes(x=river_km, y=log(cr
   scale_color_manual(values=c("red","gold", "steelblue3", "darkorange2", "darkorchid", "green3", "slategray4"))+
   theme_classic(base_size = 12)+ylab(expression(paste('Ln(NRR ' [ R],' + 1)'))) + 
   theme(axis.text.x = element_blank(), axis.title.x = element_blank())+
-  ggtitle("A Mainstem, Summer")+theme(plot.title = element_text(hjust = 0.02, vjust=-5))+
+  ggtitle("A Mainstem, Summer")+theme(plot.title = element_text(hjust = 0.0, vjust=-1))+
   scale_x_continuous(limits=c(0,290))+
   theme(legend.title=element_blank(),legend.position="none")+
    stat_function(fun=N.mains, color="red", lty="dotted", lwd=1)+
@@ -137,7 +137,7 @@ B<-ggplot(subset(sum_s_main_f, !(nutrient=="control")), aes(x=river_km, y=log(cr
   geom_errorbar(aes(ymin=log(cr_nrr+1)-log(se_cr_nrr+1), ymax=log(cr_nrr+1)+log(se_cr_nrr+1), width=2.5))+
   scale_color_manual(values=c("red","gold", "steelblue3", "darkorange2", "darkorchid", "green3", "slategray4"))+
   theme_classic(base_size = 12)+theme(axis.title.y = element_blank(), axis.title.x = element_blank(), axis.text.x = element_blank())+
-   ggtitle("B Mainstem, Autumn")+theme(plot.title = element_text(hjust = 0.02, vjust=-5))+
+   ggtitle("B Mainstem, Autumn")+theme(plot.title = element_text(hjust = 0.0, vjust=-1))+
   scale_x_continuous(limits=c(0,290))+
   theme(legend.title=element_blank(),legend.position="none")+
     stat_function(fun=N.mainf, color="red", lty="dotted", lwd=1)+
@@ -155,7 +155,7 @@ C<-ggplot(subset(sum_s_trib_s, !(nutrient=="control")), aes(x=river_km, y=log(cr
   geom_errorbar(aes(ymin=log(cr_nrr+1)-log(se_cr_nrr+1), ymax=log(cr_nrr+1)+log(se_cr_nrr+1), width=2.5))+
   scale_color_manual(values=c("red","gold", "steelblue3", "darkorange2", "darkorchid", "green3", "slategray4"))+
   theme_classic(base_size=12)+ylab(expression(paste('Ln(NRR ' [R],' + 1)'))) +xlab("River km")+
-  ggtitle("C Tributaries, Summer")+theme(plot.title = element_text(hjust = 0.02, vjust=-5))+
+  ggtitle("C Tributaries, Summer")+theme(plot.title = element_text(hjust = 0.0, vjust=-1))+
   theme(legend.title=element_blank(),legend.position="none")+
   scale_x_continuous(limits=c(0,290))+
     stat_function(fun=N.tribs, color="red", lty="dotted", lwd=1)+
@@ -173,9 +173,10 @@ D<-ggplot(subset(sum_s_trib_f, !(nutrient=="control")), aes(x=river_km, y=log(cr
   geom_errorbar(aes(ymin=log(cr_nrr+1)-log(se_cr_nrr+1), ymax=log(cr_nrr+1)+log(se_cr_nrr+1), width=2.5))+
   scale_color_manual(values=c("red","gold", "steelblue3", "darkorange2", "darkorchid", "green3", "slategray4"))+
   theme_classic(base_size = 12)+ theme(axis.title.y = element_blank())+xlab("River km")+
-  ggtitle("D Tributaries, Autumn")+theme(plot.title = element_text(hjust = 0.02, vjust=-5))+
+  ggtitle("D Tributaries, Autumn")+theme(plot.title = element_text(hjust = 0.0, vjust=-1))+
   scale_x_continuous(limits=c(0,290))+
-  theme(legend.title=element_blank(),legend.position="none")+
+  theme(legend.title=element_blank(),legend.position=c(0.2, 0.3), 
+        legend.background = element_rect(color=NA, fill=NA))+
     stat_function(fun=N.tribf, color="red", lty="dotted", lwd=1)+
   stat_function(fun=NP.tribf, color="darkorange2", lty="dashed",lwd=1)+
   stat_function(fun=NPSi.tribf, color="slategray4", lty="solid",lwd=1)+
@@ -184,10 +185,23 @@ D<-ggplot(subset(sum_s_trib_f, !(nutrient=="control")), aes(x=river_km, y=log(cr
   stat_function(fun=NSi.tribf, color="darkorchid", lty="dashed",lwd=1)+
   stat_function(fun=Si.tribf, color="steelblue3", lty="dotted",lwd=1)+
   geom_hline(yintercept=log(2), lwd=1, lty= "dashed")
+
+#legend.spacing.y = 0.2, "inch"
 stat_function(fun=tribf, lwd=1)
                
 library(gridExtra)
+
+dev.print(png, "Fig 3.png")
 grid.arrange(A, B, C, D, ncol=2, nrow = 2, heights = c(1, 1.2))
+dev.off()
+
+pdf("Fig_3.pdf", width = 10.35, height = 7.32)
+grid.arrange(A, B, C, D, ncol=2, nrow = 2, heights = c(1, 1.2))
+dev.off()
+
+png("Fig 3.png", width = 5304, height = 3750, unit = "px") 
+grid.arrange(A, B, C, D, ncol=2, nrow = 2, heights = c(1, 1.2))
+dev.off()
 
 
 #chla NRR, model with river km, season, and type only
@@ -396,6 +410,8 @@ grid.arrange(A, B, ncol=1)
 
 #slopes are so low that they look flat here. For some reason, summer lines are below all points - maybe need to check.
 #either way, hand-calculation reveals almost no change. 
+
+
 
 #previous attempts - can probably delete*****
 nds_ssummer<-subset(nds_s, season=="summer")
