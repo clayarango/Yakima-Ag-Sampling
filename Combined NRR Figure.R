@@ -345,8 +345,8 @@ d = cle_summer
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check for outliers and check data entry before calculating CR-NRR
 #ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
@@ -407,8 +407,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check for outliers and check data entry before calculating CR-NRR
 #ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
@@ -470,8 +470,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check for outliers and check data entry before calculating CR-NRR
 #ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
@@ -533,8 +533,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check for outliers and check data entry before calculating CR-NRR
 #ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
@@ -594,8 +594,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check for outliers and check data entry before calculating CR-NRR
 #ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
@@ -655,8 +655,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check distribution of controls and remove as needed before calculating NRR.
 #ggplot(d.cr, aes(x=nutrient, y=cr.area))+geom_boxplot() +theme_classic()
@@ -713,8 +713,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check distribution of controls and remove as needed before calculating NRR.
 #ggplot(d.cr, aes(x=nutrient, y=cr.area))+geom_boxplot() +theme_classic()
@@ -770,8 +770,8 @@ d = ring_fall
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check for outliers and check data entry before calculating CR-NRR
 #ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
@@ -833,8 +833,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check for outliers and check data entry before calculating CR-NRR
 #ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
@@ -898,8 +898,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check for outliers and check data entry before calculating CR-NRR
 #ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
@@ -963,8 +963,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check for outliers and check data entry before calculating CR-NRR
 #ggplot(d.cr, aes(x=nutrient, y=cr.area)) + geom_boxplot() + theme_classic()
@@ -1028,8 +1028,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #calculate nrr for cr
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T)) 
@@ -1075,8 +1075,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #calculate nrr for cr
 x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T))
@@ -1126,8 +1126,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check for outliers and check data entry before calculating NRR.
 #ggplot(d.cr, aes(x=nutrient, y=cr.area))+geom_boxplot() +theme_classic()
@@ -1183,8 +1183,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check distribution of controls and remove as needed before calculating NRR.
 #ggplot(d.cr, aes(x=nutrient, y=cr.area))+geom_boxplot() +theme_classic()
@@ -1240,8 +1240,8 @@ d$top<-recode(d$top, "cellulose" ="sponge")
 str(d)
 
 #subset data into gpp and cr response
-d.cr = subset(d, top=="sponge", data=d)
-d.gpp = subset(d, top=="glass", data=d)
+d.cr = subset(d, top=="sponge")
+d.gpp = subset(d, top=="glass")
 
 #check distribution of controls and remove as needed before calculating NRR.
 #ggplot(d.cr, aes(x=nutrient, y=cr.area))+geom_boxplot() +theme_classic()
@@ -1355,8 +1355,8 @@ cr.nrr.all$cr.nrr <- as.numeric(cr.nrr.all$cr.nrr)
 x$stream = factor(x$stream, levels = c('Cle Elum', 'Ringer', 'Roza', 'Century Landing', 'Mabton', 'Kiona', 
                                        'Reecer', 'Wenas', 'Ahtanum', 'Toppenish', 'Satus')) 
 
-x.summer <- subset(x, season=="Summer", data=x)
-x.fall <- subset(x, season=="Fall", data=x)
+x.summer <- subset(x, season=="Summer")
+x.fall <- subset(x, season=="Fall")
 
 #make plot of CR Summer
 cr.summer = 
@@ -1368,17 +1368,20 @@ cr.summer =
   #geom_point(aes(color=factor(nutrient)), size=3, position = "jitter") +
   #geom_errorbar(aes(ymin=(mNut-eNut), ymax=(mNut+eNut), width=2.5)) +
   theme_classic() +
-  ylab(expression(CR~NRR)) +
+  ylab(expression(NRR[R])) +
+  ylim(0,4) +
   geom_hline(yintercept = 1, lty = 2) +
   geom_vline(aes(xintercept = 6.5)) +
+  ggtitle("Summer") +
   theme(axis.title.x=element_blank(),
+        plot.title = element_text(hjust = 0.5),
         legend.position = "top", #change to top for individual plot
         axis.text.x=element_blank(),
         legend.title = element_blank()) +
   guides(colour = guide_legend(nrow = 1)) +
-  annotate("text", x=1, y=3.4, label="A", size=4) +
-  annotate("text", x=3.5, y=3.4, label="Mainstem", size=4) +
-  annotate("text", x=9, y=3.4, label="Tributary", size=4)
+  annotate("text", x=1, y=3.8, label="A", size=4) +
+  annotate("text", x=3.5, y=3.8, label="Mainstem", size=4) +
+  annotate("text", x=9, y=3.8, label="Tributary", size=4)
   
 #make plot of CR Fall
 cr.fall = 
@@ -1393,15 +1396,18 @@ cr.fall =
   #ylab(expression(CR~NRR)) +
   geom_hline(yintercept = 1, lty = 2) +
   geom_vline(aes(xintercept = 6.5)) +
+  ggtitle("Autumn") +
+  ylim(0,4) +
   theme(axis.title.x=element_blank(),
+        plot.title = element_text(hjust = 0.5),
         axis.title.y=element_blank(),
         legend.title = element_blank(),
         legend.position = "top", #change to top for individual plot
         axis.text.x=element_blank()) +
   guides(colour = guide_legend(nrow = 1)) +
-  annotate("text", x=1, y=3.4, label="B", size=4) +
-  annotate("text", x=3.5, y=3.4, label="Mainstem", size=4) +
-  annotate("text", x=9, y=3.4, label="Tributary", size=4)  
+  annotate("text", x=1, y=3.8, label="B", size=4) +
+  annotate("text", x=3.5, y=3.8, label="Mainstem", size=4) +
+  annotate("text", x=9, y=3.8, label="Tributary", size=4)  
 
 #################################################################
 #make graphics for chla.nrr for all streams
@@ -1418,8 +1424,8 @@ x = group_by(chla.nrr.all, stream, nutrient, season) %>%  # Grouping function ca
 x$stream = factor(x$stream, levels = c('Cle Elum', 'Ringer', 'Roza', 'Century Landing', 'Mabton', 'Kiona', 
                                        'Reecer', 'Wenas', 'Ahtanum', 'Toppenish', 'Satus')) 
 
-x.summer <- subset(x, season=="Summer", data=x)
-x.fall <- subset(x, season=="Fall", data=x)
+x.summer <- subset(x, season=="Summer")
+x.fall <- subset(x, season=="Fall")
 
 #make plot of CHLA Summer
 chla.summer = 
@@ -1431,18 +1437,19 @@ chla.summer =
   #geom_point(aes(color=factor(nutrient)), size=3, position = "jitter") +
   #geom_errorbar(aes(ymin=(mNut-eNut), ymax=(mNut+eNut), width=2.5)) +
   theme_classic() +
-  ylab(expression(Chl-a~NRR)) +
+  ylab(expression(NRR[Chla])) +
+  xlab(expression(Sites)) +
+  xlim(0,40) +
   geom_hline(yintercept = 1, lty = 2) +
   geom_vline(aes(xintercept = 6.5)) +
-  theme(axis.title.x=element_blank(),
-        legend.title = element_blank(),
+  theme(legend.title = element_blank(),
         legend.position = "top") +
   scale_x_discrete(labels=c("Cl", "Ri", "Ro", "Ce", "Ma", "Ki",
                                   "Re", "We", "Ah", "To", "Sa")) +  #change to top for individual plot
   guides(colour = guide_legend(nrow = 1)) +
-  annotate("text", x=1, y=40, label="C", size=4) +
-  annotate("text", x=3.5, y=40, label="Mainstem", size=4) +
-  annotate("text", x=9, y=40, label="Tributary", size=4)
+  annotate("text", x=1, y=38, label="C", size=4) 
+  #annotate("text", x=3.5, y=40, label="Mainstem", size=4) +
+  #annotate("text", x=9, y=40, label="Tributary", size=4)
 
 #make plot of CHLA Fall
 chla.fall = 
@@ -1455,19 +1462,19 @@ chla.fall =
   #geom_errorbar(aes(ymin=(mNut-eNut), ymax=(mNut+eNut), width=2.5)) +
   theme_classic() +
   #ylab(expression(Chl-italic(a)~NRR)) +
+  xlab(expression(Sites)) +
   geom_hline(yintercept = 1, lty = 2) +
   geom_vline(aes(xintercept = 6.5)) +
-  theme(axis.title.x=element_blank(),
-        axis.title.y=element_blank(),
+  theme(axis.title.y=element_blank(),
         legend.title = element_blank(),
         legend.position = "top") +  #change to top for individual plot
   scale_x_discrete(labels=c("Cl", "Ri", "Ro", "Ce", "Ma", "Ki", 
                             "Re", "We", "Ah", "To", "Sa")) + 
   scale_y_continuous(expand = c(0, 0), limits = c(0, 2.5)) +
   guides(colour = guide_legend(nrow = 1)) +
-  annotate("text", x=1, y=2.4, label="D", size=4) +
-  annotate("text", x=3.5, y=2.4, label="Mainstem", size=4) +
-  annotate("text", x=9, y=2.4, label="Tributary", size=4)  
+  annotate("text", x=1, y=2.3, label="D", size=4) 
+  #annotate("text", x=3.5, y=2.4, label="Mainstem", size=4) +
+  #annotate("text", x=9, y=2.4, label="Tributary", size=4)  
 
 #################################################################
 #compile figure
@@ -1488,4 +1495,17 @@ ggarrange(cr.summer, cr.fall, chla.summer, chla.fall, ncol=2, nrow=2,
              common.legend = T, #They use the same legend
              legend = "top", align = "h")
 
+fig2 = ggarrange(cr.summer, cr.fall, chla.summer, chla.fall, ncol=2, nrow=2,
+                 common.legend = T, #They use the same legend
+                 legend = "top", align = "h")
 
+tiff(filename = 'fig2TE.tiff', #open plotting device
+     width = 6.5,
+     height = 4.0,
+     units = "in",
+     res = 1200,
+     compression = "lzw")
+
+fig2# push plot to device
+
+dev.off()  # close device
