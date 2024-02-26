@@ -1394,6 +1394,7 @@ cr.fall =
   geom_hline(yintercept = 1, lty = 2) +
   geom_vline(aes(xintercept = 6.5)) +
   theme(axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
         legend.title = element_blank(),
         legend.position = "top", #change to top for individual plot
         axis.text.x=element_blank()) +
@@ -1457,6 +1458,7 @@ chla.fall =
   geom_hline(yintercept = 1, lty = 2) +
   geom_vline(aes(xintercept = 6.5)) +
   theme(axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
         legend.title = element_blank(),
         legend.position = "top") +  #change to top for individual plot
   scale_x_discrete(labels=c("Cl", "Ri", "Ro", "Ce", "Ma", "Ki", 

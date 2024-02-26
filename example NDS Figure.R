@@ -39,16 +39,25 @@ x<-ddply(d.cr, "nutrient", summarise, ave_cr = mean(cr.area, na.rm=T))
 x
 d.cr$cr.nrr = d.cr$cr.area/-7.554539 #divide by control ave_cr
 
+#remove control from CR for plotting first panel
+d.cr.panel1 = subset(d.cr, nutrient != "C", data=d)
+
+#rename nutrients to remove "+"
+d.cr.panel1$nutrient <- recode(d.cr.panel1$nutrient, "P+Si" = "PSi")
+d.cr.panel1$nutrient <- recode(d.cr.panel1$nutrient, "N+P" = "NP")
+d.cr.panel1$nutrient <- recode(d.cr.panel1$nutrient, "N+P+Si" = "NPSi")
+d.cr.panel1$nutrient <- recode(d.cr.panel1$nutrient, "N+Si" = "NSi")
+
+
 ###############
 #plot of NRR
 ##############
-ringer.sum.cr = ggplot(data=subset(d.cr, !(nutrient=="control")), aes(x=nutrient, y=cr.nrr)) +
+ringer.sum.cr = ggplot(data=subset(d.cr.panel1, !(nutrient=="control")), aes(x=nutrient, y=cr.nrr)) +
   geom_boxplot() +
   theme_bw() +
   ylab("CR NRR") +
   xlab("Nutrient") +
   geom_abline(slope = 0, intercept = 1) +
-  geom_abline(slope = 0, intercept = 1.385, lty = 2) + #what is the significance of 1.385?
   theme(panel.grid.minor=element_blank(), 
         panel.grid.major=element_blank()) +
   annotate("text", x=1, y=2.5, label="A", size=4)
@@ -155,5 +164,14 @@ gD <- ggplotGrob(PSi.int)  # set up figure
 #gC$widths[2:5] <- as.list(maxWidth)
 #gD$widths[2:5] <- as.list(maxWidth)
 
-grid.arrange(gA, gB, gC, gD, ncol=2, nrow=2)
+#grid.arrange(gA, gB, gC, gD, ncol=2, nrow=2)
+
+tiff(filename = 'xx.tiff', #open plotting device
+     width = 6.5,
+     height = 6.0,
+     units = "in",
+     res = 1200,
+     compression = "lzw")
+grid.arrange(gA, gB, gC, gD, nrow=2, ncol=2)  # push plot to device
+dev.off()  # close device
 
